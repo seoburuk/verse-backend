@@ -150,7 +150,9 @@ function MemorizeContent({
             <div className={`result-badge grade-${serverGrade}`}>
               {gradeLabel[serverGrade ?? "none"]}
             </div>
-            {isLast && <p className="course-complete">🎉 코스 완료!</p>}
+            {isLast && serverGrade === "green" && (
+              <p className="course-complete">🎉 코스 완료!</p>
+            )}
             {mismatch && (
               <p className="muted" style={{ fontSize: "0.85rem" }}>
                 서버 채점으로 확정됐어요
@@ -160,24 +162,32 @@ function MemorizeContent({
               <p className="verse-text">{item.text}</p>
             </div>
             <div className="result-actions">
-              <button className="btn-secondary" onClick={reset}>
-                다시 시도
-              </button>
-              <button
-                className="btn-primary"
-                onClick={() => {
-                  if (isLast) {
-                    navigate(courseSlug ? `/courses/${courseSlug}` : "/courses");
-                  } else {
-                    const next = items[index + 1];
-                    navigate(`/memorize/${next.course_item_id}`, {
-                      state: { items, index: index + 1, courseSlug },
-                    });
-                  }
-                }}
-              >
-                {isLast ? "코스로 돌아가기" : "다음으로"}
-              </button>
+              {serverGrade === "green" ? (
+                <>
+                  <button className="btn-secondary" onClick={reset}>
+                    다시 시도
+                  </button>
+                  <button
+                    className="btn-primary"
+                    onClick={() => {
+                      if (isLast) {
+                        navigate(courseSlug ? `/courses/${courseSlug}` : "/courses");
+                      } else {
+                        const next = items[index + 1];
+                        navigate(`/memorize/${next.course_item_id}`, {
+                          state: { items, index: index + 1, courseSlug },
+                        });
+                      }
+                    }}
+                  >
+                    {isLast ? "코스로 돌아가기" : "다음으로"}
+                  </button>
+                </>
+              ) : (
+                <button className="btn-primary" onClick={reset}>
+                  다시하기
+                </button>
+              )}
             </div>
           </div>
         )}
