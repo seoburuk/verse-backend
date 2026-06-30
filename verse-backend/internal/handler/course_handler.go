@@ -1,0 +1,111 @@
+// course_handler.go — 코스/본문 조회 핸들러. 기획서 §9.
+package handler
+
+import (
+	"net/http"
+	"strconv"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/seoburuk/verse-backend/internal/domain"
+	"github.com/seoburuk/verse-backend/internal/handler/dto"
+)
+
+func (h *Handler) GetSection(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid section id"})
+		return
+	}
+
+	sec, err := h.courses.GetSectionDetail(r.Context(), id)
+	if err != nil {
+		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		return
+	}
+
+	items := make([]dto.CourseItemResponse, len(sec.Items))
+	for i, it := range sec.Items {
+		items[i] = toItemResponse(it)
+	}
+	writeJSON(w, http.StatusOK, dto.SectionDetailResponse{
+		SectionID: sec.ID,
+		Title:     sec.Title,
+		Ord:       sec.Ord,
+		Items:     items,
+	})
+}
+
+func toItemResponse(it domain.CourseItemWithVerse) dto.CourseItemResponse {
+	return dto.CourseItemResponse{
+		CourseItemID: it.CourseItemID,
+		Ord:          it.Ord,
+		Topic:        it.Topic,
+		Book:         it.Book,
+		Chapter:      it.Chapter,
+		Verse:        it.Verse,
+		Text:         it.Text,
+	}
+}
+
+func (h *Handler) ListCourses(w http.ResponseWriter, r *http.Request) {
+	courses, err := h.courses.ListCourses(r.Context())
+	if err != nil {
+		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		return
+	}
+
+	resp := make([]dto.CourseResponse, len(courses))
+	for i, c := range courses {
+		resp[i] = dto.CourseResponse{
+			ID:    c.ID,
+			Slug:  c.Slug,
+			Title: c.Title,
+			Theme: c.Theme,
+			Ord:   c.Ord,
+		}
+	}
+	writeJSON(w, http.StatusOK, resp)
+}
+
+func (h *Handler) GetCourse(w http.ResponseWriter, r *http.Request) {
+	slug := chi.URLParam(r, "slug")
+
+	detail, err := h.courses.GetCourseDetail(r.Context(), slug)
+	if err != nil {
+		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		return
+	}
+
+	cr := dto.CourseResponse{
+		ID:    detail.Course.ID,
+		Slug:  detail.Course.Slug,
+		Title: detail.Course.Title,
+		Theme: detail.Course.Theme,
+		Ord:   detail.Course.Ord,
+	}
+
+	if len(detail.Sections) > 0 {
+		sections := make([]dto.CourseSectionResponse, len(detail.Sections))
+		for i, sec := range detail.Sections {
+			secItems := make([]dto.CourseItemResponse, len(sec.Items))
+			for j, it := range sec.Items {
+				secItems[j] = toItemResponse(it)
+			}
+			sections[i] = dto.CourseSectionResponse{
+				SectionID: sec.ID,
+				Title:     sec.Title,
+				Ord:       sec.Ord,
+				Items:     secItems,
+			}
+		}
+		writeJSON(w, http.StatusOK, dto.CourseDetailResponse{CourseResponse: cr, Sections: sections})
+		return
+	}
+
+	items := make([]dto.CourseItemResponse, len(detail.Items))
+	for i, it := range detail.Items {
+		items[i] = toItemResponse(it)
+	}
+	writeJSON(w, http.StatusOK, dto.CourseDetailResponse{CourseResponse: cr, Items: items})
+}

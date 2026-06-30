@@ -1,0 +1,13 @@
+# 비밀
+.env
+
+# Go
+/bin/
+*.exe
+vendor/
+
+# 적재 산출물(대용량 중간 파일)
+/data/*.csv
+
+# OS
+.DS_Store

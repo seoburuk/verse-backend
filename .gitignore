@@ -1,0 +1,13 @@
+# dependencies / build
+node_modules/
+dist/
+/verse-backend/bin/
+/verse-backend/seed_courses
+
+# secrets
+*.env
+.env
+!.env.example
+
+# os
+.DS_Store

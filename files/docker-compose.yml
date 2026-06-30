@@ -1,0 +1,32 @@
+# docker-compose.yml
+# 포트폴리오 재현성 핵심: `docker compose up -d` 한 줄로 누구나 동일한 DB를 띄운다.
+#
+# 설계 포인트:
+#  - healthcheck: 컨테이너가 "실행됨"과 "연결 가능"은 다른 상태다. health가 통과해야
+#    마이그레이션이 connection refused 없이 돈다 (Makefile의 wait 로직과 짝).
+#  - named volume: 데이터를 컨테이너 수명과 분리. down 해도 데이터 보존, 완전 초기화는
+#    `docker compose down -v` 로 명시적으로만.
+#  - 환경변수는 .env 에서 주입 (자격증명을 compose 파일에 하드코딩하지 않는다).
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: pixelkjv-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER:     ${DB_USER:-pixelkjv}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-pixelkjv_dev_pw}
+      POSTGRES_DB:       ${DB_NAME:-pixelkjv}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # pg_isready: Postgres가 연결을 받을 준비가 됐는지 검사.
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-pixelkjv} -d ${DB_NAME:-pixelkjv}"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

@@ -1,0 +1,4 @@
+ALTER TABLE users
+  ALTER COLUMN email         DROP NOT NULL,
+  ALTER COLUMN display_name  DROP NOT NULL,
+  ALTER COLUMN password_hash DROP NOT NULL;

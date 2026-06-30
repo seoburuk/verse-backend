@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "verse-web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "--prefix", "verse-web", "dev"],
+      "port": 5173,
+      "autoPort": false
+    }
+  ]
+}
