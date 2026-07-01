@@ -7,12 +7,14 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (username, display_name, password_hash)
 VALUES ($1, $2, $3)
-RETURNING id, display_name, password_hash, created_at, username
+RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at
 `
 
 type CreateUserParams struct {
@@ -30,6 +32,8 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.PasswordHash,
 		&i.CreatedAt,
 		&i.Username,
+		&i.Lives,
+		&i.LivesUpdatedAt,
 	)
 	return i, err
 }
@@ -44,7 +48,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, display_name, password_hash, created_at, username FROM users WHERE username = $1
+SELECT id, display_name, password_hash, created_at, username, lives, lives_updated_at FROM users WHERE username = $1
 `
 
 func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
@@ -56,6 +60,39 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 		&i.PasswordHash,
 		&i.CreatedAt,
 		&i.Username,
+		&i.Lives,
+		&i.LivesUpdatedAt,
 	)
 	return i, err
+}
+
+const getUserLives = `-- name: GetUserLives :one
+SELECT lives, lives_updated_at FROM users WHERE id = $1
+`
+
+type GetUserLivesRow struct {
+	Lives          int32              `json:"lives"`
+	LivesUpdatedAt pgtype.Timestamptz `json:"lives_updated_at"`
+}
+
+func (q *Queries) GetUserLives(ctx context.Context, id int64) (GetUserLivesRow, error) {
+	row := q.db.QueryRow(ctx, getUserLives, id)
+	var i GetUserLivesRow
+	err := row.Scan(&i.Lives, &i.LivesUpdatedAt)
+	return i, err
+}
+
+const updateUserLives = `-- name: UpdateUserLives :exec
+UPDATE users SET lives = $2, lives_updated_at = $3 WHERE id = $1
+`
+
+type UpdateUserLivesParams struct {
+	ID             int64              `json:"id"`
+	Lives          int32              `json:"lives"`
+	LivesUpdatedAt pgtype.Timestamptz `json:"lives_updated_at"`
+}
+
+func (q *Queries) UpdateUserLives(ctx context.Context, arg UpdateUserLivesParams) error {
+	_, err := q.db.Exec(ctx, updateUserLives, arg.ID, arg.Lives, arg.LivesUpdatedAt)
+	return err
 }

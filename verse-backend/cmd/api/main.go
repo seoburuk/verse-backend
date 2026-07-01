@@ -69,7 +69,7 @@ func run() error {
 
 	authSvc    := service.NewAuthService(userRepo, cfg.JWTSecret, cfg.JWTAccessTTL)
 	courseSvc  := service.NewCourseService(courseRepo)
-	attemptSvc := service.NewAttemptService(courseRepo, attemptRepo)
+	attemptSvc := service.NewAttemptService(courseRepo, attemptRepo, userRepo)
 
 	h := handler.NewHandler(authSvc, courseSvc, attemptSvc)
 

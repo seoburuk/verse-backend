@@ -10,3 +10,9 @@ type User struct {
 	PasswordHash string // argon2id. 절대 외부로 노출 금지.
 	CreatedAt    time.Time
 }
+
+// Lives — 목숨 상태(코스 §Phase4). 실패 시도(비초록)마다 1 소모, 시간 경과로 자동 리필.
+type Lives struct {
+	Count     int32
+	UpdatedAt time.Time
+}

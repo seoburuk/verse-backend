@@ -12,6 +12,7 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/seoburuk/verse-backend/internal/domain"
 	"github.com/seoburuk/verse-backend/internal/repository"
@@ -25,13 +26,15 @@ type AttemptResult struct {
 type AttemptService struct {
 	courses  repository.CourseRepo
 	attempts repository.AttemptRepo
+	users    repository.UserRepo
 }
 
-func NewAttemptService(courses repository.CourseRepo, attempts repository.AttemptRepo) *AttemptService {
-	return &AttemptService{courses: courses, attempts: attempts}
+func NewAttemptService(courses repository.CourseRepo, attempts repository.AttemptRepo, users repository.UserRepo) *AttemptService {
+	return &AttemptService{courses: courses, attempts: attempts, users: users}
 }
 
 // SubmitAttempt — 시도 제출, 서버 재채점, 진도·연속일 갱신.
+// 목숨이 0이면 시도 자체를 거부한다(domain.ErrNoLives). 비초록 결과는 목숨 1을 소모한다.
 func (s *AttemptService) SubmitAttempt(
 	ctx context.Context,
 	userID, courseItemID int64,
@@ -39,6 +42,15 @@ func (s *AttemptService) SubmitAttempt(
 	clientGrade domain.Grade,
 	tokens []string,
 ) (AttemptResult, error) {
+	// 0. 목숨 확인 — 0이면 채점 없이 즉시 거부
+	lives, err := GetLives(ctx, s.users, userID)
+	if err != nil {
+		return AttemptResult{}, err
+	}
+	if lives.Count <= 0 {
+		return AttemptResult{}, domain.ErrNoLives
+	}
+
 	// 1. 정답 절 텍스트 조회 → 정규화
 	itemVerse, err := s.courses.GetCourseItemVerse(ctx, courseItemID)
 	if err != nil {
@@ -78,7 +90,20 @@ func (s *AttemptService) SubmitAttempt(
 		return AttemptResult{}, err
 	}
 
+	// 6. 비초록 결과는 목숨 1 소모. 이미 시도는 기록됐으므로 동시성 경합으로 목숨이
+	// 먼저 소진된 예외적인 경우(ErrNoLives)는 무시하고 결과를 그대로 반환한다.
+	if !cleared {
+		if _, err := ConsumeLife(ctx, s.users, userID); err != nil && !errors.Is(err, domain.ErrNoLives) {
+			return AttemptResult{}, err
+		}
+	}
+
 	return AttemptResult{Attempt: attempt, ServerGrade: serverGrade}, nil
+}
+
+// GetLives — 현재 목숨 상태(정산 반영)를 조회한다.
+func (s *AttemptService) GetLives(ctx context.Context, userID int64) (domain.Lives, error) {
+	return GetLives(ctx, s.users, userID)
 }
 
 // ProgressSummary — 사용자 진도 조회 결과(스트릭 + 코스별 집계 + 절별 진도).

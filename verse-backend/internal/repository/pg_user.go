@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/seoburuk/verse-backend/internal/domain"
 	db "github.com/seoburuk/verse-backend/internal/repository/sqlc"
@@ -59,6 +60,25 @@ func (r *pgUserRepo) DeleteUser(ctx context.Context, userID int64) error {
 		return err
 	}
 	return tx.Commit(ctx)
+}
+
+func (r *pgUserRepo) GetLives(ctx context.Context, userID int64) (domain.Lives, error) {
+	row, err := r.q.GetUserLives(ctx, userID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.Lives{}, domain.ErrNotFound
+		}
+		return domain.Lives{}, err
+	}
+	return domain.Lives{Count: row.Lives, UpdatedAt: row.LivesUpdatedAt.Time}, nil
+}
+
+func (r *pgUserRepo) UpdateLives(ctx context.Context, userID int64, lives domain.Lives) error {
+	return r.q.UpdateUserLives(ctx, db.UpdateUserLivesParams{
+		ID:             userID,
+		Lives:          lives.Count,
+		LivesUpdatedAt: pgtype.Timestamptz{Time: lives.UpdatedAt, Valid: true},
+	})
 }
 
 func toDomainUser(u db.User) domain.User {

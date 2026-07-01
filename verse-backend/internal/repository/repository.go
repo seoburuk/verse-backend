@@ -12,6 +12,8 @@ type UserRepo interface {
 	CreateUser(ctx context.Context, username, displayName, passwordHash string) (domain.User, error)
 	GetUserByUsername(ctx context.Context, username string) (domain.User, error)
 	DeleteUser(ctx context.Context, userID int64) error
+	GetLives(ctx context.Context, userID int64) (domain.Lives, error)
+	UpdateLives(ctx context.Context, userID int64, lives domain.Lives) error
 }
 
 // CourseRepo — 코스 저장소 인터페이스.

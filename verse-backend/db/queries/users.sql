@@ -8,3 +8,9 @@ SELECT * FROM users WHERE username = $1;
 
 -- name: DeleteUser :exec
 DELETE FROM users WHERE id = $1;
+
+-- name: GetUserLives :one
+SELECT lives, lives_updated_at FROM users WHERE id = $1;
+
+-- name: UpdateUserLives :exec
+UPDATE users SET lives = $2, lives_updated_at = $3 WHERE id = $1;

@@ -42,9 +42,29 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
   const item = items[index];
   const isLast = index >= items.length - 1;
   const {
-    phase, mode, tiles, placed, typed, liveGrade, submitting, serverGrade, mismatch,
+    phase, mode, tiles, placed, typed, liveGrade, submitting, serverGrade, mismatch, outOfLives,
     setMode, tapTile, setTyped, startRecall, submit, reset,
   } = useMemorize(item.course_item_id, item.text);
+
+  if (outOfLives) {
+    return (
+      <div className="page">
+        <header className="page-header">
+          <button className="btn-link" onClick={() => router.push(backHref)}>← 뒤로</button>
+        </header>
+        <main className="page-center">
+          <div className="card out-of-lives">
+            <div className="out-of-lives-icon">💔</div>
+            <h2 className="title">목숨이 없어요</h2>
+            <p className="muted">잠시 후 목숨이 채워지면 다시 도전하세요</p>
+            <button className="btn-primary" onClick={() => router.push(backHref)}>
+              뒤로 가기
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="page">

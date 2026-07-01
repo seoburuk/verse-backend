@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo } from "react";
 import { normalize, tokenizeDisplay } from "../../lib/grading/normalize";
 import { gradeRecall, type Grade } from "../../lib/grading/grade";
 import { submitAttempt } from "../../lib/api/attempts";
+import { ApiError } from "../../lib/api/client";
 
 export type RecallMode = "drag" | "type";
 
@@ -17,6 +18,7 @@ export interface MemorizeState {
   submitting: boolean;
   serverGrade: Grade | null;
   mismatch: boolean;
+  outOfLives: boolean;
 }
 
 interface UseMemorizeReturn extends MemorizeState {
@@ -62,6 +64,7 @@ export function useMemorize(
   const [submitting, setSubmitting] = useState(false);
   const [serverGrade, setServerGrade] = useState<Grade | null>(null);
   const [mismatch, setMismatch] = useState(false);
+  const [outOfLives, setOutOfLives] = useState(false);
 
   const attemptTokens =
     mode === "drag" ? placed.flatMap((t) => normalize(t)) : normalize(typed);
@@ -102,6 +105,12 @@ export function useMemorize(
       setServerGrade(result.server_grade);
       setMismatch(result.client_grade !== result.server_grade);
       setPhase("result");
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 403) {
+        setOutOfLives(true);
+      } else {
+        throw err;
+      }
     } finally {
       setSubmitting(false);
     }
@@ -116,5 +125,5 @@ export function useMemorize(
     setMismatch(false);
   }, [answerDisplay]);
 
-  return { phase, mode, tiles, placed, typed, liveGrade, submitting, serverGrade, mismatch, setMode, tapTile, setTyped, startRecall, submit, reset };
+  return { phase, mode, tiles, placed, typed, liveGrade, submitting, serverGrade, mismatch, outOfLives, setMode, tapTile, setTyped, startRecall, submit, reset };
 }

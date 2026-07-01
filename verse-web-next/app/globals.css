@@ -186,6 +186,7 @@ body {
 .course-progress.is-done { color: var(--green); font-weight: bold; }
 
 .streak-badge { color: var(--yellow); font-size: 0.875rem; font-weight: bold; }
+.lives-badge { color: var(--red); font-size: 0.875rem; font-weight: bold; }
 .item-cleared { color: var(--green); }
 
 /* ── Course Item List ────────────────────────────── */
@@ -460,3 +461,13 @@ body {
   flex-direction: column;
   gap: 0.75rem;
 }
+
+/* ── Out of Lives ────────────────────────────────── */
+.out-of-lives {
+  align-items: center;
+  text-align: center;
+  border: 2px solid var(--red);
+  box-shadow: 4px 4px 0 var(--red);
+}
+
+.out-of-lives-icon { font-size: 2.5rem; }
