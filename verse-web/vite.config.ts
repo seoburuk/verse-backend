@@ -10,4 +10,7 @@ export default defineConfig({
       "/v1": "http://localhost:8080",
     },
   },
+  test: {
+    environment: "jsdom",
+  },
 });

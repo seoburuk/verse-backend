@@ -150,6 +150,7 @@ var warmup = seedCourseWithSections{
 	},
 }
 
+
 func main() {
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
@@ -258,7 +259,8 @@ func insertCourseWithSections(ctx context.Context, pool *pgxpool.Pool, co seedCo
 			_, err = pool.Exec(ctx, `
 				INSERT INTO course_items(course_id, section_id, verse_id, ord, topic)
 				VALUES ($1, $2, $3, $4, $5)
-				ON CONFLICT (section_id, ord) WHERE section_id IS NOT NULL DO NOTHING
+				ON CONFLICT (section_id, ord) WHERE section_id IS NOT NULL
+				DO UPDATE SET verse_id = EXCLUDED.verse_id, topic = EXCLUDED.topic
 			`, courseID, sectionID, verseID, itemOrd+1, s.title)
 			if err != nil {
 				return 0, fmt.Errorf("insert course_item (section %q, verse %d:%d:%d): %w", s.title, ref.b, ref.c, ref.v, err)
