@@ -67,7 +67,7 @@ function MemorizeContent({
   } = useMemorize(item.course_item_id, item.text);
 
   return (
-    <div className="page">
+    <div className="page memorize-page">
       <header className="page-header">
         <button
           className="btn-link"
@@ -77,6 +77,9 @@ function MemorizeContent({
         >
           ← 뒤로
         </button>
+        <div className="lesson-progress">
+          <span style={{ width: `${(index / items.length) * 100}%` }} />
+        </div>
         <span className="item-ref">{item.topic}</span>
       </header>
 
