@@ -8,12 +8,19 @@ import { ApiError } from "../../lib/api/client";
 
 export type RecallMode = "drag" | "type";
 
+// 타자 모드 밑줄 스캐폴드 한 단어. filled = 해당 위치를 정확히 입력함.
+export interface TypeHintWord {
+  word: string;
+  filled: boolean;
+}
+
 export interface MemorizeState {
   phase: "study" | "recall" | "result";
   mode: RecallMode;
   tiles: string[];       // 하단 타일 풀 (아직 배치 안 된 것)
   placed: string[];      // 상단 답안열
   typed: string;         // type 모드 입력값
+  typeReveal: TypeHintWord[]; // type 모드 밑줄 스캐폴드 (단어별 공개 상태)
   liveGrade: Grade;
   submitting: boolean;
   serverGrade: Grade | null;
@@ -70,6 +77,14 @@ export function useMemorize(
     mode === "drag" ? placed.flatMap((t) => normalize(t)) : normalize(typed);
   const liveGrade = gradeRecall(answerTokens, attemptTokens);
 
+  const typeReveal = useMemo<TypeHintWord[]>(() => {
+    const attempt = normalize(typed);
+    return answerDisplay.map((w, i) => ({
+      word: w,
+      filled: attempt[i] === answerTokens[i],
+    }));
+  }, [answerDisplay, answerTokens, typed]);
+
   const tapTile = useCallback((tile: string, fromPool: boolean) => {
     if (phase !== "recall") return;
     if (fromPool) {
@@ -125,5 +140,5 @@ export function useMemorize(
     setMismatch(false);
   }, [answerDisplay]);
 
-  return { phase, mode, tiles, placed, typed, liveGrade, submitting, serverGrade, mismatch, outOfLives, setMode, tapTile, setTyped, startRecall, submit, reset };
+  return { phase, mode, tiles, placed, typed, typeReveal, liveGrade, submitting, serverGrade, mismatch, outOfLives, setMode, tapTile, setTyped, startRecall, submit, reset };
 }

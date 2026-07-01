@@ -320,22 +320,68 @@ body {
   gap: 1rem;
 }
 
+/* 점선 픽셀 밑줄 위에 단어 블록이 올라감 */
 .placed-area {
-  background: var(--surface);
-  border: 2px solid #555;
-  border-radius: 4px;
+  --line: var(--text);
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
-  min-height: 64px;
-  padding: 0.6rem;
-  transition: border-color 0.2s;
+  align-content: flex-start;
+  gap: 10px 0.5rem;
+  min-height: 92px;
+  padding: 0;
+  background-image:
+    repeating-linear-gradient(to right, transparent 0 6px, var(--bg) 6px 9px),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 42px,
+      var(--line) 42px,
+      var(--line) 45px
+    );
+}
+
+.placed-area .tile {
+  height: 35px;
 }
 
 .placeholder {
   color: var(--muted);
-  font-size: 0.85rem;
-  align-self: center;
+  font-size: 0.9rem;
+  align-self: flex-start;
+  height: 35px;
+  display: flex;
+  align-items: center;
+}
+
+/* 타자 모드 밑줄 스캐폴드 — 단어별 글자 슬롯 */
+.type-scaffold {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 14px 14px;
+  min-height: 48px;
+}
+
+.hint-word {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.blank-char {
+  width: 0.85em;
+  min-height: 1.4em;
+  border-bottom: 3px solid var(--text);
+  text-align: center;
+  font-style: normal;
+  font-size: 1.1rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.blank-char.filled {
+  color: var(--text);
+  font-weight: bold;
+  border-bottom-color: var(--green);
 }
 
 .pool-area {

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useMemorize } from "./useMemorize";
 import { DragTiles } from "./DragTiles";
+import { TypeScaffold } from "./TypeScaffold";
 import { recordGrade, clearGrades } from "../../lib/sessionGrades";
 import type { CourseItem } from "../../lib/api/courses";
 
@@ -42,7 +43,7 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
   const item = items[index];
   const isLast = index >= items.length - 1;
   const {
-    phase, mode, tiles, placed, typed, liveGrade, submitting, serverGrade, mismatch, outOfLives,
+    phase, mode, tiles, placed, typed, typeReveal, liveGrade, submitting, serverGrade, mismatch, outOfLives,
     setMode, tapTile, setTyped, startRecall, submit, reset,
   } = useMemorize(item.course_item_id, item.text);
 
@@ -101,29 +102,32 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
 
         {phase === "recall" && (
           <div className="recall-phase">
-            <div className="verse-box verse-hidden">
-              <p className="muted">
-                {mode === "drag"
-                  ? "절을 기억해서 아래에 배치하세요"
-                  : "절을 기억해서 직접 입력하세요"}
-              </p>
-            </div>
             {mode === "drag" ? (
-              <DragTiles
-                placed={placed}
-                pool={tiles}
-                liveGrade={liveGrade}
-                onTap={tapTile}
-              />
+              <>
+                <div className="verse-box verse-hidden">
+                  <p className="muted">절을 기억해서 아래에 배치하세요</p>
+                </div>
+                <DragTiles
+                  placed={placed}
+                  pool={tiles}
+                  liveGrade={liveGrade}
+                  onTap={tapTile}
+                />
+              </>
             ) : (
-              <textarea
-                className={`type-input grade-border-${liveGrade}`}
-                value={typed}
-                onChange={(e) => setTyped(e.target.value)}
-                placeholder="절을 입력하세요"
-                rows={4}
-                autoFocus
-              />
+              <>
+                <div className="verse-box">
+                  <TypeScaffold reveal={typeReveal} />
+                </div>
+                <textarea
+                  className={`type-input grade-border-${liveGrade}`}
+                  value={typed}
+                  onChange={(e) => setTyped(e.target.value)}
+                  placeholder="절을 입력하세요"
+                  rows={4}
+                  autoFocus
+                />
+              </>
             )}
             <button
               className="btn-primary"

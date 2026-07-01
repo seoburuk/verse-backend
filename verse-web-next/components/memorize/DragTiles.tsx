@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import type { Grade } from "../../lib/grading/grade";
 
 interface Props {
@@ -13,15 +14,17 @@ const gradeColor: Record<Grade, string> = {
   green: "var(--green)",
   yellow: "var(--yellow)",
   red: "var(--red)",
-  none: "#555",
+  none: "var(--border)",
 };
 
 export function DragTiles({ placed, pool, liveGrade, onTap }: Props) {
+  // 아직 아무것도 배치하지 않았으면 채점 색(빈 답안=red) 대신 중립 밑줄
+  const lineColor = placed.length === 0 ? "var(--text)" : gradeColor[liveGrade];
   return (
     <div className="tiles-root">
       <div
         className="placed-area"
-        style={{ borderColor: gradeColor[liveGrade] }}
+        style={{ "--line": lineColor } as CSSProperties}
       >
         {placed.length === 0 && (
           <span className="placeholder">단어를 탭해서 배치하세요</span>
