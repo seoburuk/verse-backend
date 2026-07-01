@@ -175,6 +175,10 @@ func main() {
 		log.Fatalf("seed course %q: %v", warmup.slug, err)
 	}
 	fmt.Printf("OK: course %q seeded (%d sections, %d items)\n", warmup.slug, len(warmup.sections), totalItems)
+
+	if err := seedBooks(ctx, pool); err != nil {
+		log.Fatalf("seed books: %v", err)
+	}
 }
 
 func insertCourse(ctx context.Context, pool *pgxpool.Pool, co seedCourse) error {
@@ -250,7 +254,7 @@ func insertCourseWithSections(ctx context.Context, pool *pgxpool.Pool, co seedCo
 			_, err = pool.Exec(ctx, `
 				INSERT INTO course_items(course_id, section_id, verse_id, ord, topic)
 				VALUES ($1, $2, $3, $4, $5)
-				ON CONFLICT (section_id, verse_id) WHERE section_id IS NOT NULL DO NOTHING
+				ON CONFLICT (section_id, ord) WHERE section_id IS NOT NULL DO NOTHING
 			`, courseID, sectionID, verseID, itemOrd+1, s.title)
 			if err != nil {
 				return 0, fmt.Errorf("insert course_item (section %q, verse %d:%d:%d): %w", s.title, ref.b, ref.c, ref.v, err)

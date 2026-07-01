@@ -2,11 +2,12 @@
 package dto
 
 type CourseResponse struct {
-	ID    int64  `json:"id"`
-	Slug  string `json:"slug"`
-	Title string `json:"title"`
-	Theme string `json:"theme"`
-	Ord   int    `json:"ord"`
+	ID       int64  `json:"id"`
+	Slug     string `json:"slug"`
+	Title    string `json:"title"`
+	Theme    string `json:"theme"`
+	Ord      int    `json:"ord"`
+	Category string `json:"category"`
 }
 
 type CourseItemResponse struct {

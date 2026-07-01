@@ -58,11 +58,12 @@ func (h *Handler) ListCourses(w http.ResponseWriter, r *http.Request) {
 	resp := make([]dto.CourseResponse, len(courses))
 	for i, c := range courses {
 		resp[i] = dto.CourseResponse{
-			ID:    c.ID,
-			Slug:  c.Slug,
-			Title: c.Title,
-			Theme: c.Theme,
-			Ord:   c.Ord,
+			ID:       c.ID,
+			Slug:     c.Slug,
+			Title:    c.Title,
+			Theme:    c.Theme,
+			Ord:      c.Ord,
+			Category: c.Category,
 		}
 	}
 	writeJSON(w, http.StatusOK, resp)
@@ -78,11 +79,12 @@ func (h *Handler) GetCourse(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cr := dto.CourseResponse{
-		ID:    detail.Course.ID,
-		Slug:  detail.Course.Slug,
-		Title: detail.Course.Title,
-		Theme: detail.Course.Theme,
-		Ord:   detail.Course.Ord,
+		ID:       detail.Course.ID,
+		Slug:     detail.Course.Slug,
+		Title:    detail.Course.Title,
+		Theme:    detail.Course.Theme,
+		Ord:      detail.Course.Ord,
+		Category: detail.Course.Category,
 	}
 
 	if len(detail.Sections) > 0 {

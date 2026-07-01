@@ -27,12 +27,13 @@ type BibleVerse struct {
 }
 
 type Course struct {
-	ID     int64       `json:"id"`
-	Slug   string      `json:"slug"`
-	Title  string      `json:"title"`
-	Theme  pgtype.Text `json:"theme"`
-	Ord    int32       `json:"ord"`
-	Hidden bool        `json:"hidden"`
+	ID       int64       `json:"id"`
+	Slug     string      `json:"slug"`
+	Title    string      `json:"title"`
+	Theme    pgtype.Text `json:"theme"`
+	Ord      int32       `json:"ord"`
+	Hidden   bool        `json:"hidden"`
+	Category string      `json:"category"`
 }
 
 type CourseItem struct {

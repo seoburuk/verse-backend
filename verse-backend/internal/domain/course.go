@@ -2,12 +2,13 @@
 package domain
 
 type Course struct {
-	ID     int64
-	Slug   string
-	Title  string
-	Theme  string
-	Ord    int
-	Hidden bool
+	ID       int64
+	Slug     string
+	Title    string
+	Theme    string
+	Ord      int
+	Hidden   bool
+	Category string
 }
 
 // CourseItem — 코스에 담긴 절 하나. 진도(progress)는 이 단위로만 추적한다.

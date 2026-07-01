@@ -146,12 +146,13 @@ func (r *pgCourseRepo) GetSectionByID(ctx context.Context, sectionID int64) (dom
 
 func toDomainCourse(c db.Course) domain.Course {
 	return domain.Course{
-		ID:     c.ID,
-		Slug:   c.Slug,
-		Title:  c.Title,
-		Theme:  c.Theme.String,
-		Ord:    int(c.Ord),
-		Hidden: c.Hidden,
+		ID:       c.ID,
+		Slug:     c.Slug,
+		Title:    c.Title,
+		Theme:    c.Theme.String,
+		Ord:      int(c.Ord),
+		Hidden:   c.Hidden,
+		Category: c.Category,
 	}
 }
 
