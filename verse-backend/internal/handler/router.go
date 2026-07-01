@@ -63,6 +63,7 @@ func NewRouter(pool *pgxpool.Pool, h *Handler, auth *service.AuthService, corsOr
 			})
 			r.Get("/me/progress", h.GetMyProgress)
 			r.Get("/me/lives", h.GetMyLives)
+			r.Get("/me/stats", h.GetMyStats)
 			r.Delete("/me", h.DeleteAccount)
 		})
 	})

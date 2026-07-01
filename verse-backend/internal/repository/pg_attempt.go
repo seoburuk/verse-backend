@@ -104,6 +104,42 @@ func (r *pgAttemptRepo) ListCourseProgress(ctx context.Context, userID int64) ([
 	return out, nil
 }
 
+func (r *pgAttemptRepo) GetCategoryProgress(ctx context.Context, userID int64) ([]domain.CategoryProgress, error) {
+	rows, err := r.q.GetCategoryProgress(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]domain.CategoryProgress, len(rows))
+	for i, row := range rows {
+		out[i] = domain.CategoryProgress{
+			Category: row.Category,
+			Cleared:  int(row.Cleared),
+			Total:    int(row.Total),
+		}
+	}
+	return out, nil
+}
+
+func (r *pgAttemptRepo) GetGradeDistribution(ctx context.Context, userID int64) (domain.GradeDistribution, error) {
+	row, err := r.q.GetGradeDistribution(ctx, userID)
+	if err != nil {
+		return domain.GradeDistribution{}, err
+	}
+	return domain.GradeDistribution{
+		Green:  int(row.Green),
+		Yellow: int(row.Yellow),
+		Red:    int(row.Red),
+	}, nil
+}
+
+func (r *pgAttemptRepo) GetTotalCleared(ctx context.Context, userID int64) (int, error) {
+	total, err := r.q.GetTotalCleared(ctx, userID)
+	if err != nil {
+		return 0, err
+	}
+	return int(total), nil
+}
+
 func (r *pgAttemptRepo) UpsertStreak(ctx context.Context, params UpsertStreakParams) error {
 	var pgDate pgtype.Date
 	if params.LastDay != nil {

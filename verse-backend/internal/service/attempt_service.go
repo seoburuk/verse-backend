@@ -113,6 +113,35 @@ type ProgressSummary struct {
 	Items   []domain.ItemProgress
 }
 
+// Stats — 대시보드용 집계(스트릭, 카테고리별 완료율, 등급 분포, 총 암송 절 수).
+type Stats struct {
+	Streak       domain.Streak
+	TotalCleared int
+	Categories   []domain.CategoryProgress
+	Grades       domain.GradeDistribution
+}
+
+// GetStats — 대시보드에 필요한 집계를 한 번에 조회.
+func (s *AttemptService) GetStats(ctx context.Context, userID int64) (Stats, error) {
+	streak, err := s.attempts.GetStreak(ctx, userID)
+	if err != nil {
+		return Stats{}, err
+	}
+	totalCleared, err := s.attempts.GetTotalCleared(ctx, userID)
+	if err != nil {
+		return Stats{}, err
+	}
+	categories, err := s.attempts.GetCategoryProgress(ctx, userID)
+	if err != nil {
+		return Stats{}, err
+	}
+	grades, err := s.attempts.GetGradeDistribution(ctx, userID)
+	if err != nil {
+		return Stats{}, err
+	}
+	return Stats{Streak: streak, TotalCleared: totalCleared, Categories: categories, Grades: grades}, nil
+}
+
 // GetProgress — 사용자의 스트릭, 코스별 완료 집계, 절별 진도를 한 번에 조회.
 func (s *AttemptService) GetProgress(ctx context.Context, userID int64) (ProgressSummary, error) {
 	streak, err := s.attempts.GetStreak(ctx, userID)

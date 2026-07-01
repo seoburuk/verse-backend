@@ -57,6 +57,8 @@ export default function CourseListPage() {
           {lives && <span className="lives-badge">❤️ {lives.lives}</span>}
           {streak && <span className="streak-badge">🔥 {streak.current}</span>}
           <span className="user-name">{user?.display_name}</span>
+          <button className="btn-link" onClick={() => router.push("/dashboard")}>대시보드</button>
+          <button className="btn-link" onClick={() => router.push("/settings")}>설정</button>
           <button className="btn-link" onClick={logout}>로그아웃</button>
         </div>
       </header>

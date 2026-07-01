@@ -43,6 +43,9 @@ type AttemptRepo interface {
 	UpsertStreak(ctx context.Context, params UpsertStreakParams) error
 	ListUserProgress(ctx context.Context, userID int64) ([]domain.ItemProgress, error)
 	ListCourseProgress(ctx context.Context, userID int64) ([]domain.CourseProgress, error)
+	GetCategoryProgress(ctx context.Context, userID int64) ([]domain.CategoryProgress, error)
+	GetGradeDistribution(ctx context.Context, userID int64) (domain.GradeDistribution, error)
+	GetTotalCleared(ctx context.Context, userID int64) (int, error)
 }
 
 // --- 파라미터 타입 ---
