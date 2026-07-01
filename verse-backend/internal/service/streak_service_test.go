@@ -35,6 +35,15 @@ func (s *stubAttemptRepo) ListUserProgress(_ context.Context, _ int64) ([]domain
 func (s *stubAttemptRepo) ListCourseProgress(_ context.Context, _ int64) ([]domain.CourseProgress, error) {
 	panic("not implemented")
 }
+func (s *stubAttemptRepo) GetCategoryProgress(_ context.Context, _ int64) ([]domain.CategoryProgress, error) {
+	panic("not implemented")
+}
+func (s *stubAttemptRepo) GetGradeDistribution(_ context.Context, _ int64) (domain.GradeDistribution, error) {
+	panic("not implemented")
+}
+func (s *stubAttemptRepo) GetTotalCleared(_ context.Context, _ int64) (int, error) {
+	panic("not implemented")
+}
 
 func dayStr(d time.Time) string { return d.UTC().Format("2006-01-02") }
 func ptr(s string) *string      { return &s }
