@@ -605,3 +605,60 @@ body {
   border: 1px solid var(--border);
   border-radius: 4px;
 }
+
+/* ── Landing ─────────────────────────────────────── */
+.landing-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  padding: 2rem 0;
+}
+
+.landing-hero {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.landing-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+}
+
+.landing-subtitle {
+  color: var(--muted);
+  font-size: 1rem;
+  max-width: 420px;
+}
+
+.landing-cta { margin-top: 0.5rem; }
+
+.landing-cta-link {
+  display: inline-block;
+  text-decoration: none;
+  width: auto;
+  padding: 0.75rem 2.5rem;
+}
+
+.landing-features {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.landing-feature-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 var(--border);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.landing-feature-title { font-size: 1.1rem; font-weight: bold; }
