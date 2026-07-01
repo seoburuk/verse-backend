@@ -10,17 +10,20 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
+	"github.com/go-chi/httprate"
 	"github.com/jackc/pgx/v5/pgxpool"
 	mw "github.com/seoburuk/verse-backend/internal/handler/middleware"
 	"github.com/seoburuk/verse-backend/internal/service"
 )
 
 // NewRouter — 라우팅 + 미들웨어 체인을 조립해 http.Handler를 반환한다.
-func NewRouter(pool *pgxpool.Pool, h *Handler, auth *service.AuthService) http.Handler {
+func NewRouter(pool *pgxpool.Pool, h *Handler, auth *service.AuthService, corsOrigin string) http.Handler {
 	r := chi.NewRouter()
 
 	// 전역 미들웨어 — 순서가 의미를 가진다(위→아래로 요청을 감싼다)
@@ -28,15 +31,25 @@ func NewRouter(pool *pgxpool.Pool, h *Handler, auth *service.AuthService) http.H
 	r.Use(middleware.RealIP)    // 프록시 뒤에서도 실제 클라이언트 IP 복원
 	r.Use(middleware.Logger)    // 메서드/경로/상태코드/소요시간 로깅
 	r.Use(middleware.Recoverer) // 핸들러 panic → 500 변환
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   strings.Split(corsOrigin, ","),
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Authorization", "Content-Type"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
 
 	// /healthz: 로드밸런서·도커·k8s가 "살아있나"를 묻는 표준 엔드포인트
 	r.Get("/healthz", healthzHandler(pool))
 
-	// /v1 — 모든 API 엔드포인트. Vite 프록시가 /v1/* → :8080 으로 전달.
+	// /v1 — 모든 API 엔드포인트. Next.js rewrites가 /v1/* → :8080 으로 전달.
 	r.Route("/v1", func(r chi.Router) {
-		// 공개 엔드포인트
-		r.Post("/auth/signup", h.Signup)
-		r.Post("/auth/login", h.Login)
+		// 공개 엔드포인트 — 브루트포스 방지 레이트리밋(IP당 분당 10회)
+		r.Group(func(r chi.Router) {
+			r.Use(httprate.LimitByIP(10, time.Minute))
+			r.Post("/auth/signup", h.Signup)
+			r.Post("/auth/login", h.Login)
+		})
 		r.Get("/courses", h.ListCourses)
 		r.Get("/courses/{slug}", h.GetCourse)
 		r.Get("/sections/{id}", h.GetSection)
@@ -44,8 +57,12 @@ func NewRouter(pool *pgxpool.Pool, h *Handler, auth *service.AuthService) http.H
 		// 보호 엔드포인트 — JWT 필수
 		r.Group(func(r chi.Router) {
 			r.Use(mw.RequireAuth(auth))
-			r.Post("/attempts", h.SubmitAttempt)
+			r.Group(func(r chi.Router) {
+				r.Use(httprate.LimitByIP(30, time.Minute))
+				r.Post("/attempts", h.SubmitAttempt)
+			})
 			r.Get("/me/progress", h.GetMyProgress)
+			r.Delete("/me", h.DeleteAccount)
 		})
 	})
 

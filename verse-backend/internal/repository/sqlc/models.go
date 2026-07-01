@@ -70,10 +70,10 @@ type Streak struct {
 
 type User struct {
 	ID           int64              `json:"id"`
-	Email        string             `json:"email"`
 	DisplayName  string             `json:"display_name"`
 	PasswordHash string             `json:"password_hash"`
 	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	Username     string             `json:"username"`
 }
 
 type VerseSegment struct {

@@ -6,20 +6,24 @@ export interface AuthResponse {
   display_name: string;
 }
 
-export function login(email: string, password: string): Promise<AuthResponse> {
+export function login(username: string, password: string): Promise<AuthResponse> {
   return apiFetch<AuthResponse>("/auth/login", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ username, password }),
   });
 }
 
 export function signup(
-  email: string,
+  username: string,
   password: string,
   display_name: string,
 ): Promise<AuthResponse> {
   return apiFetch<AuthResponse>("/auth/signup", {
     method: "POST",
-    body: JSON.stringify({ email, password, display_name }),
+    body: JSON.stringify({ username, password, display_name }),
   });
+}
+
+export function deleteAccount(): Promise<void> {
+  return apiFetch<void>("/me", { method: "DELETE" });
 }

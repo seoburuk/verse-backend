@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/seoburuk/verse-backend/internal/handler/dto"
+	mw "github.com/seoburuk/verse-backend/internal/handler/middleware"
 )
 
 func (h *Handler) Signup(w http.ResponseWriter, r *http.Request) {
@@ -16,7 +17,7 @@ func (h *Handler) Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, token, err := h.auth.SignUp(r.Context(), req.Email, req.DisplayName, req.Password)
+	user, token, err := h.auth.SignUp(r.Context(), req.Username, req.DisplayName, req.Password)
 	if err != nil {
 		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
 		return
@@ -36,7 +37,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, token, err := h.auth.Login(r.Context(), req.Email, req.Password)
+	user, token, err := h.auth.Login(r.Context(), req.Username, req.Password)
 	if err != nil {
 		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
 		return
@@ -47,4 +48,19 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		UserID:      user.ID,
 		DisplayName: user.DisplayName,
 	})
+}
+
+func (h *Handler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(mw.CtxUserID).(int64)
+	if !ok {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "unauthorized"})
+		return
+	}
+
+	if err := h.auth.DeleteAccount(r.Context(), userID); err != nil {
+		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

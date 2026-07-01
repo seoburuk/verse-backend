@@ -13,8 +13,8 @@ interface AuthState {
 interface AuthContextValue extends AuthState {
   isAuthed: boolean;
   ready: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, displayName: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
+  signup: (username: string, password: string, displayName: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -37,16 +37,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setReady(true);
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const res = await apiLogin(email, password);
+  const login = useCallback(async (username: string, password: string) => {
+    const res = await apiLogin(username, password);
     const user: StoredUser = { user_id: res.user_id, display_name: res.display_name };
     setToken(res.access_token);
     localStorage.setItem(USER_KEY, JSON.stringify(user));
     setState({ token: res.access_token, user });
   }, []);
 
-  const signup = useCallback(async (email: string, password: string, displayName: string) => {
-    const res = await apiSignup(email, password, displayName);
+  const signup = useCallback(async (username: string, password: string, displayName: string) => {
+    const res = await apiSignup(username, password, displayName);
     const user: StoredUser = { user_id: res.user_id, display_name: res.display_name };
     setToken(res.access_token);
     localStorage.setItem(USER_KEY, JSON.stringify(user));

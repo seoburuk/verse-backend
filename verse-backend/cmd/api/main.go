@@ -76,7 +76,7 @@ func run() error {
 	// 4) HTTP 서버 조립
 	srv := &http.Server{
 		Addr:    ":" + cfg.HTTPPort,
-		Handler: handler.NewRouter(pool, h, authSvc),
+		Handler: handler.NewRouter(pool, h, authSvc, cfg.CORSOrigin),
 
 		// 타임아웃을 반드시 명시해야 하는 이유:
 		// 기본 http.Server는 타임아웃이 0(=무한)이다.

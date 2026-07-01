@@ -10,43 +10,52 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (email, display_name, password_hash)
+INSERT INTO users (username, display_name, password_hash)
 VALUES ($1, $2, $3)
-RETURNING id, email, display_name, password_hash, created_at
+RETURNING id, display_name, password_hash, created_at, username
 `
 
 type CreateUserParams struct {
-	Email        string `json:"email"`
+	Username     string `json:"username"`
 	DisplayName  string `json:"display_name"`
 	PasswordHash string `json:"password_hash"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, createUser, arg.Email, arg.DisplayName, arg.PasswordHash)
+	row := q.db.QueryRow(ctx, createUser, arg.Username, arg.DisplayName, arg.PasswordHash)
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Email,
 		&i.DisplayName,
 		&i.PasswordHash,
 		&i.CreatedAt,
+		&i.Username,
 	)
 	return i, err
 }
 
-const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, display_name, password_hash, created_at FROM users WHERE email = $1
+const deleteUser = `-- name: DeleteUser :exec
+DELETE FROM users WHERE id = $1
 `
 
-func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
-	row := q.db.QueryRow(ctx, getUserByEmail, email)
+func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, deleteUser, id)
+	return err
+}
+
+const getUserByUsername = `-- name: GetUserByUsername :one
+SELECT id, display_name, password_hash, created_at, username FROM users WHERE username = $1
+`
+
+func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByUsername, username)
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Email,
 		&i.DisplayName,
 		&i.PasswordHash,
 		&i.CreatedAt,
+		&i.Username,
 	)
 	return i, err
 }

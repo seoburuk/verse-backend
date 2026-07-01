@@ -23,6 +23,7 @@ type Config struct {
 	Env             string // "dev" | "prod"
 	JWTSecret       string
 	JWTAccessTTL    time.Duration // 액세스 토큰 유효기간
+	CORSOrigin      string        // 프론트(Next.js) origin. 콤마로 여러 개 지정 가능.
 }
 
 // Load — 환경변수에서 설정을 읽어 검증한다. 필수값 누락 시 에러.
@@ -42,6 +43,7 @@ func Load() (*Config, error) {
 		Env:             getEnv("APP_ENV", "dev"),
 		JWTSecret:       getEnv("JWT_SECRET", ""),
 		JWTAccessTTL:    time.Duration(ttlMinutes) * time.Minute,
+		CORSOrigin:      getEnv("CORS_ORIGIN", "http://localhost:3000"),
 	}
 
 	// fail fast: 잘못된 설정으로 조용히 뜨는 것보다

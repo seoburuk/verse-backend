@@ -5,7 +5,7 @@ import "time"
 
 type User struct {
 	ID           int64
-	Email        string
+	Username     string
 	DisplayName  string
 	PasswordHash string // argon2id. 절대 외부로 노출 금지.
 	CreatedAt    time.Time
