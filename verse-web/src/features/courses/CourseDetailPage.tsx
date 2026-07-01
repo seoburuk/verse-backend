@@ -55,7 +55,7 @@ export function CourseDetailPage() {
                 <button
                   key={section.section_id}
                   className="item-card"
-                  onClick={() => navigate(`/sections/${section.section_id}`)}
+                  onClick={() => navigate(`/sections/${section.section_id}`, { state: { courseSlug: slug } })}
                 >
                   <span className="item-topic">{section.title}</span>
                   <span className="item-ref">{section.items.length}구절</span>

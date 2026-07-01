@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { getSection, type SectionDetail } from "../../api/courses";
 import { getProgress } from "../../api/progress";
 
@@ -23,6 +23,8 @@ function bookRef(book: number, chapter: number, verse: number): string {
 export function SectionDetailPage() {
   const { sectionId } = useParams<{ sectionId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const courseSlug: string = (location.state as { courseSlug?: string } | null)?.courseSlug ?? "warmup";
   const [section, setSection] = useState<SectionDetail | null>(null);
   const [cleared, setCleared] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +44,7 @@ export function SectionDetailPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <button className="btn-link" onClick={() => navigate(-1)}>← 워밍업 섹터</button>
+        <button className="btn-link" onClick={() => navigate(-1)}>← 뒤로</button>
         <h2 className="title">{section?.title ?? "..."}</h2>
       </header>
       <main className="content">
@@ -55,7 +57,7 @@ export function SectionDetailPage() {
               className="item-card"
               onClick={() =>
                 navigate(`/memorize/${item.course_item_id}`, {
-                  state: { items: section.items, index, courseSlug: "warmup" },
+                  state: { items: section.items, index, courseSlug },
                 })
               }
             >
