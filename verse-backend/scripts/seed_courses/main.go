@@ -67,7 +67,7 @@ func sec(title string, refs ...r) seedSection { return seedSection{title: title,
 var courses = []seedCourse{
 	{
 		slug:  "beginnings",
-		title: "Foundations",
+		title: "기초",
 		theme: "faith",
 		ord:   1,
 		verses: []verseRef{
@@ -191,7 +191,7 @@ func insertCourse(ctx context.Context, pool *pgxpool.Pool, co seedCourse) error 
 	err := pool.QueryRow(ctx, `
 		INSERT INTO courses(slug, title, theme, ord, hidden)
 		VALUES ($1, $2, $3, $4, $5)
-		ON CONFLICT (slug) DO UPDATE SET hidden = EXCLUDED.hidden
+		ON CONFLICT (slug) DO UPDATE SET hidden = EXCLUDED.hidden, title = EXCLUDED.title
 		RETURNING id
 	`, co.slug, co.title, co.theme, co.ord, co.hidden).Scan(&courseID)
 	if err != nil {

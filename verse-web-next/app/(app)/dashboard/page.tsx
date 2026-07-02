@@ -3,16 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getStats, type Stats } from "../../../lib/api/stats";
-
-const CATEGORY_LABELS: Record<string, string> = {
-  ot: "구약",
-  nt: "신약",
-  warmup: "워밍업",
-  messiah: "예언",
-  topic: "주제별",
-};
-
-const CATEGORY_ORDER = ["ot", "nt", "warmup", "messiah", "topic"];
+import { CATEGORY_LABELS, CATEGORY_ORDER } from "../../../lib/categories";
 
 export default function DashboardPage() {
   const router = useRouter();

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { getSection, type SectionDetail } from "../../../../../../lib/api/courses";
+import { getSection, getCourse, type SectionDetail } from "../../../../../../lib/api/courses";
 import { getProgress } from "../../../../../../lib/api/progress";
 import { bookRef } from "../../../../../../lib/bookRef";
 import { itemsCacheKey } from "../../../../../../lib/itemsCache";
@@ -12,26 +12,27 @@ export default function SectionDetailPage() {
   const { slug, id: sectionId } = params;
   const router = useRouter();
   const [section, setSection] = useState<SectionDetail | null>(null);
+  const [courseTitle, setCourseTitle] = useState<string | null>(null);
   const [cleared, setCleared] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!sectionId) return;
-    Promise.all([getSection(Number(sectionId)), getProgress()])
-      .then(([s, p]) => {
+    Promise.all([getSection(Number(sectionId)), getCourse(slug), getProgress()])
+      .then(([s, c, p]) => {
         setSection(s);
+        setCourseTitle(c.title);
         setCleared(new Set(p.items.filter((it) => it.cleared).map((it) => it.course_item_id)));
       })
       .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false));
-  }, [sectionId]);
+  }, [sectionId, slug]);
 
   return (
     <div className="page">
       <header className="page-header">
-        <button className="btn-link" onClick={() => router.push(`/courses/${slug}`)}>← {section?.title ?? "코스"}로</button>
-        <h2 className="title">{section?.title ?? "..."}</h2>
+        <button className="btn-link" onClick={() => router.push(`/courses/${slug}`)}>← {courseTitle ?? "코스"}로</button>
       </header>
       <main className="content">
         {loading && <p className="muted">불러오는 중...</p>}
@@ -48,7 +49,7 @@ export default function SectionDetailPage() {
             >
               <span className="item-topic">
                 {cleared.has(item.course_item_id) && <span className="item-cleared">✓ </span>}
-                {item.topic}
+                {item.text.slice(0, 40)}
               </span>
               <span className="item-ref">{bookRef(item.book, item.chapter, item.verse)}</span>
             </button>

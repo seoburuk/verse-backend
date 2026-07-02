@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../lib/hooks/useAuth";
 import { ApiError } from "../../lib/api/client";
+
+const SAVED_USERNAME_KEY = "kjv_saved_username";
 
 export default function LoginPage() {
   const { login, signup } = useAuth();
@@ -12,8 +14,17 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [saveUsername, setSaveUsername] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(SAVED_USERNAME_KEY);
+    if (saved) {
+      setUsername(saved);
+      setSaveUsername(true);
+    }
+  }, []);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -24,6 +35,11 @@ export default function LoginPage() {
         await signup(username, password, displayName);
       } else {
         await login(username, password);
+      }
+      if (saveUsername) {
+        localStorage.setItem(SAVED_USERNAME_KEY, username);
+      } else {
+        localStorage.removeItem(SAVED_USERNAME_KEY);
       }
       router.push("/courses");
     } catch (err) {
@@ -73,6 +89,16 @@ export default function LoginPage() {
               onChange={(e) => setDisplayName(e.target.value)}
               required
             />
+          )}
+          {!isSignup && (
+            <label className="checkbox-row">
+              <input
+                type="checkbox"
+                checked={saveUsername}
+                onChange={(e) => setSaveUsername(e.target.checked)}
+              />
+              아이디 저장
+            </label>
           )}
           {error && <p className="error-msg">{error}</p>}
           <button className="btn-primary" type="submit" disabled={loading}>

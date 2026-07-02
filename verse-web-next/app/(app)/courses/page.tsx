@@ -8,16 +8,7 @@ import { getLives, type Lives } from "../../../lib/api/lives";
 import { getResume, type ResumeTarget } from "../../../lib/api/resume";
 import { useAuth } from "../../../lib/hooks/useAuth";
 import { bookRef } from "../../../lib/bookRef";
-
-const CATEGORY_LABELS: Record<string, string> = {
-  ot: "구약",
-  nt: "신약",
-  warmup: "워밍업",
-  messiah: "예언",
-  topic: "주제별",
-};
-
-const CATEGORY_ORDER = ["topic", "warmup", "messiah", "ot", "nt"];
+import { CATEGORY_LABELS, CATEGORY_ORDER } from "../../../lib/categories";
 
 function groupByCategory(courses: Course[]): Array<[string, Course[]]> {
   const groups = new Map<string, Course[]>();
@@ -34,31 +25,6 @@ function resumeUrl(r: ResumeTarget): string {
     return `/courses/${r.course_slug}/sections/${r.section_id}/memorize/${r.course_item_id}`;
   }
   return `/courses/${r.course_slug}/memorize/${r.course_item_id}`;
-}
-
-interface CourseCardProps {
-  course: Course;
-  progress: Map<number, CourseProgress>;
-  onClick: () => void;
-}
-
-function CourseCard({ course, progress, onClick }: CourseCardProps) {
-  const p = progress.get(course.id);
-  const done = p ? p.cleared === p.total && p.total > 0 : false;
-
-  return (
-    <button className="course-card" onClick={onClick}>
-      <span className="course-title">{course.title}</span>
-      <span className="course-meta">
-        {p && (
-          <span className={`course-progress${done ? " is-done" : ""}`}>
-            {done ? "✓ " : ""}{p.cleared}/{p.total}
-          </span>
-        )}
-        <span className="course-theme">{course.theme}</span>
-      </span>
-    </button>
-  );
 }
 
 export default function CourseListPage() {
@@ -85,6 +51,22 @@ export default function CourseListPage() {
 
     getResume().then((res) => setResume(res.resume)).catch(() => {});
   }, []);
+
+  function categoryMeta(group: Course[]): string {
+    if (group.length === 1) {
+      const p = progress.get(group[0].id);
+      return p ? `${p.cleared}/${p.total}` : "";
+    }
+    return `${group.length}권`;
+  }
+
+  function openCategory(category: string, group: Course[]) {
+    if (group.length === 1) {
+      router.push(`/courses/${group[0].slug}`);
+    } else {
+      router.push(`/courses/category/${category}`);
+    }
+  }
 
   return (
     <div className="page">
@@ -121,21 +103,20 @@ export default function CourseListPage() {
           </div>
         )}
 
-        {groupByCategory(courses).map(([category, group]) => (
-          <div key={category} className="section-group">
-            <h2 className="section-title">{CATEGORY_LABELS[category] ?? category}</h2>
-            <div className="course-list">
-              {group.map((c) => (
-                <CourseCard
-                  key={c.id}
-                  course={c}
-                  progress={progress}
-                  onClick={() => router.push(`/courses/${c.slug}`)}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
+        <div className="course-list">
+          {groupByCategory(courses).map(([category, group]) => (
+            <button
+              key={category}
+              className="course-card"
+              onClick={() => openCategory(category, group)}
+            >
+              <span className="course-title">{CATEGORY_LABELS[category] ?? category}</span>
+              <span className="course-meta">
+                <span className="course-progress">{categoryMeta(group)}</span>
+              </span>
+            </button>
+          ))}
+        </div>
       </main>
     </div>
   );

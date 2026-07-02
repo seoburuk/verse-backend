@@ -14,9 +14,9 @@ func seedMessiahProphecy(ctx context.Context, pool *pgxpool.Pool) error {
 	err := pool.QueryRow(ctx, `
 		INSERT INTO courses(slug, title, theme, ord, category)
 		VALUES ($1, $2, $3, $4, $5)
-		ON CONFLICT (slug) DO UPDATE SET category = EXCLUDED.category
+		ON CONFLICT (slug) DO UPDATE SET category = EXCLUDED.category, title = EXCLUDED.title
 		RETURNING id
-	`, "messiah-prophecy", "메시아 예언", "messiah", 33, "messiah").Scan(&courseID)
+	`, "messiah-prophecy", "구약에 나온 메시아에 대한 예언 성취", "messiah", 33, "messiah").Scan(&courseID)
 	if err != nil {
 		return fmt.Errorf("upsert messiah-prophecy course: %w", err)
 	}
