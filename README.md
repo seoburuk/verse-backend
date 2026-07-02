@@ -4,7 +4,7 @@
 
 ```
 verse-backend/   Go REST API (포트 8080)
-verse-web/       React 웹 클라이언트 (포트 5173)
+verse-web/       Next.js 웹 클라이언트 (포트 3000)
 files/           KJV 원본 데이터 + DB 파이프라인
 ```
 
@@ -42,18 +42,18 @@ curl http://localhost:8080/healthz
 cd verse-web
 npm install
 npm run dev
-# → http://localhost:5173
+# → http://localhost:3000
 ```
 
-`/v1/*` 요청은 Vite 프록시가 자동으로 `:8080`으로 전달한다.
+`/v1/*` 요청은 Next.js rewrites가 자동으로 `:8080`으로 전달한다.
 
 ---
 
 ## 아키텍처
 
 ```
-브라우저 (React)
-    │  /v1/*  (Vite 프록시 → :8080)
+브라우저 (Next.js)
+    │  /v1/*  (Next.js rewrites → :8080)
     ▼
 Go API (chi 라우터)
     │
@@ -62,7 +62,7 @@ Go API (chi 라우터)
     └── repository (sqlc → PostgreSQL)
 ```
 
-멀티 클라이언트 구조: 동일한 REST API에 React 웹과 Flutter 앱(예정)이 각각 붙는다.
+멀티 클라이언트 구조: 동일한 REST API에 Next.js 웹과 Flutter 앱(예정)이 각각 붙는다.
 
 ---
 
@@ -81,7 +81,7 @@ Go API (chi 라우터)
 
 ## 채점 규칙 (★ 가장 중요한 계약)
 
-`verse-backend/internal/service/grading.go` ↔ `verse-web/src/grading/` 는 **1:1로 동일**해야 한다.
+`verse-backend/internal/service/grading.go` ↔ `verse-web/lib/grading/` 는 **1:1로 동일**해야 한다.
 
 **정규화 (`normalize`)**
 1. 소문자화

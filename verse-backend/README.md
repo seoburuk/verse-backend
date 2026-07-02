@@ -32,5 +32,5 @@ handler(HTTP) → service(도메인) → repository(sqlc) 의 단방향 3계층.
     docs/adr/        의사결정 기록
 
 ## ★ 주의: 채점 규칙 미러링
-internal/service/grading.go 의 규칙은 verse-web/src/grading 과 1:1 일치해야 한다.
+internal/service/grading.go 의 규칙은 verse-web/lib/grading 과 1:1 일치해야 한다.
 한쪽 변경 시 반드시 양쪽 동기화. 명세 단일 출처: docs/adr/0002.
