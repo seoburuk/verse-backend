@@ -46,7 +46,7 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
   const item = items[index];
   const isLast = index >= items.length - 1;
   const {
-    phase, mode, tiles, placed, typed, typeReveal, liveGrade, submitting, serverGrade, mismatch, outOfLives,
+    phase, mode, tiles, placed, typed, typeReveal, liveGrade, submitting, serverGrade, mismatch, outOfLives, combo, fx,
     setMode, tapTile, setTyped, startRecall, submit, reset,
   } = useMemorize(item.course_item_id, item.text);
 
@@ -155,16 +155,21 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
             ) : (
               <>
                 <div className="verse-box">
-                  <TypeScaffold reveal={typeReveal} />
+                  <TypeScaffold reveal={typeReveal} fx={fx} />
                 </div>
-                <textarea
-                  className={`type-input grade-border-${liveGrade}`}
-                  value={typed}
-                  onChange={(e) => setTyped(e.target.value)}
-                  placeholder="절을 입력하세요"
-                  rows={4}
-                  autoFocus
-                />
+                <div className="type-input-wrap">
+                  {combo >= 5 && <span className="combo-badge">x{combo}</span>}
+                  <textarea
+                    className={`type-input grade-border-${liveGrade}${
+                      fx ? ` fx-${fx.kind}-${fx.seq % 2 ? "a" : "b"}` : ""
+                    }`}
+                    value={typed}
+                    onChange={(e) => setTyped(e.target.value)}
+                    placeholder="절을 입력하세요"
+                    rows={4}
+                    autoFocus
+                  />
+                </div>
               </>
             )}
             <button

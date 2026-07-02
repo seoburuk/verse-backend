@@ -7,6 +7,8 @@
   --border: #333;
   --text: #e5e5e5;
   --muted: #888;
+  --pink: #ff4d9d;
+  --pink-soft: #f9a8d4;
 }
 
 [data-theme="light"] {
@@ -18,6 +20,8 @@
   --border: #d4d4d4;
   --text: #1a1a1a;
   --muted: #6b6b6b;
+  --pink: #db2777;
+  --pink-soft: #f472b6;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -443,6 +447,78 @@ body {
   color: var(--text);
   font-weight: bold;
   border-bottom-color: var(--green);
+}
+
+/* ── 타격 효과 (keycap impact) ───────────────────── */
+/* 방금 맞힌 단어: 픽셀 팝 — 핑크 플래시 후 초록 정착 */
+.hint-word.hit {
+  animation: word-pop 0.18s steps(3);
+}
+
+.hint-word.hit .blank-char.filled {
+  animation: char-flash 0.18s steps(2);
+}
+
+@keyframes word-pop {
+  0% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+@keyframes char-flash {
+  0% {
+    color: var(--pink);
+    border-bottom-color: var(--pink);
+    text-shadow: 2px 2px 0 var(--pink-soft);
+  }
+  100% {
+    color: var(--text);
+    border-bottom-color: var(--green);
+    text-shadow: none;
+  }
+}
+
+/* textarea 임팩트 펄스 — seq 홀짝으로 a/b 교대해 애니메이션 재시작 */
+.type-input.fx-hit-a { animation: input-pulse-a 0.25s steps(3); }
+.type-input.fx-hit-b { animation: input-pulse-b 0.25s steps(3); }
+.type-input.fx-miss-a { animation: input-shake-a 0.2s steps(4); }
+.type-input.fx-miss-b { animation: input-shake-b 0.2s steps(4); }
+
+@keyframes input-pulse-a {
+  0% { box-shadow: 4px 4px 0 var(--pink); border-color: var(--pink); }
+  100% { box-shadow: none; }
+}
+@keyframes input-pulse-b {
+  0% { box-shadow: 4px 4px 0 var(--pink); border-color: var(--pink); }
+  100% { box-shadow: none; }
+}
+@keyframes input-shake-a {
+  0% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+  100% { transform: translateX(0); }
+}
+@keyframes input-shake-b {
+  0% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+  100% { transform: translateX(0); }
+}
+
+.type-input-wrap {
+  position: relative;
+}
+
+/* 5콤보 이상일 때만 표시되는 픽셀 콤보 뱃지 */
+.combo-badge {
+  position: absolute;
+  top: -0.75rem;
+  right: 0.5rem;
+  background: var(--pink);
+  color: #0f0f0f;
+  border: 2px solid var(--text);
+  box-shadow: 2px 2px 0 var(--text);
+  padding: 0.1rem 0.4rem;
+  font-size: 0.8rem;
+  font-weight: bold;
+  z-index: 1;
 }
 
 .pool-area {

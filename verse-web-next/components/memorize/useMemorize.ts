@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { normalize, tokenizeDisplay } from "../../lib/grading/normalize";
 import { gradeRecall, type Grade } from "../../lib/grading/grade";
 import { submitAttempt } from "../../lib/api/attempts";
 import { ApiError } from "../../lib/api/client";
+import { playHit, playMiss } from "../../lib/fx/sound";
 
 export type RecallMode = "drag" | "type";
 
@@ -12,6 +13,13 @@ export type RecallMode = "drag" | "type";
 export interface TypeHintWord {
   word: string;
   filled: boolean;
+}
+
+// 타격 효과 트리거. seq가 바뀔 때마다 애니메이션 1회 재생.
+export interface HitFx {
+  seq: number;
+  index: number; // 방금 맞힌 단어 인덱스 (miss는 -1)
+  kind: "hit" | "miss";
 }
 
 export interface MemorizeState {
@@ -26,6 +34,8 @@ export interface MemorizeState {
   serverGrade: Grade | null;
   mismatch: boolean;
   outOfLives: boolean;
+  combo: number;
+  fx: HitFx | null;
 }
 
 interface UseMemorizeReturn extends MemorizeState {
@@ -72,6 +82,23 @@ export function useMemorize(
   const [serverGrade, setServerGrade] = useState<Grade | null>(null);
   const [mismatch, setMismatch] = useState(false);
   const [outOfLives, setOutOfLives] = useState(false);
+  const [combo, setCombo] = useState(0);
+  const [fx, setFx] = useState<HitFx | null>(null);
+  const fxSeqRef = useRef(0);
+
+  const fireFx = useCallback((kind: HitFx["kind"], index: number) => {
+    fxSeqRef.current += 1;
+    setFx({ seq: fxSeqRef.current, index, kind });
+    if (kind === "hit") {
+      setCombo((c) => {
+        playHit(c + 1);
+        return c + 1;
+      });
+    } else {
+      playMiss();
+      setCombo(0);
+    }
+  }, []);
 
   const attemptTokens =
     mode === "drag" ? placed.flatMap((t) => normalize(t)) : normalize(typed);
@@ -85,6 +112,24 @@ export function useMemorize(
     }));
   }, [answerDisplay, answerTokens, typed]);
 
+  // type 모드: 새로 완성된 단어 → hit, 완성했던 단어가 깨짐 → miss
+  const prevFilledRef = useRef(0);
+  useEffect(() => {
+    const filledCount = typeReveal.filter((w) => w.filled).length;
+    const prev = prevFilledRef.current;
+    prevFilledRef.current = filledCount;
+    if (mode !== "type" || phase !== "recall") return;
+    if (filledCount > prev) {
+      let lastIdx = -1;
+      typeReveal.forEach((w, i) => {
+        if (w.filled) lastIdx = i;
+      });
+      fireFx("hit", lastIdx);
+    } else if (filledCount < prev) {
+      fireFx("miss", -1);
+    }
+  }, [typeReveal, mode, phase, fireFx]);
+
   const tapTile = useCallback((tile: string, fromPool: boolean) => {
     if (phase !== "recall") return;
     if (fromPool) {
@@ -94,6 +139,13 @@ export function useMemorize(
         return [...prev.slice(0, idx), ...prev.slice(idx + 1)];
       });
       setPlaced((prev) => [...prev, tile]);
+      // 정답 순서대로 배치했으면 히트 효과
+      const nextTokens = [...placed, tile].flatMap((t) => normalize(t));
+      const correct =
+        nextTokens.length <= answerTokens.length &&
+        nextTokens.every((t, i) => t === answerTokens[i]);
+      if (correct) fireFx("hit", nextTokens.length - 1);
+      else fireFx("miss", -1);
     } else {
       setPlaced((prev) => {
         const idx = prev.indexOf(tile);
@@ -101,8 +153,9 @@ export function useMemorize(
         return [...prev.slice(0, idx), ...prev.slice(idx + 1)];
       });
       setTiles((prev) => [...prev, tile]);
+      setCombo(0);
     }
-  }, [phase]);
+  }, [phase, placed, answerTokens, fireFx]);
 
   const startRecall = useCallback(() => {
     setPhase("recall");
@@ -138,7 +191,10 @@ export function useMemorize(
     setTyped("");
     setServerGrade(null);
     setMismatch(false);
+    setCombo(0);
+    setFx(null);
+    prevFilledRef.current = 0;
   }, [answerDisplay]);
 
-  return { phase, mode, tiles, placed, typed, typeReveal, liveGrade, submitting, serverGrade, mismatch, outOfLives, setMode, tapTile, setTyped, startRecall, submit, reset };
+  return { phase, mode, tiles, placed, typed, typeReveal, liveGrade, submitting, serverGrade, mismatch, outOfLives, combo, fx, setMode, tapTile, setTyped, startRecall, submit, reset };
 }
