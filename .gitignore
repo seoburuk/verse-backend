@@ -4,6 +4,10 @@ dist/
 /verse-backend/bin/
 /verse-backend/seed_courses
 
+# Next.js
+verse-web/.next/
+verse-web/tsconfig.tsbuildinfo
+
 # secrets
 *.env
 .env
