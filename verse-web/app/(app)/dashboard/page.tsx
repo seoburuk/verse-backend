@@ -3,35 +3,40 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getStats, type Stats } from "../../../lib/api/stats";
+import { listCourses } from "../../../lib/api/courses";
+import { getProgress, type CourseProgress } from "../../../lib/api/progress";
 
-const CATEGORY_LABELS: Record<string, string> = {
-  ot: "구약",
-  nt: "신약",
-  warmup: "워밍업",
-  messiah: "예언",
-  topic: "주제별",
-};
-
-const CATEGORY_ORDER = ["ot", "nt", "warmup", "messiah", "topic"];
+interface CourseRow {
+  slug: string;
+  title: string;
+  cleared: number;
+  total: number;
+}
 
 export default function DashboardPage() {
   const router = useRouter();
   const [stats, setStats] = useState<Stats | null>(null);
+  const [courseRows, setCourseRows] = useState<CourseRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getStats()
-      .then(setStats)
+    Promise.all([getStats(), listCourses(), getProgress()])
+      .then(([s, cs, p]) => {
+        setStats(s);
+        const progressByCourse = new Map<number, CourseProgress>(p.courses.map((c) => [c.course_id, c]));
+        const rows = cs
+          .map((c) => {
+            const pr = progressByCourse.get(c.id);
+            return { slug: c.slug, title: c.title, cleared: pr?.cleared ?? 0, total: pr?.total ?? 0 };
+          })
+          .filter((r) => r.cleared > 0)
+          .sort((a, b) => b.cleared - a.cleared);
+        setCourseRows(rows);
+      })
       .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
-
-  const categories = stats
-    ? CATEGORY_ORDER.filter((cat) => stats.categories.some((c) => c.category === cat)).map(
-        (cat) => stats.categories.find((c) => c.category === cat)!,
-      )
-    : [];
 
   const totalGrades = stats ? stats.grades.green + stats.grades.yellow + stats.grades.red : 0;
 
@@ -62,23 +67,27 @@ export default function DashboardPage() {
             </div>
 
             <div className="section-group">
-              <h2 className="section-title">카테고리별 진도</h2>
-              <div className="dash-category-list">
-                {categories.map((c) => {
-                  const pct = c.total > 0 ? Math.round((c.cleared / c.total) * 100) : 0;
-                  return (
-                    <div key={c.category} className="dash-category-row">
-                      <div className="dash-category-head">
-                        <span>{CATEGORY_LABELS[c.category] ?? c.category}</span>
-                        <span className="muted">{c.cleared}/{c.total} ({pct}%)</span>
+              <h2 className="section-title">섹션별 진도</h2>
+              {courseRows.length === 0 ? (
+                <p className="muted">아직 암송 기록이 없어요</p>
+              ) : (
+                <div className="dash-category-list">
+                  {courseRows.map((c) => {
+                    const pct = c.total > 0 ? Math.round((c.cleared / c.total) * 100) : 0;
+                    return (
+                      <div key={c.slug} className="dash-category-row">
+                        <div className="dash-category-head">
+                          <span>{c.title}</span>
+                          <span className="muted">{c.cleared}/{c.total} ({pct}%)</span>
+                        </div>
+                        <div className="dash-bar-track">
+                          <div className="dash-bar-fill" style={{ width: `${pct}%` }} />
+                        </div>
                       </div>
-                      <div className="dash-bar-track">
-                        <div className="dash-bar-fill" style={{ width: `${pct}%` }} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div className="section-group">
