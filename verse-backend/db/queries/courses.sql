@@ -43,10 +43,16 @@ JOIN bible_verses bv ON bv.id = ci.verse_id
 WHERE ci.section_id = $1
 ORDER BY ci.ord;
 
+-- name: ListCourseItemsByVerse :many
+-- 같은 절(verse_id)을 담고 있는 모든 코스아이템 id. 워밍업/예언 코스에서 암송해도
+-- 구약/신약 등 같은 절을 담은 다른 코스의 진도가 함께 갱신되도록 하기 위함.
+SELECT id FROM course_items WHERE verse_id = $1;
+
 -- name: GetCourseItemVerse :one
--- 시도 제출 시 정답 텍스트 확보(채점 분모): course_item_id → 절 텍스트
+-- 시도 제출 시 정답 텍스트 확보(채점 분모): course_item_id → 절 텍스트 + verse_id(형제 코스아이템 조회용)
 SELECT
   ci.id AS course_item_id,
+  ci.verse_id,
   bv.book,
   bv.chapter,
   bv.verse,

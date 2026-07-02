@@ -84,11 +84,16 @@ func (r *pgCourseRepo) GetCourseItemVerse(ctx context.Context, courseItemID int6
 	}
 	return domain.CourseItemWithVerse{
 		CourseItemID: row.CourseItemID,
+		VerseID:      row.VerseID,
 		Book:         row.Book,
 		Chapter:      row.Chapter,
 		Verse:        row.Verse,
 		Text:         row.Text,
 	}, nil
+}
+
+func (r *pgCourseRepo) ListCourseItemsByVerse(ctx context.Context, verseID int64) ([]int64, error) {
+	return r.q.ListCourseItemsByVerse(ctx, verseID)
 }
 
 func (r *pgCourseRepo) ListSectionsByCourse(ctx context.Context, courseID int64) ([]domain.CourseSection, error) {

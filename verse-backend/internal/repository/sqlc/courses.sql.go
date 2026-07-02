@@ -33,6 +33,7 @@ func (q *Queries) GetCourseBySlug(ctx context.Context, slug string) (Course, err
 const getCourseItemVerse = `-- name: GetCourseItemVerse :one
 SELECT
   ci.id AS course_item_id,
+  ci.verse_id,
   bv.book,
   bv.chapter,
   bv.verse,
@@ -44,18 +45,20 @@ WHERE ci.id = $1
 
 type GetCourseItemVerseRow struct {
 	CourseItemID int64  `json:"course_item_id"`
+	VerseID      int64  `json:"verse_id"`
 	Book         int16  `json:"book"`
 	Chapter      int16  `json:"chapter"`
 	Verse        int16  `json:"verse"`
 	Text         string `json:"text"`
 }
 
-// 시도 제출 시 정답 텍스트 확보(채점 분모): course_item_id → 절 텍스트
+// 시도 제출 시 정답 텍스트 확보(채점 분모): course_item_id → 절 텍스트 + verse_id(형제 코스아이템 조회용)
 func (q *Queries) GetCourseItemVerse(ctx context.Context, id int64) (GetCourseItemVerseRow, error) {
 	row := q.db.QueryRow(ctx, getCourseItemVerse, id)
 	var i GetCourseItemVerseRow
 	err := row.Scan(
 		&i.CourseItemID,
+		&i.VerseID,
 		&i.Book,
 		&i.Chapter,
 		&i.Verse,
@@ -104,6 +107,32 @@ func (q *Queries) ListCourseItems(ctx context.Context, courseID int64) ([]Course
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listCourseItemsByVerse = `-- name: ListCourseItemsByVerse :many
+SELECT id FROM course_items WHERE verse_id = $1
+`
+
+// 같은 절(verse_id)을 담고 있는 모든 코스아이템 id. 워밍업/예언 코스에서 암송해도
+// 구약/신약 등 같은 절을 담은 다른 코스의 진도가 함께 갱신되도록 하기 위함.
+func (q *Queries) ListCourseItemsByVerse(ctx context.Context, verseID int64) ([]int64, error) {
+	rows, err := q.db.Query(ctx, listCourseItemsByVerse, verseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []int64
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

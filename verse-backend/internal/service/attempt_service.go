@@ -4,7 +4,8 @@
 //   1) 클라 tokens → 정답 절 텍스트 조회 → Normalize
 //   2) GradeRecall(LCS)로 server_grade 산출
 //   3) InsertAttempt(client_grade + server_grade 둘 다 저장)
-//   4) UpsertProgress(cleared = server_grade=="green")
+//   4) UpsertProgress(cleared = server_grade=="green") — 같은 절을 담은 모든 코스의
+//      course_item에 동일 반영(코스 간 진도 동기화)
 //   5) UpdateStreak
 //
 // NOTE: 트랜잭션(sqlc WithTx) 래핑은 후속 리팩터. 현재는 순차 실행.
@@ -75,14 +76,28 @@ func (s *AttemptService) SubmitAttempt(
 	}
 
 	// 4. 진도 업데이트(cleared = 서버 기준 green)
+	//
+	// 같은 절(verse_id)이 워밍업/예언 코스와 구약/신약 권별 코스 등 여러 코스에
+	// 동시에 등장할 수 있다. 진도는 course_item 단위로 저장되므로, 제출한
+	// course_item뿐 아니라 같은 절을 담은 모든 형제 course_item에도 동일하게
+	// 반영해야 "워밍업에서 외웠는데 구약 진도가 안 올라간다" 같은 불일치가 없다.
 	cleared := serverGrade == domain.GradeGreen
-	if err := s.attempts.UpsertProgress(ctx, repository.UpsertProgressParams{
-		UserID:       userID,
-		CourseItemID: courseItemID,
-		Grade:        string(serverGrade),
-		Cleared:      cleared,
-	}); err != nil {
+	siblingItemIDs, err := s.courses.ListCourseItemsByVerse(ctx, itemVerse.VerseID)
+	if err != nil {
 		return AttemptResult{}, err
+	}
+	if len(siblingItemIDs) == 0 {
+		siblingItemIDs = []int64{courseItemID}
+	}
+	for _, itemID := range siblingItemIDs {
+		if err := s.attempts.UpsertProgress(ctx, repository.UpsertProgressParams{
+			UserID:       userID,
+			CourseItemID: itemID,
+			Grade:        string(serverGrade),
+			Cleared:      cleared,
+		}); err != nil {
+			return AttemptResult{}, err
+		}
 	}
 
 	// 5. 연속일 갱신

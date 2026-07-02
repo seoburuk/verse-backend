@@ -25,6 +25,7 @@ type CourseItem struct {
 // repository가 JOIN 쿼리로 한 번에 채워 반환한다.
 type CourseItemWithVerse struct {
 	CourseItemID int64
+	VerseID      int64 // GetCourseItemVerse에서만 채워짐(형제 코스아이템 조회용)
 	Ord          int
 	Topic        string
 	Book         int16

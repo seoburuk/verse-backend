@@ -23,6 +23,7 @@ type CourseRepo interface {
 	ListCourseItems(ctx context.Context, courseID int64) ([]domain.CourseItem, error)
 	ListCourseItemsWithVerse(ctx context.Context, courseID int64) ([]domain.CourseItemWithVerse, error)
 	GetCourseItemVerse(ctx context.Context, courseItemID int64) (domain.CourseItemWithVerse, error)
+	ListCourseItemsByVerse(ctx context.Context, verseID int64) ([]int64, error)
 	ListSectionsByCourse(ctx context.Context, courseID int64) ([]domain.CourseSection, error)
 	ListItemsBySection(ctx context.Context, sectionID int64) ([]domain.CourseItemWithVerse, error)
 	GetSectionByID(ctx context.Context, sectionID int64) (domain.CourseSection, error)
