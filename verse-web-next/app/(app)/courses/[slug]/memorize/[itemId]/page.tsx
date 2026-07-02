@@ -14,7 +14,7 @@ export default function CourseMemorizePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const cached = sessionStorage.getItem(itemsCacheKey.course(slug));
+    const cached = localStorage.getItem(itemsCacheKey.course(slug));
     if (cached) {
       setItems(JSON.parse(cached) as CourseItem[]);
       return;

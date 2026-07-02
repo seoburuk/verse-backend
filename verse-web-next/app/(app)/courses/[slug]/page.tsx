@@ -58,7 +58,7 @@ export default function CourseDetailPage() {
                   key={item.course_item_id}
                   className="item-card"
                   onClick={() => {
-                    sessionStorage.setItem(itemsCacheKey.course(slug), JSON.stringify(course.items));
+                    localStorage.setItem(itemsCacheKey.course(slug), JSON.stringify(course.items));
                     router.push(`/courses/${slug}/memorize/${item.course_item_id}?i=${index}`);
                   }}
                 >

@@ -43,7 +43,7 @@ export default function SectionDetailPage() {
               key={item.course_item_id}
               className="item-card"
               onClick={() => {
-                sessionStorage.setItem(itemsCacheKey.section(sectionId), JSON.stringify(section.items));
+                localStorage.setItem(itemsCacheKey.section(sectionId), JSON.stringify(section.items));
                 router.push(`/courses/${slug}/sections/${sectionId}/memorize/${item.course_item_id}?i=${index}`);
               }}
             >

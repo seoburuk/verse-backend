@@ -591,62 +591,73 @@ body {
   flex-direction: column;
   gap: 1.5rem;
   justify-content: center;
+  position: relative;
 }
 
 .complete-banner {
+  position: relative;
   background: var(--surface);
   border: 2px solid var(--green);
   border-radius: 4px;
-  padding: 2rem 1.5rem;
+  padding: 2.25rem 1.5rem 2rem;
   text-align: center;
-  box-shadow: 4px 4px 0 var(--green);
+  box-shadow: 6px 6px 0 var(--green);
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 0.5rem;
+  overflow: hidden;
+  animation: banner-pop 0.32s steps(4);
+}
+
+@keyframes banner-pop {
+  0%   { transform: translate(6px, 6px) scale(0.9); box-shadow: 0 0 0 var(--green); }
+  60%  { transform: translate(-2px, -2px) scale(1.02); }
+  100% { transform: translate(0, 0) scale(1); box-shadow: 6px 6px 0 var(--green); }
+}
+
+/* 상단 픽셀 스캔라인 장식 */
+.complete-banner::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 6px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--green) 0 8px,
+    transparent 8px 16px
+  );
+  opacity: 0.5;
 }
 
 .complete-icon {
-  font-size: 2.5rem;
+  font-size: 3rem;
+  line-height: 1;
   color: var(--green);
+  text-shadow: 3px 3px 0 var(--surface), 5px 5px 0 var(--border);
+  animation: star-spin 0.9s steps(8) 0.2s both;
+}
+
+@keyframes star-spin {
+  0%   { transform: rotate(-90deg) scale(0); }
+  70%  { transform: rotate(20deg) scale(1.25); }
+  100% { transform: rotate(0deg) scale(1); }
 }
 
 .complete-title {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: bold;
   color: var(--green);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
+  text-shadow: 2px 2px 0 var(--border);
 }
 
 .complete-section-name {
   color: var(--muted);
   font-size: 0.9rem;
-}
-
-.complete-stats {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.stat-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.stat-row:last-child { border-bottom: none; }
-
-.stat-label { color: var(--muted); font-size: 0.875rem; }
-.stat-value { font-weight: bold; font-size: 0.95rem; }
-
-.stat-grades {
-  display: flex;
-  gap: 0.75rem;
+  padding: 0.15rem 0.6rem;
+  border: 1px dashed var(--border);
+  border-radius: 3px;
 }
 
 .grade-dot { font-size: 0.875rem; font-weight: bold; }
@@ -656,8 +667,28 @@ body {
 
 .complete-actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 0.75rem;
+}
+
+.complete-actions > button {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 픽셀 컨페티 — 배너 위로 떨어지는 사각 조각 */
+.confetti {
+  position: absolute;
+  top: -10px;
+  width: 8px;
+  height: 8px;
+  opacity: 0;
+  pointer-events: none;
+  animation: confetti-fall 1.1s steps(9) forwards;
+}
+@keyframes confetti-fall {
+  0%   { opacity: 1; transform: translateY(0) rotate(0deg); }
+  100% { opacity: 0; transform: translateY(120px) rotate(180deg); }
 }
 
 /* ── Out of Lives ────────────────────────────────── */

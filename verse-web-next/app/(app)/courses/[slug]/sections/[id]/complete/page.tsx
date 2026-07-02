@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { getCourse, getSection, type SectionDetail, type CourseDetail } from "../../../../../../../lib/api/courses";
-import { getProgress, type ProgressSummary } from "../../../../../../../lib/api/progress";
-import { sessionGradesKey } from "../../../../../../../lib/sessionGrades";
 
 export default function SectionCompletePage() {
   const params = useParams<{ slug: string; id: string }>();
@@ -13,23 +11,16 @@ export default function SectionCompletePage() {
 
   const [section, setSection] = useState<SectionDetail | null>(null);
   const [course, setCourse] = useState<CourseDetail | null>(null);
-  const [progress, setProgress] = useState<ProgressSummary | null>(null);
-  const [grades, setGrades] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const stored = sessionStorage.getItem(sessionGradesKey(sectionId));
-    if (stored) setGrades(JSON.parse(stored) as string[]);
-
     Promise.all([
       getSection(Number(sectionId)),
       getCourse(slug),
-      getProgress(),
     ])
-      .then(([s, c, p]) => {
+      .then(([s, c]) => {
         setSection(s);
         setCourse(c);
-        setProgress(p);
       })
       .finally(() => setLoading(false));
   }, [sectionId, slug]);
@@ -41,15 +32,7 @@ export default function SectionCompletePage() {
   const currentIdx = sections.findIndex((s) => s.section_id === Number(sectionId));
   const nextSection = currentIdx >= 0 && currentIdx < sections.length - 1 ? sections[currentIdx + 1] : null;
 
-  const clearedIds = new Set(
-    (progress?.items ?? []).filter((it) => it.cleared).map((it) => it.course_item_id),
-  );
-  const clearedCount = section.items.filter((it) => clearedIds.has(it.course_item_id)).length;
-  const total = section.items.length;
-
-  const greenCount = grades.filter((g) => g === "green").length;
-  const yellowCount = grades.filter((g) => g === "yellow").length;
-  const redCount = grades.filter((g) => g === "red").length;
+  const confettiColors = ["var(--green)", "var(--yellow)", "var(--pink)", "var(--pink-soft)"];
 
   return (
     <div className="page">
@@ -59,32 +42,20 @@ export default function SectionCompletePage() {
 
       <main className="complete-main">
         <div className="complete-banner">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <span
+              key={i}
+              className="confetti"
+              style={{
+                left: `${8 + i * 7.5}%`,
+                background: confettiColors[i % confettiColors.length],
+                animationDelay: `${0.25 + (i % 5) * 0.09}s`,
+              }}
+            />
+          ))}
           <div className="complete-icon">★</div>
           <h1 className="complete-title">섹션 완료!</h1>
           <p className="complete-section-name">{section.title}</p>
-        </div>
-
-        <div className="complete-stats">
-          <div className="stat-row">
-            <span className="stat-label">암송한 절</span>
-            <span className="stat-value">{clearedCount} / {total}</span>
-          </div>
-          {grades.length > 0 && (
-            <div className="stat-row">
-              <span className="stat-label">이번 세션</span>
-              <span className="stat-grades">
-                {greenCount > 0 && <span className="grade-dot green-dot">●{greenCount}</span>}
-                {yellowCount > 0 && <span className="grade-dot yellow-dot">●{yellowCount}</span>}
-                {redCount > 0 && <span className="grade-dot red-dot">●{redCount}</span>}
-              </span>
-            </div>
-          )}
-          {progress?.streak && progress.streak.current > 0 && (
-            <div className="stat-row">
-              <span className="stat-label">스트릭</span>
-              <span className="stat-value streak-badge">🔥 {progress.streak.current}일</span>
-            </div>
-          )}
         </div>
 
         <div className="complete-actions">

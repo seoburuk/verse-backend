@@ -14,7 +14,7 @@ export default function SectionMemorizePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const cached = sessionStorage.getItem(itemsCacheKey.section(sectionId));
+    const cached = localStorage.getItem(itemsCacheKey.section(sectionId));
     if (cached) {
       setItems(JSON.parse(cached) as CourseItem[]);
       return;
