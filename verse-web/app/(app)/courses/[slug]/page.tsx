@@ -7,6 +7,9 @@ import { getProgress } from "../../../../lib/api/progress";
 import { bookRef } from "../../../../lib/bookRef";
 import { itemsCacheKey } from "../../../../lib/itemsCache";
 
+// 기초/워밍업/예언은 목록 화면 없이 코스 목록에서 바로 진입하므로, 뒤로가기도 코스 목록으로.
+const DIRECT_CATEGORIES = new Set(["foundations", "warmup", "messiah"]);
+
 export default function CourseDetailPage() {
   const params = useParams<{ slug: string }>();
   const slug = params.slug;
@@ -27,10 +30,14 @@ export default function CourseDetailPage() {
       .finally(() => setLoading(false));
   }, [slug]);
 
+  const backHref = course && !DIRECT_CATEGORIES.has(course.category)
+    ? `/courses/sector/${course.category}`
+    : "/courses";
+
   return (
     <div className="page">
       <header className="page-header">
-        <button className="btn-link" onClick={() => router.push("/courses")}>← 코스 목록</button>
+        <button className="btn-link" onClick={() => router.push(backHref)}>← 코스 목록</button>
         <h2 className="title">{course?.title ?? "..."}</h2>
       </header>
       <main className="content">
