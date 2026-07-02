@@ -7,7 +7,7 @@ export function LoginPage() {
   const { login, signup } = useAuth();
   const navigate = useNavigate();
   const [isSignup, setIsSignup] = useState(false);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -19,9 +19,9 @@ export function LoginPage() {
     setLoading(true);
     try {
       if (isSignup) {
-        await signup(email, password, displayName);
+        await signup(username, password, displayName);
       } else {
-        await login(email, password);
+        await login(username, password);
       }
       navigate("/courses");
     } catch (err) {
@@ -39,10 +39,10 @@ export function LoginPage() {
         <form onSubmit={handleSubmit} className="form">
           <input
             className="input"
-            type="email"
-            placeholder="이메일"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="text"
+            placeholder="아이디"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
           />
           <input

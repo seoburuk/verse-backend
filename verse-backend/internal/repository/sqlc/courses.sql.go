@@ -12,7 +12,7 @@ import (
 )
 
 const getCourseBySlug = `-- name: GetCourseBySlug :one
-SELECT id, slug, title, theme, ord, hidden FROM courses WHERE slug = $1
+SELECT id, slug, title, theme, ord, hidden, category FROM courses WHERE slug = $1
 `
 
 func (q *Queries) GetCourseBySlug(ctx context.Context, slug string) (Course, error) {
@@ -25,6 +25,7 @@ func (q *Queries) GetCourseBySlug(ctx context.Context, slug string) (Course, err
 		&i.Theme,
 		&i.Ord,
 		&i.Hidden,
+		&i.Category,
 	)
 	return i, err
 }
@@ -165,7 +166,7 @@ func (q *Queries) ListCourseItemsWithVerse(ctx context.Context, courseID int64) 
 }
 
 const listCourses = `-- name: ListCourses :many
-SELECT id, slug, title, theme, ord, hidden FROM courses WHERE NOT hidden ORDER BY ord
+SELECT id, slug, title, theme, ord, hidden, category FROM courses WHERE NOT hidden ORDER BY ord
 `
 
 func (q *Queries) ListCourses(ctx context.Context) ([]Course, error) {
@@ -184,6 +185,7 @@ func (q *Queries) ListCourses(ctx context.Context) ([]Course, error) {
 			&i.Theme,
 			&i.Ord,
 			&i.Hidden,
+			&i.Category,
 		); err != nil {
 			return nil, err
 		}

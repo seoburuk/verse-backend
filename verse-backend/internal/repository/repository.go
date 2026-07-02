@@ -9,8 +9,11 @@ import (
 // UserRepo — 사용자 저장소 인터페이스.
 // service는 이것만 알고, 실제 구현(sqlc)은 모른다 → 테스트 시 mock 교체 가능.
 type UserRepo interface {
-	CreateUser(ctx context.Context, email, displayName, passwordHash string) (domain.User, error)
-	GetUserByEmail(ctx context.Context, email string) (domain.User, error)
+	CreateUser(ctx context.Context, username, displayName, passwordHash string) (domain.User, error)
+	GetUserByUsername(ctx context.Context, username string) (domain.User, error)
+	DeleteUser(ctx context.Context, userID int64) error
+	GetLives(ctx context.Context, userID int64) (domain.Lives, error)
+	UpdateLives(ctx context.Context, userID int64, lives domain.Lives) error
 }
 
 // CourseRepo — 코스 저장소 인터페이스.
@@ -40,6 +43,9 @@ type AttemptRepo interface {
 	UpsertStreak(ctx context.Context, params UpsertStreakParams) error
 	ListUserProgress(ctx context.Context, userID int64) ([]domain.ItemProgress, error)
 	ListCourseProgress(ctx context.Context, userID int64) ([]domain.CourseProgress, error)
+	GetCategoryProgress(ctx context.Context, userID int64) ([]domain.CategoryProgress, error)
+	GetGradeDistribution(ctx context.Context, userID int64) (domain.GradeDistribution, error)
+	GetTotalCleared(ctx context.Context, userID int64) (int, error)
 }
 
 // --- 파라미터 타입 ---

@@ -56,3 +56,17 @@ type CourseProgress struct {
 	Cleared  int
 	Total    int
 }
+
+// CategoryProgress — 카테고리(ot/nt/topic/warmup/messiah) 단위 완료 집계. 대시보드용.
+type CategoryProgress struct {
+	Category string
+	Cleared  int
+	Total    int
+}
+
+// GradeDistribution — 사용자의 현재 절별 등급 분포(진도 기준, 최신 상태).
+type GradeDistribution struct {
+	Green  int
+	Yellow int
+	Red    int
+}

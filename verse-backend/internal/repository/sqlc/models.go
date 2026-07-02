@@ -27,12 +27,13 @@ type BibleVerse struct {
 }
 
 type Course struct {
-	ID     int64       `json:"id"`
-	Slug   string      `json:"slug"`
-	Title  string      `json:"title"`
-	Theme  pgtype.Text `json:"theme"`
-	Ord    int32       `json:"ord"`
-	Hidden bool        `json:"hidden"`
+	ID       int64       `json:"id"`
+	Slug     string      `json:"slug"`
+	Title    string      `json:"title"`
+	Theme    pgtype.Text `json:"theme"`
+	Ord      int32       `json:"ord"`
+	Hidden   bool        `json:"hidden"`
+	Category string      `json:"category"`
 }
 
 type CourseItem struct {
@@ -68,11 +69,13 @@ type Streak struct {
 }
 
 type User struct {
-	ID           int64              `json:"id"`
-	Email        string             `json:"email"`
-	DisplayName  string             `json:"display_name"`
-	PasswordHash string             `json:"password_hash"`
-	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	ID             int64              `json:"id"`
+	DisplayName    string             `json:"display_name"`
+	PasswordHash   string             `json:"password_hash"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	Username       string             `json:"username"`
+	Lives          int32              `json:"lives"`
+	LivesUpdatedAt pgtype.Timestamptz `json:"lives_updated_at"`
 }
 
 type VerseSegment struct {

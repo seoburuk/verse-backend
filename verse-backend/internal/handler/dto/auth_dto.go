@@ -6,13 +6,13 @@
 package dto
 
 type SignupRequest struct {
-	Email       string `json:"email"`
+	Username    string `json:"username"`
 	Password    string `json:"password"`
 	DisplayName string `json:"display_name"`
 }
 
 type LoginRequest struct {
-	Email    string `json:"email"`
+	Username string `json:"username"`
 	Password string `json:"password"`
 }
 

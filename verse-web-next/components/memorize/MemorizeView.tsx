@@ -1,0 +1,192 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useMemorize } from "./useMemorize";
+import { DragTiles } from "./DragTiles";
+import { TypeScaffold } from "./TypeScaffold";
+import { recordGrade, clearGrades } from "../../lib/sessionGrades";
+import type { CourseItem } from "../../lib/api/courses";
+
+const gradeLabel: Record<string, string> = {
+  green: "🟢 완벽해요!",
+  yellow: "🟡 조금 더!",
+  red: "🔴 다시 해보세요",
+  none: "",
+};
+
+interface Props {
+  items: CourseItem[];
+  index: number;
+  sectionId: string;
+  backHref: string;
+  doneHref: string;
+  buildItemHref: (index: number) => string;
+}
+
+export function MemorizeView({ items, index, sectionId, backHref, doneHref, buildItemHref }: Props) {
+  const item = items[index];
+  return (
+    <MemorizeContent
+      key={item.course_item_id}
+      items={items}
+      index={index}
+      sectionId={sectionId}
+      backHref={backHref}
+      doneHref={doneHref}
+      buildItemHref={buildItemHref}
+    />
+  );
+}
+
+function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildItemHref }: Props) {
+  const router = useRouter();
+  const item = items[index];
+  const isLast = index >= items.length - 1;
+  const {
+    phase, mode, tiles, placed, typed, typeReveal, liveGrade, submitting, serverGrade, mismatch, outOfLives,
+    setMode, tapTile, setTyped, startRecall, submit, reset,
+  } = useMemorize(item.course_item_id, item.text);
+
+  if (outOfLives) {
+    return (
+      <div className="page">
+        <header className="page-header">
+          <button className="btn-link" onClick={() => router.push(backHref)}>← 뒤로</button>
+        </header>
+        <main className="page-center">
+          <div className="card out-of-lives">
+            <div className="out-of-lives-icon">💔</div>
+            <h2 className="title">목숨이 없어요</h2>
+            <p className="muted">잠시 후 목숨이 채워지면 다시 도전하세요</p>
+            <button className="btn-primary" onClick={() => router.push(backHref)}>
+              뒤로 가기
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="page">
+      <header className="page-header">
+        <button className="btn-link" onClick={() => router.push(backHref)}>← 뒤로</button>
+        <span className="item-ref">{item.topic}</span>
+      </header>
+
+      <main className="memorize-main">
+        {phase === "study" && (
+          <div className="study-phase">
+            <div className="verse-box">
+              <p className="verse-text">{item.text}</p>
+            </div>
+            <div className="mode-toggle">
+              <button
+                className={mode === "drag" ? "mode-btn mode-active" : "mode-btn"}
+                onClick={() => setMode("drag")}
+              >
+                타일 탭
+              </button>
+              <button
+                className={mode === "type" ? "mode-btn mode-active" : "mode-btn"}
+                onClick={() => setMode("type")}
+              >
+                직접 입력
+              </button>
+            </div>
+            <button className="btn-primary" onClick={startRecall}>
+              암송 시작
+            </button>
+          </div>
+        )}
+
+        {phase === "recall" && (
+          <div className="recall-phase">
+            {mode === "drag" ? (
+              <>
+                <div className="verse-box verse-hidden">
+                  <p className="muted">절을 기억해서 아래에 배치하세요</p>
+                </div>
+                <DragTiles
+                  placed={placed}
+                  pool={tiles}
+                  liveGrade={liveGrade}
+                  onTap={tapTile}
+                />
+              </>
+            ) : (
+              <>
+                <div className="verse-box">
+                  <TypeScaffold reveal={typeReveal} />
+                </div>
+                <textarea
+                  className={`type-input grade-border-${liveGrade}`}
+                  value={typed}
+                  onChange={(e) => setTyped(e.target.value)}
+                  placeholder="절을 입력하세요"
+                  rows={4}
+                  autoFocus
+                />
+              </>
+            )}
+            <button
+              className="btn-primary"
+              onClick={submit}
+              disabled={
+                submitting ||
+                (mode === "drag" ? placed.length === 0 : typed.trim() === "")
+              }
+            >
+              {submitting ? "제출 중..." : "제출"}
+            </button>
+          </div>
+        )}
+
+        {phase === "result" && (
+          <div className="result-phase">
+            <div className={`result-badge grade-${serverGrade}`}>
+              {gradeLabel[serverGrade ?? "none"]}
+            </div>
+            {isLast && serverGrade === "green" && (
+              <p className="course-complete">🎉 코스 완료!</p>
+            )}
+            {mismatch && (
+              <p className="muted" style={{ fontSize: "0.85rem" }}>
+                서버 채점으로 확정됐어요
+              </p>
+            )}
+            <div className="verse-box">
+              <p className="verse-text">{item.text}</p>
+            </div>
+            <div className="result-actions">
+              {serverGrade === "green" ? (
+                <>
+                  <button className="btn-secondary" onClick={reset}>
+                    다시 시도
+                  </button>
+                  <button
+                    className="btn-primary"
+                    onClick={() => {
+                      recordGrade(sectionId, serverGrade!);
+                      if (isLast) {
+                        router.push(doneHref);
+                      } else {
+                        router.push(buildItemHref(index + 1));
+                      }
+                    }}
+                  >
+                    {isLast ? "섹션 완료!" : "다음으로"}
+                  </button>
+                </>
+              ) : (
+                <button className="btn-primary" onClick={() => { clearGrades(sectionId); reset(); }}>
+                  다시하기
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}

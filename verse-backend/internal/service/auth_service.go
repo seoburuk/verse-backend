@@ -41,9 +41,9 @@ func NewAuthService(users repository.UserRepo, jwtSecret string, accessTTL time.
 	}
 }
 
-// SignUp — 새 사용자 등록. 이메일 중복 시 ErrConflict.
-func (s *AuthService) SignUp(ctx context.Context, email, displayName, password string) (domain.User, string, error) {
-	if email == "" || displayName == "" || password == "" {
+// SignUp — 새 사용자 등록. 아이디 중복 시 ErrConflict.
+func (s *AuthService) SignUp(ctx context.Context, username, displayName, password string) (domain.User, string, error) {
+	if username == "" || displayName == "" || password == "" {
 		return domain.User{}, "", domain.ErrInvalidInput
 	}
 
@@ -52,7 +52,7 @@ func (s *AuthService) SignUp(ctx context.Context, email, displayName, password s
 		return domain.User{}, "", fmt.Errorf("hash password: %w", err)
 	}
 
-	user, err := s.users.CreateUser(ctx, email, displayName, hash)
+	user, err := s.users.CreateUser(ctx, username, displayName, hash)
 	if err != nil {
 		if isDuplicateError(err) {
 			return domain.User{}, "", domain.ErrConflict
@@ -68,9 +68,9 @@ func (s *AuthService) SignUp(ctx context.Context, email, displayName, password s
 	return user, token, nil
 }
 
-// Login — 이메일+비밀번호 검증 후 JWT 발급.
-func (s *AuthService) Login(ctx context.Context, email, password string) (domain.User, string, error) {
-	user, err := s.users.GetUserByEmail(ctx, email)
+// Login — 아이디+비밀번호 검증 후 JWT 발급.
+func (s *AuthService) Login(ctx context.Context, username, password string) (domain.User, string, error) {
+	user, err := s.users.GetUserByUsername(ctx, username)
 	if err != nil {
 		if errors.Is(err, domain.ErrNotFound) {
 			return domain.User{}, "", domain.ErrUnauthorized
@@ -88,6 +88,11 @@ func (s *AuthService) Login(ctx context.Context, email, password string) (domain
 	}
 
 	return user, token, nil
+}
+
+// DeleteAccount — 사용자 데이터 전체 삭제.
+func (s *AuthService) DeleteAccount(ctx context.Context, userID int64) error {
+	return s.users.DeleteUser(ctx, userID)
 }
 
 // VerifyToken — JWT 검증 후 userID 반환. 미들웨어에서 사용.

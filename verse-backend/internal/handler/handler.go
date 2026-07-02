@@ -37,6 +37,8 @@ func errStatus(err error) int {
 		return http.StatusConflict
 	case errors.Is(err, domain.ErrInvalidInput):
 		return http.StatusBadRequest
+	case errors.Is(err, domain.ErrNoLives):
+		return http.StatusForbidden
 	default:
 		return http.StatusInternalServerError
 	}

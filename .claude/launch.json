@@ -6,6 +6,13 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "--prefix", "verse-web", "dev"],
       "port": 5173,
+      "autoPort": false
+    },
+    {
+      "name": "verse-web-next",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "--prefix", "verse-web-next", "dev"],
+      "port": 3000,
       "autoPort": true
     }
   ]

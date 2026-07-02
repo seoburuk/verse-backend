@@ -7,46 +7,92 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (email, display_name, password_hash)
+INSERT INTO users (username, display_name, password_hash)
 VALUES ($1, $2, $3)
-RETURNING id, email, display_name, password_hash, created_at
+RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at
 `
 
 type CreateUserParams struct {
-	Email        string `json:"email"`
+	Username     string `json:"username"`
 	DisplayName  string `json:"display_name"`
 	PasswordHash string `json:"password_hash"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, createUser, arg.Email, arg.DisplayName, arg.PasswordHash)
+	row := q.db.QueryRow(ctx, createUser, arg.Username, arg.DisplayName, arg.PasswordHash)
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Email,
 		&i.DisplayName,
 		&i.PasswordHash,
 		&i.CreatedAt,
+		&i.Username,
+		&i.Lives,
+		&i.LivesUpdatedAt,
 	)
 	return i, err
 }
 
-const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, display_name, password_hash, created_at FROM users WHERE email = $1
+const deleteUser = `-- name: DeleteUser :exec
+DELETE FROM users WHERE id = $1
 `
 
-func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
-	row := q.db.QueryRow(ctx, getUserByEmail, email)
+func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, deleteUser, id)
+	return err
+}
+
+const getUserByUsername = `-- name: GetUserByUsername :one
+SELECT id, display_name, password_hash, created_at, username, lives, lives_updated_at FROM users WHERE username = $1
+`
+
+func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByUsername, username)
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Email,
 		&i.DisplayName,
 		&i.PasswordHash,
 		&i.CreatedAt,
+		&i.Username,
+		&i.Lives,
+		&i.LivesUpdatedAt,
 	)
 	return i, err
+}
+
+const getUserLives = `-- name: GetUserLives :one
+SELECT lives, lives_updated_at FROM users WHERE id = $1
+`
+
+type GetUserLivesRow struct {
+	Lives          int32              `json:"lives"`
+	LivesUpdatedAt pgtype.Timestamptz `json:"lives_updated_at"`
+}
+
+func (q *Queries) GetUserLives(ctx context.Context, id int64) (GetUserLivesRow, error) {
+	row := q.db.QueryRow(ctx, getUserLives, id)
+	var i GetUserLivesRow
+	err := row.Scan(&i.Lives, &i.LivesUpdatedAt)
+	return i, err
+}
+
+const updateUserLives = `-- name: UpdateUserLives :exec
+UPDATE users SET lives = $2, lives_updated_at = $3 WHERE id = $1
+`
+
+type UpdateUserLivesParams struct {
+	ID             int64              `json:"id"`
+	Lives          int32              `json:"lives"`
+	LivesUpdatedAt pgtype.Timestamptz `json:"lives_updated_at"`
+}
+
+func (q *Queries) UpdateUserLives(ctx context.Context, arg UpdateUserLivesParams) error {
+	_, err := q.db.Exec(ctx, updateUserLives, arg.ID, arg.Lives, arg.LivesUpdatedAt)
+	return err
 }
