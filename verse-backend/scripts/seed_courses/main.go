@@ -224,9 +224,9 @@ func insertCourse(ctx context.Context, pool *pgxpool.Pool, co seedCourse) error 
 func insertCourseWithSections(ctx context.Context, pool *pgxpool.Pool, co seedCourseWithSections) (int, error) {
 	var courseID int64
 	err := pool.QueryRow(ctx, `
-		INSERT INTO courses(slug, title, theme, ord)
-		VALUES ($1, $2, $3, $4)
-		ON CONFLICT (slug) DO UPDATE SET slug = EXCLUDED.slug
+		INSERT INTO courses(slug, title, theme, ord, category)
+		VALUES ($1, $2, $3, $4, 'warmup')
+		ON CONFLICT (slug) DO UPDATE SET category = EXCLUDED.category, title = EXCLUDED.title
 		RETURNING id
 	`, co.slug, co.title, co.theme, co.ord).Scan(&courseID)
 	if err != nil {

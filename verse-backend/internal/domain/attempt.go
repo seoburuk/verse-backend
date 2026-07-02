@@ -70,3 +70,31 @@ type GradeDistribution struct {
 	Yellow int
 	Red    int
 }
+
+// FavoriteItem — 북마크한 절(course_item) + 표시용 상세.
+type FavoriteItem struct {
+	CourseItemID int64
+	Topic        string
+	CourseSlug   string
+	CourseTitle  string
+	SectionID    *int64
+	SectionTitle *string
+	Book         int16
+	Chapter      int16
+	Verse        int16
+	Text         string
+}
+
+// ResumeTarget — 이어가기: 마지막 시도 코스에서 첫 미완료 절 위치.
+type ResumeTarget struct {
+	CourseItemID    int64
+	CourseID        int64
+	CourseSlug      string
+	CourseTitle     string
+	SectionID       *int64
+	SectionTitle    *string
+	Book            int16
+	Chapter         int16
+	Verse           int16
+	LastAttemptedAt time.Time
+}

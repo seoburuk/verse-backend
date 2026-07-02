@@ -140,6 +140,63 @@ func (r *pgAttemptRepo) GetTotalCleared(ctx context.Context, userID int64) (int,
 	return int(total), nil
 }
 
+func (r *pgAttemptRepo) GetResume(ctx context.Context, userID int64) (*domain.ResumeTarget, error) {
+	last, err := r.q.GetLastAttempt(ctx, userID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	next, err := r.q.GetNextUnclearedItem(ctx, db.GetNextUnclearedItemParams{
+		UserID:   userID,
+		CourseID: last.CourseID,
+		Ord:      last.ItemOrd,
+	})
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return nil, err
+	}
+
+	target := &domain.ResumeTarget{
+		CourseID:        last.CourseID,
+		CourseSlug:      last.Slug,
+		CourseTitle:     last.CourseTitle,
+		LastAttemptedAt: last.CreatedAt.Time,
+	}
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		// 코스 전체 완료 → 마지막 시도 절 자체로 반환
+		target.CourseItemID = last.CourseItemID
+		target.Book = last.Book
+		target.Chapter = last.Chapter
+		target.Verse = last.Verse
+		if last.SectionID.Valid {
+			v := last.SectionID.Int64
+			target.SectionID = &v
+		}
+		if last.SectionTitle.Valid {
+			v := last.SectionTitle.String
+			target.SectionTitle = &v
+		}
+	} else {
+		target.CourseItemID = next.CourseItemID
+		target.Book = next.Book
+		target.Chapter = next.Chapter
+		target.Verse = next.Verse
+		if next.SectionID.Valid {
+			v := next.SectionID.Int64
+			target.SectionID = &v
+		}
+		if next.SectionTitle.Valid {
+			v := next.SectionTitle.String
+			target.SectionTitle = &v
+		}
+	}
+
+	return target, nil
+}
+
 func (r *pgAttemptRepo) UpsertStreak(ctx context.Context, params UpsertStreakParams) error {
 	var pgDate pgtype.Date
 	if params.LastDay != nil {

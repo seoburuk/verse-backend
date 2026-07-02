@@ -7,9 +7,15 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/seoburuk/verse-backend/internal/domain"
 	db "github.com/seoburuk/verse-backend/internal/repository/sqlc"
 )
+
+func asPgError(err error) (*pgconn.PgError, bool) {
+	var pgErr *pgconn.PgError
+	return pgErr, errors.As(err, &pgErr)
+}
 
 type pgCourseRepo struct {
 	q *db.Queries
@@ -142,6 +148,52 @@ func (r *pgCourseRepo) GetSectionByID(ctx context.Context, sectionID int64) (dom
 		Title:    row.Title,
 		Ord:      int(row.Ord),
 	}, nil
+}
+
+func (r *pgCourseRepo) AddFavorite(ctx context.Context, userID, courseItemID int64) error {
+	err := r.q.AddFavorite(ctx, db.AddFavoriteParams{UserID: userID, CourseItemID: courseItemID})
+	if err != nil {
+		// 23503 = foreign_key_violation (courseItemID가 없는 경우)
+		if pgErr, ok := asPgError(err); ok && pgErr.Code == "23503" {
+			return domain.ErrNotFound
+		}
+		return err
+	}
+	return nil
+}
+
+func (r *pgCourseRepo) RemoveFavorite(ctx context.Context, userID, courseItemID int64) error {
+	return r.q.RemoveFavorite(ctx, db.RemoveFavoriteParams{UserID: userID, CourseItemID: courseItemID})
+}
+
+func (r *pgCourseRepo) ListFavoriteItems(ctx context.Context, userID int64) ([]domain.FavoriteItem, error) {
+	rows, err := r.q.ListFavoriteItems(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]domain.FavoriteItem, len(rows))
+	for i, row := range rows {
+		fav := domain.FavoriteItem{
+			CourseItemID: row.CourseItemID,
+			Topic:        row.Topic.String,
+			CourseSlug:   row.CourseSlug,
+			CourseTitle:  row.CourseTitle,
+			Book:         row.Book,
+			Chapter:      row.Chapter,
+			Verse:        row.Verse,
+			Text:         row.Text,
+		}
+		if row.SectionID.Valid {
+			v := row.SectionID.Int64
+			fav.SectionID = &v
+		}
+		if row.SectionTitle.Valid {
+			v := row.SectionTitle.String
+			fav.SectionTitle = &v
+		}
+		out[i] = fav
+	}
+	return out, nil
 }
 
 func toDomainCourse(c db.Course) domain.Course {

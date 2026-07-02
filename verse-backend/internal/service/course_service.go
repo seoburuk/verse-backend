@@ -28,6 +28,18 @@ func (s *CourseService) ListCourses(ctx context.Context) ([]domain.Course, error
 	return s.courses.ListCourses(ctx)
 }
 
+func (s *CourseService) AddFavorite(ctx context.Context, userID, courseItemID int64) error {
+	return s.courses.AddFavorite(ctx, userID, courseItemID)
+}
+
+func (s *CourseService) RemoveFavorite(ctx context.Context, userID, courseItemID int64) error {
+	return s.courses.RemoveFavorite(ctx, userID, courseItemID)
+}
+
+func (s *CourseService) ListFavoriteItems(ctx context.Context, userID int64) ([]domain.FavoriteItem, error) {
+	return s.courses.ListFavoriteItems(ctx, userID)
+}
+
 // GetSectionDetail — 섹션 ID로 섹션 정보 + 절 목록을 반환.
 func (s *CourseService) GetSectionDetail(ctx context.Context, sectionID int64) (domain.CourseSectionWithItems, error) {
 	sec, err := s.courses.GetSectionByID(ctx, sectionID)

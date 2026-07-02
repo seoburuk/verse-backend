@@ -18,6 +18,10 @@ import (
 	"github.com/seoburuk/verse-backend/internal/repository"
 )
 
+func (s *AttemptService) GetResume(ctx context.Context, userID int64) (*domain.ResumeTarget, error) {
+	return s.attempts.GetResume(ctx, userID)
+}
+
 type AttemptResult struct {
 	Attempt     domain.Attempt
 	ServerGrade domain.Grade

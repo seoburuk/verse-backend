@@ -52,6 +52,12 @@ type CourseSection struct {
 	Ord      int32  `json:"ord"`
 }
 
+type ItemFavorite struct {
+	UserID       int64              `json:"user_id"`
+	CourseItemID int64              `json:"course_item_id"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+}
+
 type Progress struct {
 	ID           int64              `json:"id"`
 	UserID       int64              `json:"user_id"`

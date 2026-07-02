@@ -1,10 +1,13 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useMemorize } from "./useMemorize";
 import { DragTiles } from "./DragTiles";
 import { TypeScaffold } from "./TypeScaffold";
 import { recordGrade, clearGrades } from "../../lib/sessionGrades";
+import { getFavorites, addFavorite, removeFavorite } from "../../lib/api/favorites";
+import { getLives } from "../../lib/api/lives";
 import type { CourseItem } from "../../lib/api/courses";
 
 const gradeLabel: Record<string, string> = {
@@ -47,11 +50,36 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
     setMode, tapTile, setTyped, startRecall, submit, reset,
   } = useMemorize(item.course_item_id, item.text);
 
+  const [favorited, setFavorited] = useState(false);
+  useEffect(() => {
+    getFavorites()
+      .then(({ items }) => setFavorited(items.some((f) => f.course_item_id === item.course_item_id)))
+      .catch(() => {});
+  }, [item.course_item_id]);
+
+  function toggleFavorite() {
+    const next = !favorited;
+    setFavorited(next);
+    const req = next ? addFavorite(item.course_item_id) : removeFavorite(item.course_item_id);
+    req.catch(() => setFavorited(!next));
+  }
+
+  const [lives, setLives] = useState<number | null>(null);
+  useEffect(() => {
+    getLives().then((l) => setLives(l.lives)).catch(() => {});
+  }, []);
+  useEffect(() => {
+    if (phase === "result") {
+      getLives().then((l) => setLives(l.lives)).catch(() => {});
+    }
+  }, [phase]);
+
   if (outOfLives) {
     return (
       <div className="page">
         <header className="page-header">
           <button className="btn-link" onClick={() => router.push(backHref)}>← 뒤로</button>
+          <span className="lives-badge">❤️ 0</span>
         </header>
         <main className="page-center">
           <div className="card out-of-lives">
@@ -72,6 +100,16 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
       <header className="page-header">
         <button className="btn-link" onClick={() => router.push(backHref)}>← 뒤로</button>
         <span className="item-ref">{item.topic}</span>
+        <div className="header-right">
+          {lives !== null && <span className="lives-badge">❤️ {lives}</span>}
+          <button
+            className="fav-btn"
+            aria-label={favorited ? "책갈피 해제" : "책갈피"}
+            onClick={toggleFavorite}
+          >
+            {favorited ? "★" : "☆"}
+          </button>
+        </div>
       </header>
 
       <main className="memorize-main">

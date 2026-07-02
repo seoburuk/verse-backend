@@ -26,6 +26,9 @@ type CourseRepo interface {
 	ListSectionsByCourse(ctx context.Context, courseID int64) ([]domain.CourseSection, error)
 	ListItemsBySection(ctx context.Context, sectionID int64) ([]domain.CourseItemWithVerse, error)
 	GetSectionByID(ctx context.Context, sectionID int64) (domain.CourseSection, error)
+	AddFavorite(ctx context.Context, userID, courseItemID int64) error
+	RemoveFavorite(ctx context.Context, userID, courseItemID int64) error
+	ListFavoriteItems(ctx context.Context, userID int64) ([]domain.FavoriteItem, error)
 }
 
 // VerseRepo — 본문 저장소 인터페이스.
@@ -46,6 +49,7 @@ type AttemptRepo interface {
 	GetCategoryProgress(ctx context.Context, userID int64) ([]domain.CategoryProgress, error)
 	GetGradeDistribution(ctx context.Context, userID int64) (domain.GradeDistribution, error)
 	GetTotalCleared(ctx context.Context, userID int64) (int, error)
+	GetResume(ctx context.Context, userID int64) (*domain.ResumeTarget, error)
 }
 
 // --- 파라미터 타입 ---

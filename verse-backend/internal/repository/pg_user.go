@@ -51,7 +51,7 @@ func (r *pgUserRepo) DeleteUser(ctx context.Context, userID int64) error {
 	}
 	defer tx.Rollback(ctx)
 
-	for _, table := range []string{"attempts", "progress", "streaks"} {
+	for _, table := range []string{"item_favorites", "attempts", "progress", "streaks"} {
 		if _, err := tx.Exec(ctx, "DELETE FROM "+table+" WHERE user_id = $1", userID); err != nil {
 			return err
 		}

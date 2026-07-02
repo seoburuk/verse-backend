@@ -42,6 +42,9 @@ export default function LoginPage() {
           <input
             className="input"
             type="text"
+            name="username"
+            id="username"
+            autoComplete="username"
             placeholder="아이디"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -50,6 +53,9 @@ export default function LoginPage() {
           <input
             className="input"
             type="password"
+            name="password"
+            id="password"
+            autoComplete={isSignup ? "new-password" : "current-password"}
             placeholder="비밀번호"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -59,6 +65,9 @@ export default function LoginPage() {
             <input
               className="input"
               type="text"
+              name="displayName"
+              id="displayName"
+              autoComplete="name"
               placeholder="이름"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
