@@ -99,15 +99,20 @@ func (q *Queries) ListCourseProgress(ctx context.Context, userID int64) ([]ListC
 }
 
 const listUserProgress = `-- name: ListUserProgress :many
-SELECT course_item_id, grade, cleared
-FROM progress
-WHERE user_id = $1
+SELECT p.course_item_id, p.grade, p.cleared, bv.book, bv.chapter, bv.verse
+FROM progress p
+JOIN course_items ci ON ci.id = p.course_item_id
+JOIN bible_verses bv ON bv.id = ci.verse_id
+WHERE p.user_id = $1
 `
 
 type ListUserProgressRow struct {
 	CourseItemID int64  `json:"course_item_id"`
 	Grade        string `json:"grade"`
 	Cleared      bool   `json:"cleared"`
+	Book         int16  `json:"book"`
+	Chapter      int16  `json:"chapter"`
+	Verse        int16  `json:"verse"`
 }
 
 func (q *Queries) ListUserProgress(ctx context.Context, userID int64) ([]ListUserProgressRow, error) {
@@ -119,7 +124,14 @@ func (q *Queries) ListUserProgress(ctx context.Context, userID int64) ([]ListUse
 	var items []ListUserProgressRow
 	for rows.Next() {
 		var i ListUserProgressRow
-		if err := rows.Scan(&i.CourseItemID, &i.Grade, &i.Cleared); err != nil {
+		if err := rows.Scan(
+			&i.CourseItemID,
+			&i.Grade,
+			&i.Cleared,
+			&i.Book,
+			&i.Chapter,
+			&i.Verse,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

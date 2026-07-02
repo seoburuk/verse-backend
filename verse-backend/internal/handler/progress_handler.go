@@ -32,6 +32,9 @@ func (h *Handler) GetMyProgress(w http.ResponseWriter, r *http.Request) {
 			CourseItemID: it.CourseItemID,
 			Grade:        string(it.Grade),
 			Cleared:      it.Cleared,
+			Book:         it.Book,
+			Chapter:      it.Chapter,
+			Verse:        it.Verse,
 		}
 	}
 

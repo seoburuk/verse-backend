@@ -79,14 +79,25 @@ func (s *AttemptService) SubmitAttempt(
 	}
 
 	// 4. 진도 업데이트(cleared = 서버 기준 green)
+	// 같은 절(verse_id)을 공유하는 모든 course_item(다른 코스/섹터에 속한 사본 포함)에
+	// 진도를 함께 반영해, 한 곳에서 외운 절이 다른 코스에서도 완료로 집계되게 한다.
 	cleared := serverGrade == domain.GradeGreen
-	if err := s.attempts.UpsertProgress(ctx, repository.UpsertProgressParams{
-		UserID:       userID,
-		CourseItemID: courseItemID,
-		Grade:        string(serverGrade),
-		Cleared:      cleared,
-	}); err != nil {
+	siblingIDs, err := s.courses.ListSiblingCourseItemIDs(ctx, courseItemID)
+	if err != nil {
 		return AttemptResult{}, err
+	}
+	if len(siblingIDs) == 0 {
+		siblingIDs = []int64{courseItemID}
+	}
+	for _, id := range siblingIDs {
+		if err := s.attempts.UpsertProgress(ctx, repository.UpsertProgressParams{
+			UserID:       userID,
+			CourseItemID: id,
+			Grade:        string(serverGrade),
+			Cleared:      cleared,
+		}); err != nil {
+			return AttemptResult{}, err
+		}
 	}
 
 	// 5. 연속일 갱신

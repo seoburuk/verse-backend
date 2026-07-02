@@ -15,6 +15,9 @@ export interface ItemProgress {
   course_item_id: number;
   grade: string;
   cleared: boolean;
+  book: number;
+  chapter: number;
+  verse: number;
 }
 
 export interface ProgressSummary {

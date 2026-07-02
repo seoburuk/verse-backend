@@ -12,7 +12,7 @@ export default function CourseDetailPage() {
   const slug = params.slug;
   const router = useRouter();
   const [course, setCourse] = useState<CourseDetail | null>(null);
-  const [cleared, setCleared] = useState<Set<number>>(new Set());
+  const [cleared, setCleared] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -21,7 +21,7 @@ export default function CourseDetailPage() {
     Promise.all([getCourse(slug), getProgress()])
       .then(([c, p]) => {
         setCourse(c);
-        setCleared(new Set(p.items.filter((it) => it.cleared).map((it) => it.course_item_id)));
+        setCleared(new Set(p.items.filter((it) => it.cleared).map((it) => `${it.book}-${it.chapter}-${it.verse}`)));
       })
       .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false));
@@ -63,7 +63,7 @@ export default function CourseDetailPage() {
                   }}
                 >
                   <span className="item-topic">
-                    {cleared.has(item.course_item_id) && <span className="item-cleared">✓ </span>}
+                    {cleared.has(`${item.book}-${item.chapter}-${item.verse}`) && <span className="item-cleared">✓ </span>}
                     {item.topic}
                   </span>
                   <span className="item-ref">{bookRef(item.book, item.chapter, item.verse)}</span>

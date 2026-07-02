@@ -54,3 +54,11 @@ SELECT
 FROM course_items ci
 JOIN bible_verses bv ON bv.id = ci.verse_id
 WHERE ci.id = $1;
+
+-- name: ListSiblingCourseItemIDs :many
+-- 같은 절(verse_id)을 공유하는 모든 course_item_id(자기 자신 포함).
+-- 진도 제출 시 이 목록 전체에 progress를 fan-out해 코스/섹터 간 진도를 일치시킨다.
+SELECT ci2.id
+FROM course_items ci
+JOIN course_items ci2 ON ci2.verse_id = ci.verse_id
+WHERE ci.id = $1;

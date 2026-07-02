@@ -48,6 +48,9 @@ type ItemProgress struct {
 	CourseItemID int64
 	Grade        Grade
 	Cleared      bool
+	Book         int16
+	Chapter      int16
+	Verse        int16
 }
 
 // CourseProgress — 코스 단위 완료 집계(클리어한 수 / 전체 절 수).

@@ -13,7 +13,7 @@ export default function SectionDetailPage() {
   const router = useRouter();
   const [section, setSection] = useState<SectionDetail | null>(null);
   const [courseTitle, setCourseTitle] = useState<string | null>(null);
-  const [cleared, setCleared] = useState<Set<number>>(new Set());
+  const [cleared, setCleared] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -23,7 +23,7 @@ export default function SectionDetailPage() {
       .then(([s, c, p]) => {
         setSection(s);
         setCourseTitle(c.title);
-        setCleared(new Set(p.items.filter((it) => it.cleared).map((it) => it.course_item_id)));
+        setCleared(new Set(p.items.filter((it) => it.cleared).map((it) => `${it.book}-${it.chapter}-${it.verse}`)));
       })
       .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false));
@@ -48,7 +48,7 @@ export default function SectionDetailPage() {
               }}
             >
               <span className="item-topic">
-                {cleared.has(item.course_item_id) && <span className="item-cleared">✓ </span>}
+                {cleared.has(`${item.book}-${item.chapter}-${item.verse}`) && <span className="item-cleared">✓ </span>}
                 {item.text.slice(0, 40)}
               </span>
               <span className="item-ref">{bookRef(item.book, item.chapter, item.verse)}</span>

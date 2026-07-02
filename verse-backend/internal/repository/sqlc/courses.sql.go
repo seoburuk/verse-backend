@@ -279,3 +279,32 @@ func (q *Queries) ListSectionsByCourse(ctx context.Context, courseID int64) ([]C
 	}
 	return items, nil
 }
+
+const listSiblingCourseItemIDs = `-- name: ListSiblingCourseItemIDs :many
+SELECT ci2.id
+FROM course_items ci
+JOIN course_items ci2 ON ci2.verse_id = ci.verse_id
+WHERE ci.id = $1
+`
+
+// 같은 절(verse_id)을 공유하는 모든 course_item_id(자기 자신 포함).
+// 진도 제출 시 이 목록 전체에 progress를 fan-out해 코스/섹터 간 진도를 일치시킨다.
+func (q *Queries) ListSiblingCourseItemIDs(ctx context.Context, id int64) ([]int64, error) {
+	rows, err := q.db.Query(ctx, listSiblingCourseItemIDs, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []int64
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

@@ -97,6 +97,10 @@ func (r *pgCourseRepo) GetCourseItemVerse(ctx context.Context, courseItemID int6
 	}, nil
 }
 
+func (r *pgCourseRepo) ListSiblingCourseItemIDs(ctx context.Context, courseItemID int64) ([]int64, error) {
+	return r.q.ListSiblingCourseItemIDs(ctx, courseItemID)
+}
+
 func (r *pgCourseRepo) ListSectionsByCourse(ctx context.Context, courseID int64) ([]domain.CourseSection, error) {
 	rows, err := r.q.ListSectionsByCourse(ctx, courseID)
 	if err != nil {

@@ -6,6 +6,7 @@ import { gradeRecall, type Grade } from "../../lib/grading/grade";
 import { submitAttempt } from "../../lib/api/attempts";
 import { ApiError } from "../../lib/api/client";
 import { playHit, playMiss } from "../../lib/fx/sound";
+import { getStoredMode, setStoredMode } from "../../lib/recallMode";
 
 export type RecallMode = "drag" | "type";
 
@@ -74,7 +75,17 @@ export function useMemorize(
   const initTiles = useMemo(() => buildTilePool(answerDisplay), [answerDisplay]);
 
   const [phase, setPhase] = useState<MemorizeState["phase"]>("study");
-  const [mode, setMode] = useState<RecallMode>("drag");
+  const [mode, setModeState] = useState<RecallMode>("drag");
+
+  // 저장된 입력 모드 선호도를 마운트 후 반영(SSR 하이드레이션 안전).
+  useEffect(() => {
+    setModeState(getStoredMode());
+  }, []);
+
+  const setMode = useCallback((next: RecallMode) => {
+    setModeState(next);
+    setStoredMode(next);
+  }, []);
   const [tiles, setTiles] = useState<string[]>(initTiles);
   const [placed, setPlaced] = useState<string[]>([]);
   const [typed, setTyped] = useState("");

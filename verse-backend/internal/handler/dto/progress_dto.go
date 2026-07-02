@@ -16,6 +16,9 @@ type ItemProgressDTO struct {
 	CourseItemID int64  `json:"course_item_id"`
 	Grade        string `json:"grade"`
 	Cleared      bool   `json:"cleared"`
+	Book         int16  `json:"book"`
+	Chapter      int16  `json:"chapter"`
+	Verse        int16  `json:"verse"`
 }
 
 type ProgressResponse struct {

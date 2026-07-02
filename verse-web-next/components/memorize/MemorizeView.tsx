@@ -17,6 +17,8 @@ const gradeLabel: Record<string, string> = {
   none: "",
 };
 
+const confettiColors = ["var(--green)", "var(--yellow)", "var(--pink)", "var(--pink-soft)"];
+
 interface Props {
   items: CourseItem[];
   index: number;
@@ -129,7 +131,7 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
                 className={mode === "type" ? "mode-btn mode-active" : "mode-btn"}
                 onClick={() => setMode("type")}
               >
-                직접 입력
+                타이핑
               </button>
             </div>
             <button className="btn-primary" onClick={startRecall}>
@@ -165,6 +167,12 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
                     }`}
                     value={typed}
                     onChange={(e) => setTyped(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        if (!submitting && typed.trim() !== "") submit();
+                      }
+                    }}
                     placeholder="절을 입력하세요"
                     rows={4}
                     autoFocus
@@ -187,11 +195,26 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
 
         {phase === "result" && (
           <div className="result-phase">
-            <div className={`result-badge grade-${serverGrade}`}>
-              {gradeLabel[serverGrade ?? "none"]}
-            </div>
-            {isLast && serverGrade === "green" && (
-              <p className="course-complete">🎉 코스 완료!</p>
+            {serverGrade === "green" ? (
+              <div className="complete-banner">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <span
+                    key={i}
+                    className="confetti"
+                    style={{
+                      left: `${8 + i * 7.5}%`,
+                      background: confettiColors[i % confettiColors.length],
+                      animationDelay: `${0.25 + (i % 5) * 0.09}s`,
+                    }}
+                  />
+                ))}
+                <div className="complete-icon">★</div>
+                <h1 className="complete-title">{isLast ? "완료!" : "완벽해요!"}</h1>
+              </div>
+            ) : (
+              <div className={`result-badge grade-${serverGrade}`}>
+                {gradeLabel[serverGrade ?? "none"]}
+              </div>
             )}
             {mismatch && (
               <p className="muted" style={{ fontSize: "0.85rem" }}>
