@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { getSection, getCourse, type SectionDetail } from "../../../../../../lib/api/courses";
-import { getProgress } from "../../../../../../lib/api/progress";
-import { bookRef } from "../../../../../../lib/bookRef";
-import { itemsCacheKey } from "../../../../../../lib/itemsCache";
+import { getSection, getCourse, type SectionDetail } from "../../../../../lib/api/courses";
+import { getProgress } from "../../../../../lib/api/progress";
+import { bookRef } from "../../../../../lib/bookRef";
+import { itemsCacheKey } from "../../../../../lib/itemsCache";
 
 export default function SectionDetailPage() {
   const params = useParams<{ slug: string; id: string }>();

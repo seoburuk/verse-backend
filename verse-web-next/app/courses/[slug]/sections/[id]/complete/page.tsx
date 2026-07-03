@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { getCourse, getSection, type SectionDetail, type CourseDetail } from "../../../../../../../lib/api/courses";
+import { getCourse, getSection, type SectionDetail, type CourseDetail } from "../../../../../../lib/api/courses";
 
 export default function SectionCompletePage() {
   const params = useParams<{ slug: string; id: string }>();

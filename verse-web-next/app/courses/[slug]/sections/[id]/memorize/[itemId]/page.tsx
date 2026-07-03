@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
-import { getSection, type CourseItem } from "../../../../../../../../lib/api/courses";
-import { itemsCacheKey } from "../../../../../../../../lib/itemsCache";
-import { MemorizeView } from "../../../../../../../../components/memorize/MemorizeView";
+import { getSection, type CourseItem } from "../../../../../../../lib/api/courses";
+import { itemsCacheKey } from "../../../../../../../lib/itemsCache";
+import { MemorizeView } from "../../../../../../../components/memorize/MemorizeView";
 
 export default function SectionMemorizePage() {
   const params = useParams<{ slug: string; id: string; itemId: string }>();
