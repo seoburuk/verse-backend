@@ -5,6 +5,7 @@ type Course struct {
 	ID       int64
 	Slug     string
 	Title    string
+	TitleEn  string
 	Theme    string
 	Ord      int
 	Hidden   bool
@@ -27,6 +28,7 @@ type CourseItemWithVerse struct {
 	CourseItemID int64
 	Ord          int
 	Topic        string
+	TopicEn      string
 	Book         int16
 	Chapter      int16
 	Verse        int16
@@ -38,6 +40,7 @@ type CourseSection struct {
 	ID       int64
 	CourseID int64
 	Title    string
+	TitleEn  string
 	Ord      int
 }
 

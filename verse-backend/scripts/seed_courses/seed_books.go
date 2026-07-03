@@ -15,11 +15,11 @@ func seedBooks(ctx context.Context, pool *pgxpool.Pool) error {
 		slug := fmt.Sprintf("book-%02d-%s", b.num, bookSlug(b.en))
 		var courseID int64
 		err := pool.QueryRow(ctx, `
-			INSERT INTO courses(slug, title, theme, ord, category, hidden)
-			VALUES ($1, $2, $3, $4, $5, FALSE)
-			ON CONFLICT (slug) DO UPDATE SET category = EXCLUDED.category, title = EXCLUDED.title
+			INSERT INTO courses(slug, title, title_en, theme, ord, category, hidden)
+			VALUES ($1, $2, $3, $4, $5, $6, FALSE)
+			ON CONFLICT (slug) DO UPDATE SET category = EXCLUDED.category, title = EXCLUDED.title, title_en = EXCLUDED.title_en
 			RETURNING id
-		`, slug, b.ko, bookSlug(b.en), 100+int(b.num), b.category()).Scan(&courseID)
+		`, slug, b.ko, b.en, bookSlug(b.en), 100+int(b.num), b.category()).Scan(&courseID)
 		if err != nil {
 			return fmt.Errorf("upsert book course %q: %w", slug, err)
 		}
@@ -43,11 +43,11 @@ func seedBooks(ctx context.Context, pool *pgxpool.Pool) error {
 		for _, ch := range chapters {
 			var sectionID int64
 			err := pool.QueryRow(ctx, `
-				INSERT INTO course_sections(course_id, title, ord)
-				VALUES ($1, $2, $3)
-				ON CONFLICT (course_id, ord) DO UPDATE SET title = EXCLUDED.title
+				INSERT INTO course_sections(course_id, title, title_en, ord)
+				VALUES ($1, $2, $3, $4)
+				ON CONFLICT (course_id, ord) DO UPDATE SET title = EXCLUDED.title, title_en = EXCLUDED.title_en
 				RETURNING id
-			`, courseID, fmt.Sprintf("%d장", ch), int(ch)).Scan(&sectionID)
+			`, courseID, fmt.Sprintf("%d장", ch), chapterTitleEn(ch), int(ch)).Scan(&sectionID)
 			if err != nil {
 				return fmt.Errorf("upsert section (book %d, chapter %d): %w", b.num, ch, err)
 			}

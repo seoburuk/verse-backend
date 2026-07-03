@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCourseServer, listCoursesServer } from "../../../lib/api/server";
-import { bookRef } from "../../../lib/bookRef";
-import CourseDetailPersonal from "../../../components/courses/CourseDetailPersonal";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Link, type Locale } from "@/i18n/routing";
+import { getCourseServer, listCoursesServer } from "@/lib/api/server";
+import { pickLocalized } from "@/lib/api/courses";
+import CourseDetailPersonal from "@/components/courses/CourseDetailPersonal";
+import CourseItemList from "@/components/courses/CourseItemList";
 
 export async function generateStaticParams() {
   try {
@@ -14,28 +16,42 @@ export async function generateStaticParams() {
   }
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params;
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale; slug: string }>;
+}): Promise<Metadata> {
+  const { locale, slug } = await params;
+  const t = await getTranslations({ locale, namespace: "meta" });
   try {
     const course = await getCourseServer(slug);
+    const title = pickLocalized(course.title, course.title_en, locale);
     const totalVerses =
       (course.items?.length ?? 0) +
       (course.sections?.reduce((n, s) => n + s.items.length, 0) ?? 0);
     return {
-      title: course.title,
-      description: `${course.title} — KJV 성경 ${totalVerses}구절 암송 코스. 절별로 암기하며 말씀을 마음에 새기세요.`,
+      title,
+      description: t("courseDetailDesc", { title, count: totalVerses }),
       openGraph: {
-        title: `${course.title} | PIX BIBLE`,
-        description: `KJV 성경 ${totalVerses}구절 암송 코스.`,
+        title: t("courseDetailOgTitle", { title }),
+        description: t("courseDetailOgDesc", { count: totalVerses }),
       },
     };
   } catch {
-    return { title: "코스 상세" };
+    return { title: t("courseDetailFallback") };
   }
 }
 
-export default async function CourseDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default async function CourseDetailPage({
+  params,
+}: {
+  params: Promise<{ locale: Locale; slug: string }>;
+}) {
+  const { locale, slug } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("common");
+  const tCourses = await getTranslations("courses");
+
   let course;
   try {
     course = await getCourseServer(slug);
@@ -43,6 +59,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
     notFound();
   }
 
+  const courseTitle = pickLocalized(course.title, course.title_en, locale);
   const totalVerses =
     (course.items?.length ?? 0) +
     (course.sections?.reduce((n, s) => n + s.items.length, 0) ?? 0);
@@ -50,18 +67,18 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: course.title,
+    name: courseTitle,
     numberOfItems: totalVerses,
     itemListElement: course.sections
       ? course.sections.map((s, i) => ({
           "@type": "ListItem",
           position: i + 1,
-          name: s.title,
+          name: pickLocalized(s.title, s.title_en, locale),
         }))
       : (course.items ?? []).slice(0, 20).map((item, i) => ({
           "@type": "ListItem",
           position: i + 1,
-          name: item.topic,
+          name: pickLocalized(item.topic, item.topic_en, locale),
           description: item.text,
         })),
   };
@@ -73,8 +90,8 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <header className="page-header">
-        <Link href="/courses" className="btn-link">← 코스 목록</Link>
-        <h1 className="title">{course.title}</h1>
+        <Link href="/courses" className="btn-link">{t("backToCourses")}</Link>
+        <h1 className="title">{courseTitle}</h1>
         <CourseDetailPersonal />
       </header>
       <main className="content">
@@ -86,24 +103,13 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                 href={`/courses/${slug}/sections/${section.section_id}`}
                 className="item-card"
               >
-                <span className="item-topic">{section.title}</span>
-                <span className="item-ref">{section.items.length}구절</span>
+                <span className="item-topic">{pickLocalized(section.title, section.title_en, locale)}</span>
+                <span className="item-ref">{tCourses("verseCount", { count: section.items.length })}</span>
               </Link>
             ))}
           </div>
         ) : (
-          <div className="item-list">
-            {(course.items ?? []).map((item, index) => (
-              <Link
-                key={item.course_item_id}
-                href={`/courses/${slug}/memorize/${item.course_item_id}?i=${index}`}
-                className="item-card"
-              >
-                <span className="item-topic">{item.topic}</span>
-                <span className="item-ref">{bookRef(item.book, item.chapter, item.verse)}</span>
-              </Link>
-            ))}
-          </div>
+          <CourseItemList slug={slug} items={course.items ?? []} />
         )}
       </main>
     </div>

@@ -1,0 +1,140 @@
+{
+  "common": {
+    "backToCourses": "← Courses",
+    "back": "← Back",
+    "loading": "Loading...",
+    "brandTagline": "Memorize the KJV Bible"
+  },
+  "landing": {
+    "cta": "Get started"
+  },
+  "login": {
+    "subtitle": "Memorize the KJV Bible",
+    "username": "Username",
+    "password": "Password",
+    "name": "Name",
+    "saveUsername": "Remember username",
+    "processing": "Working...",
+    "signup": "Sign up",
+    "login": "Log in",
+    "haveAccount": "I already have an account",
+    "createAccount": "Create an account",
+    "genericError": "Something went wrong"
+  },
+  "nav": {
+    "bookmarks": "Bookmarks",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "logout": "Log out",
+    "login": "Log in",
+    "resume": "▶ Resume"
+  },
+  "courses": {
+    "verseCount": "{count} verses",
+    "bookCount": "{count} books"
+  },
+  "settings": {
+    "title": "Settings",
+    "backToCourses": "← Courses",
+    "display": "Display",
+    "theme": "Theme",
+    "dark": "🌙 Dark",
+    "light": "☀️ Light",
+    "language": "Language",
+    "account": "Account",
+    "username": "Username",
+    "logout": "Log out",
+    "deleteAccount": "Delete account",
+    "deleting": "Deleting...",
+    "deleteConfirm": "Delete your account for good? All progress will be lost and this cannot be undone.",
+    "deleteFailed": "Failed to delete account",
+    "referenceTables": "Reference tables",
+    "warmupSector": "Warm-up Sector",
+    "messiahProphecy": "Messianic Prophecy",
+    "colTopic": "Topic",
+    "colVerse": "Verse",
+    "colProphecy": "Prophecy",
+    "colFulfilled": "Fulfilled"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "back": "← Courses",
+    "loading": "Loading...",
+    "memorizedVerses": "Verses memorized",
+    "currentStreak": "Current streak",
+    "longestStreak": "Longest streak",
+    "categoryProgress": "Progress by category",
+    "gradeDistribution": "Grade distribution",
+    "noRecords": "No memorization records yet",
+    "green": "Green",
+    "yellow": "Yellow",
+    "red": "Red"
+  },
+  "bookmarks": {
+    "title": "Bookmarks",
+    "back": "← Courses",
+    "loading": "Loading...",
+    "empty": "No bookmarked verses yet. Tap ☆ on the practice screen to save one.",
+    "remove": "Remove bookmark"
+  },
+  "memorize": {
+    "back": "← Back",
+    "gradeGreen": "🟢 Perfect!",
+    "gradeYellow": "🟡 Almost there!",
+    "gradeRed": "🔴 Try again",
+    "outOfLivesTitle": "Out of lives",
+    "outOfLivesDesc": "Your lives will refill soon — come back and try again",
+    "goBack": "Go back",
+    "modeDrag": "Tap tiles",
+    "modeType": "Typing",
+    "startRecall": "Start reciting",
+    "dragHint": "Recall the verse and arrange it below",
+    "typePlaceholder": "Type the verse",
+    "submitting": "Submitting...",
+    "submit": "Submit",
+    "complete": "Done!",
+    "perfect": "Perfect!",
+    "serverConfirmed": "Confirmed by server grading",
+    "retry": "Try again",
+    "sectionComplete": "Section complete!",
+    "next": "Next",
+    "retryAgain": "Retry",
+    "bookmark": "Bookmark",
+    "removeBookmark": "Remove bookmark"
+  },
+  "section": {
+    "backToCourse": "← Back to {title}",
+    "fallbackCourse": "course",
+    "loading": "Loading..."
+  },
+  "complete": {
+    "backToCourse": "← Back to course",
+    "sectionComplete": "Section complete!",
+    "nextSection": "Next section: {title} →",
+    "courseComplete": "Course complete! Go back",
+    "reviewSection": "Review this section"
+  },
+  "categories": {
+    "foundations": "Foundations",
+    "warmup": "Warm-up",
+    "messiah": "Prophecy",
+    "ot": "Old Testament",
+    "nt": "New Testament",
+    "topic": "By topic"
+  },
+  "meta": {
+    "landingTitle": "PIX BIBLE — Memorize the Bible",
+    "landingDesc": "PIX BIBLE is a retro-pixel Bible memory app. Memorize the King James Version (KJV) verse by verse with tile-ordering and typing drills.",
+    "landingOgDesc": "Memorize the King James Version (KJV) verse by verse. Topic and book memory courses included.",
+    "coursesTitle": "Bible memory courses",
+    "coursesDesc": "Browse KJV Bible memory courses by topic and category — foundations, warm-up, Old Testament, New Testament, and topical courses.",
+    "coursesOgTitle": "Bible memory courses | PIX BIBLE",
+    "coursesOgDesc": "Browse KJV Bible memory courses by topic and category.",
+    "courseDetailDesc": "{title} — a KJV memory course of {count} verses. Memorize verse by verse and write the Word on your heart.",
+    "courseDetailOgTitle": "{title} | PIX BIBLE",
+    "courseDetailOgDesc": "A KJV memory course of {count} verses.",
+    "courseDetailFallback": "Course detail",
+    "categoryTitle": "{label} courses",
+    "categoryDesc": "KJV Bible memory courses in the {label} category."
+  }
+}

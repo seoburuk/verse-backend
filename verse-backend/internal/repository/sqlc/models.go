@@ -34,6 +34,7 @@ type Course struct {
 	Ord      int32       `json:"ord"`
 	Hidden   bool        `json:"hidden"`
 	Category string      `json:"category"`
+	TitleEn  pgtype.Text `json:"title_en"`
 }
 
 type CourseItem struct {
@@ -43,13 +44,15 @@ type CourseItem struct {
 	Ord       int32       `json:"ord"`
 	Topic     pgtype.Text `json:"topic"`
 	SectionID pgtype.Int8 `json:"section_id"`
+	TopicEn   pgtype.Text `json:"topic_en"`
 }
 
 type CourseSection struct {
-	ID       int64  `json:"id"`
-	CourseID int64  `json:"course_id"`
-	Title    string `json:"title"`
-	Ord      int32  `json:"ord"`
+	ID       int64       `json:"id"`
+	CourseID int64       `json:"course_id"`
+	Title    string      `json:"title"`
+	Ord      int32       `json:"ord"`
+	TitleEn  pgtype.Text `json:"title_en"`
 }
 
 type ItemFavorite struct {

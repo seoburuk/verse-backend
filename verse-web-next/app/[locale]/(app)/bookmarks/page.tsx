@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { getFavorites, removeFavorite, type FavoriteItem } from "../../../lib/api/favorites";
-import { bookRef } from "../../../lib/bookRef";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/routing";
+import { getFavorites, removeFavorite, type FavoriteItem } from "@/lib/api/favorites";
+import { bookRef } from "@/lib/bookRef";
 
 function memorizeUrl(f: FavoriteItem): string {
   if (f.section_id != null) {
@@ -14,6 +15,7 @@ function memorizeUrl(f: FavoriteItem): string {
 
 export default function BookmarksPage() {
   const router = useRouter();
+  const t = useTranslations("bookmarks");
   const [items, setItems] = useState<FavoriteItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,14 +36,14 @@ export default function BookmarksPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <button className="btn-link" onClick={() => router.push("/courses")}>← 코스 목록</button>
-        <h1 className="title">책갈피</h1>
+        <button className="btn-link" onClick={() => router.push("/courses")}>{t("back")}</button>
+        <h1 className="title">{t("title")}</h1>
       </header>
       <main className="content">
-        {loading && <p className="muted">불러오는 중...</p>}
+        {loading && <p className="muted">{t("loading")}</p>}
         {error && <p className="error-msg">{error}</p>}
         {!loading && items.length === 0 && (
-          <p className="muted">아직 책갈피한 절이 없어요. 암송 화면에서 ☆ 를 눌러 저장하세요.</p>
+          <p className="muted">{t("empty")}</p>
         )}
         <div className="course-list">
           {items.map((f) => (
@@ -62,7 +64,7 @@ export default function BookmarksPage() {
               </div>
               <button
                 className="fav-btn"
-                aria-label="책갈피 해제"
+                aria-label={t("remove")}
                 onClick={() => unbookmark(f.course_item_id)}
               >
                 ★

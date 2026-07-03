@@ -71,6 +71,7 @@ func (r *pgCourseRepo) ListCourseItemsWithVerse(ctx context.Context, courseID in
 			CourseItemID: row.CourseItemID,
 			Ord:          int(row.Ord),
 			Topic:        row.Topic.String, // pgtype.Text → string (NULL이면 "")
+			TopicEn:      row.TopicEn.String,
 			Book:         row.Book,
 			Chapter:      row.Chapter,
 			Verse:        row.Verse,
@@ -112,6 +113,7 @@ func (r *pgCourseRepo) ListSectionsByCourse(ctx context.Context, courseID int64)
 			ID:       row.ID,
 			CourseID: row.CourseID,
 			Title:    row.Title,
+			TitleEn:  row.TitleEn.String,
 			Ord:      int(row.Ord),
 		}
 	}
@@ -129,6 +131,7 @@ func (r *pgCourseRepo) ListItemsBySection(ctx context.Context, sectionID int64) 
 			CourseItemID: row.CourseItemID,
 			Ord:          int(row.Ord),
 			Topic:        row.Topic.String,
+			TopicEn:      row.TopicEn.String,
 			Book:         row.Book,
 			Chapter:      row.Chapter,
 			Verse:        row.Verse,
@@ -150,6 +153,7 @@ func (r *pgCourseRepo) GetSectionByID(ctx context.Context, sectionID int64) (dom
 		ID:       row.ID,
 		CourseID: row.CourseID,
 		Title:    row.Title,
+		TitleEn:  row.TitleEn.String,
 		Ord:      int(row.Ord),
 	}, nil
 }
@@ -205,6 +209,7 @@ func toDomainCourse(c db.Course) domain.Course {
 		ID:       c.ID,
 		Slug:     c.Slug,
 		Title:    c.Title,
+		TitleEn:  c.TitleEn.String,
 		Theme:    c.Theme.String,
 		Ord:      int(c.Ord),
 		Hidden:   c.Hidden,

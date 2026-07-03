@@ -31,6 +31,7 @@ func (h *Handler) GetSection(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, dto.SectionDetailResponse{
 		SectionID: sec.ID,
 		Title:     sec.Title,
+		TitleEn:   sec.TitleEn,
 		Ord:       sec.Ord,
 		Items:     items,
 	})
@@ -41,6 +42,7 @@ func toItemResponse(it domain.CourseItemWithVerse) dto.CourseItemResponse {
 		CourseItemID: it.CourseItemID,
 		Ord:          it.Ord,
 		Topic:        it.Topic,
+		TopicEn:      it.TopicEn,
 		Book:         it.Book,
 		Chapter:      it.Chapter,
 		Verse:        it.Verse,
@@ -61,6 +63,7 @@ func (h *Handler) ListCourses(w http.ResponseWriter, r *http.Request) {
 			ID:       c.ID,
 			Slug:     c.Slug,
 			Title:    c.Title,
+			TitleEn:  c.TitleEn,
 			Theme:    c.Theme,
 			Ord:      c.Ord,
 			Category: c.Category,
@@ -82,6 +85,7 @@ func (h *Handler) GetCourse(w http.ResponseWriter, r *http.Request) {
 		ID:       detail.Course.ID,
 		Slug:     detail.Course.Slug,
 		Title:    detail.Course.Title,
+		TitleEn:  detail.Course.TitleEn,
 		Theme:    detail.Course.Theme,
 		Ord:      detail.Course.Ord,
 		Category: detail.Course.Category,
@@ -97,6 +101,7 @@ func (h *Handler) GetCourse(w http.ResponseWriter, r *http.Request) {
 			sections[i] = dto.CourseSectionResponse{
 				SectionID: sec.ID,
 				Title:     sec.Title,
+				TitleEn:   sec.TitleEn,
 				Ord:       sec.Ord,
 				Items:     secItems,
 			}

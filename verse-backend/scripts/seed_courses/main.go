@@ -189,11 +189,11 @@ func main() {
 func insertCourse(ctx context.Context, pool *pgxpool.Pool, co seedCourse) error {
 	var courseID int64
 	err := pool.QueryRow(ctx, `
-		INSERT INTO courses(slug, title, theme, ord, hidden)
-		VALUES ($1, $2, $3, $4, $5)
-		ON CONFLICT (slug) DO UPDATE SET hidden = EXCLUDED.hidden, title = EXCLUDED.title
+		INSERT INTO courses(slug, title, title_en, theme, ord, hidden)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		ON CONFLICT (slug) DO UPDATE SET hidden = EXCLUDED.hidden, title = EXCLUDED.title, title_en = EXCLUDED.title_en
 		RETURNING id
-	`, co.slug, co.title, co.theme, co.ord, co.hidden).Scan(&courseID)
+	`, co.slug, co.title, nz(themeEn[co.title]), co.theme, co.ord, co.hidden).Scan(&courseID)
 	if err != nil {
 		return fmt.Errorf("upsert course: %w", err)
 	}
@@ -209,10 +209,11 @@ func insertCourse(ctx context.Context, pool *pgxpool.Pool, co seedCourse) error 
 		}
 
 		_, err = pool.Exec(ctx, `
-			INSERT INTO course_items(course_id, verse_id, ord, topic)
-			VALUES ($1, $2, $3, $4)
-			ON CONFLICT (course_id, verse_id) WHERE section_id IS NULL DO NOTHING
-		`, courseID, verseID, i+1, vr.topic)
+			INSERT INTO course_items(course_id, verse_id, ord, topic, topic_en)
+			VALUES ($1, $2, $3, $4, $5)
+			ON CONFLICT (course_id, verse_id) WHERE section_id IS NULL
+			DO UPDATE SET topic_en = EXCLUDED.topic_en
+		`, courseID, verseID, i+1, vr.topic, nz(themeEn[vr.topic]))
 		if err != nil {
 			return fmt.Errorf("insert course_item: %w", err)
 		}
@@ -224,11 +225,11 @@ func insertCourse(ctx context.Context, pool *pgxpool.Pool, co seedCourse) error 
 func insertCourseWithSections(ctx context.Context, pool *pgxpool.Pool, co seedCourseWithSections) (int, error) {
 	var courseID int64
 	err := pool.QueryRow(ctx, `
-		INSERT INTO courses(slug, title, theme, ord, category)
-		VALUES ($1, $2, $3, $4, 'warmup')
-		ON CONFLICT (slug) DO UPDATE SET category = EXCLUDED.category, title = EXCLUDED.title
+		INSERT INTO courses(slug, title, title_en, theme, ord, category)
+		VALUES ($1, $2, $3, $4, $5, 'warmup')
+		ON CONFLICT (slug) DO UPDATE SET category = EXCLUDED.category, title = EXCLUDED.title, title_en = EXCLUDED.title_en
 		RETURNING id
-	`, co.slug, co.title, co.theme, co.ord).Scan(&courseID)
+	`, co.slug, co.title, nz(themeEn[co.title]), co.theme, co.ord).Scan(&courseID)
 	if err != nil {
 		return 0, fmt.Errorf("upsert course: %w", err)
 	}
@@ -237,11 +238,11 @@ func insertCourseWithSections(ctx context.Context, pool *pgxpool.Pool, co seedCo
 	for secOrd, s := range co.sections {
 		var sectionID int64
 		err := pool.QueryRow(ctx, `
-			INSERT INTO course_sections(course_id, title, ord)
-			VALUES ($1, $2, $3)
-			ON CONFLICT (course_id, ord) DO UPDATE SET title = EXCLUDED.title
+			INSERT INTO course_sections(course_id, title, title_en, ord)
+			VALUES ($1, $2, $3, $4)
+			ON CONFLICT (course_id, ord) DO UPDATE SET title = EXCLUDED.title, title_en = EXCLUDED.title_en
 			RETURNING id
-		`, courseID, s.title, secOrd+1).Scan(&sectionID)
+		`, courseID, s.title, nz(themeEn[s.title]), secOrd+1).Scan(&sectionID)
 		if err != nil {
 			return 0, fmt.Errorf("upsert section %q: %w", s.title, err)
 		}
@@ -257,11 +258,11 @@ func insertCourseWithSections(ctx context.Context, pool *pgxpool.Pool, co seedCo
 			}
 
 			_, err = pool.Exec(ctx, `
-				INSERT INTO course_items(course_id, section_id, verse_id, ord, topic)
-				VALUES ($1, $2, $3, $4, $5)
+				INSERT INTO course_items(course_id, section_id, verse_id, ord, topic, topic_en)
+				VALUES ($1, $2, $3, $4, $5, $6)
 				ON CONFLICT (section_id, ord) WHERE section_id IS NOT NULL
-				DO UPDATE SET verse_id = EXCLUDED.verse_id, topic = EXCLUDED.topic
-			`, courseID, sectionID, verseID, itemOrd+1, s.title)
+				DO UPDATE SET verse_id = EXCLUDED.verse_id, topic = EXCLUDED.topic, topic_en = EXCLUDED.topic_en
+			`, courseID, sectionID, verseID, itemOrd+1, s.title, nz(themeEn[s.title]))
 			if err != nil {
 				return 0, fmt.Errorf("insert course_item (section %q, verse %d:%d:%d): %w", s.title, ref.b, ref.c, ref.v, err)
 			}

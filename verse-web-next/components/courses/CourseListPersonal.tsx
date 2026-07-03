@@ -9,6 +9,7 @@ import { getLives, type Lives } from "../../lib/api/lives";
 import { getResume, type ResumeTarget } from "../../lib/api/resume";
 import { useAuth } from "../../lib/hooks/useAuth";
 import { bookRef } from "../../lib/bookRef";
+import { PixelIcon } from "../PixelIcon";
 
 function resumeUrl(r: ResumeTarget): string {
   if (r.section_id != null) {
@@ -36,8 +37,16 @@ export function CourseHeaderPersonal() {
 
   return (
     <div className="header-right">
-      {lives && <span className="lives-badge">❤️ {lives.lives}</span>}
-      {streak && <span className="streak-badge">🔥 {streak.current}</span>}
+      {lives && (
+        <span className="lives-badge">
+          <PixelIcon name="heart" /> {lives.lives}
+        </span>
+      )}
+      {streak && (
+        <span className="streak-badge">
+          <PixelIcon name="flame" /> {streak.current}
+        </span>
+      )}
       {isAuthed ? (
         <>
           <span className="user-name">{user?.display_name}</span>
@@ -75,7 +84,9 @@ export function ResumeCard() {
       onClick={() => router.push(resumeUrl(resume))}
       onKeyDown={(e) => e.key === "Enter" && router.push(resumeUrl(resume))}
     >
-      <span className="resume-label">{t("resume")}</span>
+      <span className="resume-label">
+        <PixelIcon name="play" /> {t("resume")}
+      </span>
       <span className="resume-title">
         {pickLocalized(resume.course_title, resume.course_title_en, locale)}
         {resume.section_title ? ` › ${pickLocalized(resume.section_title, resume.section_title_en, locale)}` : ""}

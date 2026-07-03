@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { useAuth } from "../lib/hooks/useAuth";
 
 // AuthRedirect — 이미 로그인한 사용자가 공개 랜딩(/)에 들어오면 /courses로 보낸다.

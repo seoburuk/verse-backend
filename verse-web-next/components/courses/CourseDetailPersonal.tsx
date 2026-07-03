@@ -1,21 +1,22 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/routing";
 import { useAuth } from "../../lib/hooks/useAuth";
 
 export default function CourseDetailPersonal() {
   const { isAuthed, logout } = useAuth();
   const router = useRouter();
+  const t = useTranslations("nav");
 
   return (
     <div className="header-right">
       {isAuthed ? (
         <>
-          <button className="btn-link" onClick={() => router.push("/courses")}>목록</button>
-          <button className="btn-link" onClick={logout}>로그아웃</button>
+          <button className="btn-link" onClick={logout}>{t("logout")}</button>
         </>
       ) : (
-        <button className="btn-link" onClick={() => router.push("/login")}>로그인</button>
+        <button className="btn-link" onClick={() => router.push("/login")}>{t("login")}</button>
       )}
     </div>
   );
