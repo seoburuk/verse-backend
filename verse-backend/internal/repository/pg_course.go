@@ -199,6 +199,14 @@ func (r *pgCourseRepo) ListFavoriteItems(ctx context.Context, userID int64) ([]d
 			v := row.SectionTitle.String
 			fav.SectionTitle = &v
 		}
+		if row.CourseTitleEn.Valid {
+			v := row.CourseTitleEn.String
+			fav.CourseTitleEn = &v
+		}
+		if row.SectionTitleEn.Valid {
+			v := row.SectionTitleEn.String
+			fav.SectionTitleEn = &v
+		}
 		out[i] = fav
 	}
 	return out, nil

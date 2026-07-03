@@ -8,6 +8,7 @@ interface Props {
   pool: string[];
   liveGrade: Grade;
   onTap: (tile: string, fromPool: boolean) => void;
+  placeholder?: string;
 }
 
 const gradeColor: Record<Grade, string> = {
@@ -17,7 +18,7 @@ const gradeColor: Record<Grade, string> = {
   none: "var(--border)",
 };
 
-export function DragTiles({ placed, pool, liveGrade, onTap }: Props) {
+export function DragTiles({ placed, pool, liveGrade, onTap, placeholder = "단어를 탭해서 배치하세요" }: Props) {
   // 아직 아무것도 배치하지 않았으면 채점 색(빈 답안=red) 대신 중립 밑줄
   const lineColor = placed.length === 0 ? "var(--text)" : gradeColor[liveGrade];
   return (
@@ -27,7 +28,7 @@ export function DragTiles({ placed, pool, liveGrade, onTap }: Props) {
         style={{ "--line": lineColor } as CSSProperties}
       >
         {placed.length === 0 && (
-          <span className="placeholder">단어를 탭해서 배치하세요</span>
+          <span className="placeholder">{placeholder}</span>
         )}
         {placed.map((tile, i) => (
           <button

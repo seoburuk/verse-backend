@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { getFavorites, removeFavorite, type FavoriteItem } from "@/lib/api/favorites";
 import { bookRef } from "@/lib/bookRef";
+import { pickLocalized } from "@/lib/api/courses";
 
 function memorizeUrl(f: FavoriteItem): string {
   if (f.section_id != null) {
@@ -16,6 +17,7 @@ function memorizeUrl(f: FavoriteItem): string {
 export default function BookmarksPage() {
   const router = useRouter();
   const t = useTranslations("bookmarks");
+  const locale = useLocale();
   const [items, setItems] = useState<FavoriteItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -58,8 +60,8 @@ export default function BookmarksPage() {
                 <span className="bookmark-ref">{bookRef(f.book, f.chapter, f.verse)}</span>
                 <span className="bookmark-text">{f.text}</span>
                 <span className="muted bookmark-course">
-                  {f.course_title}
-                  {f.section_title ? ` › ${f.section_title}` : ""}
+                  {pickLocalized(f.course_title, f.course_title_en, locale)}
+                  {f.section_title ? ` › ${pickLocalized(f.section_title, f.section_title_en, locale)}` : ""}
                 </span>
               </div>
               <button
