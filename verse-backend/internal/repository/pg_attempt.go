@@ -167,6 +167,10 @@ func (r *pgAttemptRepo) GetResume(ctx context.Context, userID int64) (*domain.Re
 		CourseTitle:     last.CourseTitle,
 		LastAttemptedAt: last.CreatedAt.Time,
 	}
+	if last.CourseTitleEn.Valid {
+		v := last.CourseTitleEn.String
+		target.CourseTitleEn = &v
+	}
 
 	if errors.Is(err, pgx.ErrNoRows) {
 		// 코스 전체 완료 → 마지막 시도 절 자체로 반환
@@ -182,6 +186,10 @@ func (r *pgAttemptRepo) GetResume(ctx context.Context, userID int64) (*domain.Re
 			v := last.SectionTitle.String
 			target.SectionTitle = &v
 		}
+		if last.SectionTitleEn.Valid {
+			v := last.SectionTitleEn.String
+			target.SectionTitleEn = &v
+		}
 	} else {
 		target.CourseItemID = next.CourseItemID
 		target.Book = next.Book
@@ -194,6 +202,10 @@ func (r *pgAttemptRepo) GetResume(ctx context.Context, userID int64) (*domain.Re
 		if next.SectionTitle.Valid {
 			v := next.SectionTitle.String
 			target.SectionTitle = &v
+		}
+		if next.SectionTitleEn.Valid {
+			v := next.SectionTitleEn.String
+			target.SectionTitleEn = &v
 		}
 	}
 

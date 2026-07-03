@@ -18,8 +18,10 @@ SELECT
   co.id          AS course_id,
   co.slug,
   co.title       AS course_title,
+  co.title_en    AS course_title_en,
   cs.id          AS section_id,
   cs.title       AS section_title,
+  cs.title_en    AS section_title_en,
   bv.book,
   bv.chapter,
   bv.verse,
@@ -35,17 +37,19 @@ LIMIT 1
 `
 
 type GetLastAttemptRow struct {
-	CourseItemID int64              `json:"course_item_id"`
-	ItemOrd      int32              `json:"item_ord"`
-	CourseID     int64              `json:"course_id"`
-	Slug         string             `json:"slug"`
-	CourseTitle  string             `json:"course_title"`
-	SectionID    pgtype.Int8        `json:"section_id"`
-	SectionTitle pgtype.Text        `json:"section_title"`
-	Book         int16              `json:"book"`
-	Chapter      int16              `json:"chapter"`
-	Verse        int16              `json:"verse"`
-	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	CourseItemID    int64              `json:"course_item_id"`
+	ItemOrd         int32              `json:"item_ord"`
+	CourseID        int64              `json:"course_id"`
+	Slug            string             `json:"slug"`
+	CourseTitle     string             `json:"course_title"`
+	CourseTitleEn   pgtype.Text        `json:"course_title_en"`
+	SectionID       pgtype.Int8        `json:"section_id"`
+	SectionTitle    pgtype.Text        `json:"section_title"`
+	SectionTitleEn  pgtype.Text        `json:"section_title_en"`
+	Book            int16              `json:"book"`
+	Chapter         int16              `json:"chapter"`
+	Verse           int16              `json:"verse"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) GetLastAttempt(ctx context.Context, userID int64) (GetLastAttemptRow, error) {
@@ -57,8 +61,10 @@ func (q *Queries) GetLastAttempt(ctx context.Context, userID int64) (GetLastAtte
 		&i.CourseID,
 		&i.Slug,
 		&i.CourseTitle,
+		&i.CourseTitleEn,
 		&i.SectionID,
 		&i.SectionTitle,
+		&i.SectionTitleEn,
 		&i.Book,
 		&i.Chapter,
 		&i.Verse,
@@ -73,6 +79,7 @@ SELECT
   ci.ord,
   cs.id          AS section_id,
   cs.title       AS section_title,
+  cs.title_en    AS section_title_en,
   bv.book,
   bv.chapter,
   bv.verse
@@ -93,13 +100,14 @@ type GetNextUnclearedItemParams struct {
 }
 
 type GetNextUnclearedItemRow struct {
-	CourseItemID int64       `json:"course_item_id"`
-	Ord          int32       `json:"ord"`
-	SectionID    pgtype.Int8 `json:"section_id"`
-	SectionTitle pgtype.Text `json:"section_title"`
-	Book         int16       `json:"book"`
-	Chapter      int16       `json:"chapter"`
-	Verse        int16       `json:"verse"`
+	CourseItemID   int64       `json:"course_item_id"`
+	Ord            int32       `json:"ord"`
+	SectionID      pgtype.Int8 `json:"section_id"`
+	SectionTitle   pgtype.Text `json:"section_title"`
+	SectionTitleEn pgtype.Text `json:"section_title_en"`
+	Book           int16       `json:"book"`
+	Chapter        int16       `json:"chapter"`
+	Verse          int16       `json:"verse"`
 }
 
 func (q *Queries) GetNextUnclearedItem(ctx context.Context, arg GetNextUnclearedItemParams) (GetNextUnclearedItemRow, error) {
@@ -110,6 +118,7 @@ func (q *Queries) GetNextUnclearedItem(ctx context.Context, arg GetNextUncleared
 		&i.Ord,
 		&i.SectionID,
 		&i.SectionTitle,
+		&i.SectionTitleEn,
 		&i.Book,
 		&i.Chapter,
 		&i.Verse,

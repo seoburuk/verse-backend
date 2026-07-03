@@ -94,8 +94,10 @@ type ResumeTarget struct {
 	CourseID        int64
 	CourseSlug      string
 	CourseTitle     string
+	CourseTitleEn   *string
 	SectionID       *int64
 	SectionTitle    *string
+	SectionTitleEn  *string
 	Book            int16
 	Chapter         int16
 	Verse           int16

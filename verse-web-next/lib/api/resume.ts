@@ -4,8 +4,10 @@ export interface ResumeTarget {
   course_item_id: number;
   course_slug: string;
   course_title: string;
+  course_title_en?: string;
   section_id: number | null;
   section_title: string | null;
+  section_title_en?: string;
   book: number;
   chapter: number;
   verse: number;
