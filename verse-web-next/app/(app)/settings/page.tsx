@@ -8,6 +8,7 @@ import { deleteAccount } from "../../../lib/api/auth";
 import { getCourse, type CourseDetail } from "../../../lib/api/courses";
 import { getLanguage, setLanguage, type Language } from "../../../lib/store/languageStore";
 import { bookRef } from "../../../lib/bookRef";
+import { messiahReference } from "../../../lib/messiahReference";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -16,7 +17,6 @@ export default function SettingsPage() {
   const [lang, setLang] = useState<Language>("ko");
   const [mounted, setMounted] = useState(false);
   const [warmup, setWarmup] = useState<CourseDetail | null>(null);
-  const [messiah, setMessiah] = useState<CourseDetail | null>(null);
   const [showReference, setShowReference] = useState<"warmup" | "messiah" | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -41,9 +41,6 @@ export default function SettingsPage() {
     if (key === "warmup" && !warmup) {
       getCourse("warmup").then(setWarmup).catch(() => {});
     }
-    if (key === "messiah" && !messiah) {
-      getCourse("messiah-prophecy").then(setMessiah).catch(() => {});
-    }
   }
 
   async function handleDeleteAccount() {
@@ -61,8 +58,6 @@ export default function SettingsPage() {
       setDeleting(false);
     }
   }
-
-  const referenceCourse = showReference === "warmup" ? warmup : showReference === "messiah" ? messiah : null;
 
   return (
     <div className="page">
@@ -108,26 +103,69 @@ export default function SettingsPage() {
         <div className="section-group">
           <h2 className="section-title">참고 표</h2>
           <div className="settings-row-buttons">
-            <button className="btn-secondary" onClick={() => loadReference("warmup")}>
-              워밍업 섹터 {showReference === "warmup" ? "숨기기" : "보기"}
+            <button
+              className={`btn-secondary${showReference === "warmup" ? " active" : ""}`}
+              onClick={() => loadReference("warmup")}
+            >
+              워밍업 섹터 {showReference === "warmup" ? "▲" : "▼"}
             </button>
-            <button className="btn-secondary" onClick={() => loadReference("messiah")}>
-              메시아 예언 {showReference === "messiah" ? "숨기기" : "보기"}
+            <button
+              className={`btn-secondary${showReference === "messiah" ? " active" : ""}`}
+              onClick={() => loadReference("messiah")}
+            >
+              메시아 예언 {showReference === "messiah" ? "▲" : "▼"}
             </button>
           </div>
-          {referenceCourse && (
+
+          {showReference === "warmup" && warmup && (
             <div className="reference-table">
-              {referenceCourse.sections?.map((sec) => (
+              {warmup.sections?.map((sec) => (
                 <div key={sec.section_id} className="reference-section">
-                  <h3 className="reference-section-title">{sec.title}</h3>
-                  <ul className="reference-list">
-                    {sec.items.map((item) => (
-                      <li key={item.course_item_id} className="reference-item">
-                        <span>{item.topic}</span>
-                        <span className="muted">{bookRef(item.book, item.chapter, item.verse)}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="reference-section-title">{sec.title}</div>
+                  <table className="pixel-table">
+                    <thead>
+                      <tr>
+                        <th>주제</th>
+                        <th>구절</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sec.items.map((item) => (
+                        <tr key={item.course_item_id}>
+                          <td>{item.topic}</td>
+                          <td className="ref-cell">{bookRef(item.book, item.chapter, item.verse)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {showReference === "messiah" && (
+            <div className="reference-table">
+              {messiahReference.map((sec) => (
+                <div key={sec.title} className="reference-section">
+                  <div className="reference-section-title">{sec.title}</div>
+                  <table className="pixel-table">
+                    <thead>
+                      <tr>
+                        <th>구절</th>
+                        <th>예언 내용</th>
+                        <th>성취</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sec.rows.map((row, i) => (
+                        <tr key={i}>
+                          <td className="ref-cell">{row.ref}</td>
+                          <td>{row.topic}</td>
+                          <td className="ref-cell">{row.fulfilled}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               ))}
             </div>

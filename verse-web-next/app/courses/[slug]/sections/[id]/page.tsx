@@ -38,22 +38,40 @@ export default function SectionDetailPage() {
         {loading && <p className="muted">불러오는 중...</p>}
         {error && <p className="error-msg">{error}</p>}
         <div className="item-list">
-          {section?.items.map((item, index) => (
-            <button
-              key={item.course_item_id}
-              className="item-card"
-              onClick={() => {
-                localStorage.setItem(itemsCacheKey.section(sectionId), JSON.stringify(section.items));
-                router.push(`/courses/${slug}/sections/${sectionId}/memorize/${item.course_item_id}?i=${index}`);
-              }}
-            >
-              <span className="item-topic">
-                {cleared.has(`${item.book}-${item.chapter}-${item.verse}`) && <span className="item-cleared">✓ </span>}
-                {item.text.slice(0, 40)}
-              </span>
-              <span className="item-ref">{bookRef(item.book, item.chapter, item.verse)}</span>
-            </button>
-          ))}
+          {section && (() => {
+            // 연속된 topic 기준으로 그룹핑 (전체 인덱스는 memorize ?i= 파라미터에 그대로 사용)
+            const groups: { topic: string; items: { item: typeof section.items[0]; index: number }[] }[] = [];
+            section.items.forEach((item, index) => {
+              const last = groups[groups.length - 1];
+              if (last && last.topic === item.topic) {
+                last.items.push({ item, index });
+              } else {
+                groups.push({ topic: item.topic, items: [{ item, index }] });
+              }
+            });
+            const showTopics = groups.length > 1;
+            return groups.map((group) => (
+              <div key={group.topic + group.items[0].index} className="item-group">
+                {showTopics && <div className="reference-section-title">{group.topic}</div>}
+                {group.items.map(({ item, index }) => (
+                  <button
+                    key={item.course_item_id}
+                    className="item-card"
+                    onClick={() => {
+                      localStorage.setItem(itemsCacheKey.section(sectionId), JSON.stringify(section.items));
+                      router.push(`/courses/${slug}/sections/${sectionId}/memorize/${item.course_item_id}?i=${index}`);
+                    }}
+                  >
+                    <span className="item-topic">
+                      {cleared.has(`${item.book}-${item.chapter}-${item.verse}`) && <span className="item-cleared">✓ </span>}
+                      {item.text.slice(0, 40)}
+                    </span>
+                    <span className="item-ref">{bookRef(item.book, item.chapter, item.verse)}</span>
+                  </button>
+                ))}
+              </div>
+            ));
+          })()}
         </div>
       </main>
     </div>
