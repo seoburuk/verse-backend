@@ -1,20 +1,35 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { listCoursesServer } from "../../../../lib/api/server";
-import { CATEGORY_LABELS } from "../../../../lib/categories";
-import type { Course } from "../../../../lib/api/courses";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Link, type Locale } from "@/i18n/routing";
+import { listCoursesServer } from "@/lib/api/server";
+import { pickLocalized, type Course } from "@/lib/api/courses";
 
-export async function generateMetadata({ params }: { params: Promise<{ category: string }> }): Promise<Metadata> {
-  const { category } = await params;
-  const label = CATEGORY_LABELS[category] ?? category;
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale; category: string }>;
+}): Promise<Metadata> {
+  const { locale, category } = await params;
+  const t = await getTranslations({ locale, namespace: "meta" });
+  const tc = await getTranslations({ locale, namespace: "categories" });
+  const label = tc.has(category) ? tc(category) : category;
   return {
-    title: `${label} 코스`,
-    description: `KJV 성경 ${label} 카테고리 암송 코스 목록.`,
+    title: t("categoryTitle", { label }),
+    description: t("categoryDesc", { label }),
   };
 }
 
-export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
-  const { category } = await params;
+export default async function CategoryPage({
+  params,
+}: {
+  params: Promise<{ locale: Locale; category: string }>;
+}) {
+  const { locale, category } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("common");
+  const tc = await getTranslations("categories");
+  const label = tc.has(category) ? tc(category) : category;
+
   let courses: Course[] = [];
   try {
     const all = await listCoursesServer();
@@ -26,14 +41,14 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   return (
     <div className="page">
       <header className="page-header">
-        <Link href="/courses" className="btn-link">← 코스 목록</Link>
-        <h1 className="title">{CATEGORY_LABELS[category] ?? category}</h1>
+        <Link href="/courses" className="btn-link">{t("backToCourses")}</Link>
+        <h1 className="title">{label}</h1>
       </header>
       <main className="content">
         <div className="course-list">
           {courses.map((c) => (
             <Link key={c.id} href={`/courses/${c.slug}`} className="course-card">
-              <span className="course-title">{c.title}</span>
+              <span className="course-title">{pickLocalized(c.title, c.title_en, locale)}</span>
               <span className="course-meta">
                 <span className="course-theme">{c.theme}</span>
               </span>

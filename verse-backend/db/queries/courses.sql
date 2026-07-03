@@ -13,6 +13,7 @@ SELECT
   ci.id        AS course_item_id,
   ci.ord,
   ci.topic,
+  ci.topic_en,
   bv.book,
   bv.chapter,
   bv.verse,
@@ -23,10 +24,10 @@ WHERE ci.course_id = $1
 ORDER BY ci.ord;
 
 -- name: GetSectionByID :one
-SELECT id, course_id, title, ord FROM course_sections WHERE id = $1;
+SELECT id, course_id, title, title_en, ord FROM course_sections WHERE id = $1;
 
 -- name: ListSectionsByCourse :many
-SELECT id, course_id, title, ord FROM course_sections WHERE course_id = $1 ORDER BY ord;
+SELECT id, course_id, title, title_en, ord FROM course_sections WHERE course_id = $1 ORDER BY ord;
 
 -- name: ListItemsBySection :many
 -- 섹션 상세: 섹션 내 절 목록 + 텍스트
@@ -34,6 +35,7 @@ SELECT
   ci.id AS course_item_id,
   ci.ord,
   ci.topic,
+  ci.topic_en,
   bv.book,
   bv.chapter,
   bv.verse,

@@ -1,18 +1,26 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { listCoursesServer } from "../../lib/api/server";
-import { CATEGORY_LABELS, CATEGORY_ORDER } from "../../lib/categories";
-import type { Course } from "../../lib/api/courses";
-import { CourseHeaderPersonal, ResumeCard } from "../../components/courses/CourseListPersonal";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Link, type Locale } from "@/i18n/routing";
+import { listCoursesServer } from "@/lib/api/server";
+import { CATEGORY_ORDER } from "@/lib/categories";
+import type { Course } from "@/lib/api/courses";
+import { CourseHeaderPersonal, ResumeCard } from "@/components/courses/CourseListPersonal";
 
-export const metadata: Metadata = {
-  title: "성경 암송 코스",
-  description: "KJV 성경 66권을 주제별·카테고리별로 암송하는 코스 목록. 기초, 워밍업, 구약, 신약, 주제별 코스 제공.",
-  openGraph: {
-    title: "성경 암송 코스 | PIX BIBLE",
-    description: "KJV 성경 66권을 주제별·카테고리별로 암송하는 코스 목록.",
-  },
-};
+export async function generateMetadata({
+  params: { locale },
+}: {
+  params: { locale: Locale };
+}): Promise<Metadata> {
+  const t = await getTranslations({ locale, namespace: "meta" });
+  return {
+    title: t("coursesTitle"),
+    description: t("coursesDesc"),
+    openGraph: {
+      title: t("coursesOgTitle"),
+      description: t("coursesOgDesc"),
+    },
+  };
+}
 
 function groupByCategory(courses: Course[]): Array<[string, Course[]]> {
   const groups = new Map<string, Course[]>();
@@ -24,7 +32,15 @@ function groupByCategory(courses: Course[]): Array<[string, Course[]]> {
   return CATEGORY_ORDER.filter((cat) => groups.has(cat)).map((cat) => [cat, groups.get(cat)!]);
 }
 
-export default async function CourseListPage() {
+export default async function CourseListPage({
+  params: { locale },
+}: {
+  params: { locale: Locale };
+}) {
+  setRequestLocale(locale);
+  const t = await getTranslations("courses");
+  const tc = await getTranslations("categories");
+
   let courses: Course[] = [];
   try {
     courses = await listCoursesServer();
@@ -49,9 +65,9 @@ export default async function CourseListPage() {
               href={group.length === 1 ? `/courses/${group[0].slug}` : `/courses/category/${category}`}
               className="course-card"
             >
-              <span className="course-title">{CATEGORY_LABELS[category] ?? category}</span>
+              <span className="course-title">{tc(category)}</span>
               <span className="course-meta">
-                <span className="course-progress">{group.length > 1 ? `${group.length}권` : ""}</span>
+                <span className="course-progress">{group.length > 1 ? t("bookCount", { count: group.length }) : ""}</span>
               </span>
             </Link>
           ))}

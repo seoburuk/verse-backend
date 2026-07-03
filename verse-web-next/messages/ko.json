@@ -1,0 +1,140 @@
+{
+  "common": {
+    "backToCourses": "← 코스 목록",
+    "back": "← 뒤로",
+    "loading": "불러오는 중...",
+    "brandTagline": "KJV 성경 암송"
+  },
+  "landing": {
+    "cta": "시작하기"
+  },
+  "login": {
+    "subtitle": "KJV 성경 암송",
+    "username": "아이디",
+    "password": "비밀번호",
+    "name": "이름",
+    "saveUsername": "아이디 저장",
+    "processing": "처리 중...",
+    "signup": "회원가입",
+    "login": "로그인",
+    "haveAccount": "이미 계정이 있어요",
+    "createAccount": "계정 만들기",
+    "genericError": "오류가 발생했습니다"
+  },
+  "nav": {
+    "bookmarks": "책갈피",
+    "dashboard": "대시보드",
+    "settings": "설정",
+    "logout": "로그아웃",
+    "login": "로그인",
+    "resume": "▶ 이어가기"
+  },
+  "courses": {
+    "verseCount": "{count}구절",
+    "bookCount": "{count}권"
+  },
+  "settings": {
+    "title": "설정",
+    "backToCourses": "← 코스 목록",
+    "display": "화면",
+    "theme": "테마",
+    "dark": "🌙 다크",
+    "light": "☀️ 라이트",
+    "language": "언어",
+    "account": "계정",
+    "username": "아이디",
+    "logout": "로그아웃",
+    "deleteAccount": "계정 삭제",
+    "deleting": "삭제 중...",
+    "deleteConfirm": "정말 계정을 삭제할까요? 모든 진도 기록이 사라지며 되돌릴 수 없어요.",
+    "deleteFailed": "삭제에 실패했어요",
+    "referenceTables": "참고 표",
+    "warmupSector": "워밍업 섹터",
+    "messiahProphecy": "메시아 예언",
+    "colTopic": "주제",
+    "colVerse": "구절",
+    "colProphecy": "예언 내용",
+    "colFulfilled": "성취"
+  },
+  "dashboard": {
+    "title": "대시보드",
+    "back": "← 코스 목록",
+    "loading": "불러오는 중...",
+    "memorizedVerses": "암송한 절",
+    "currentStreak": "현재 스트릭",
+    "longestStreak": "최장 스트릭",
+    "categoryProgress": "카테고리별 진도",
+    "gradeDistribution": "등급 분포",
+    "noRecords": "아직 암송 기록이 없어요",
+    "green": "초록",
+    "yellow": "노랑",
+    "red": "빨강"
+  },
+  "bookmarks": {
+    "title": "책갈피",
+    "back": "← 코스 목록",
+    "loading": "불러오는 중...",
+    "empty": "아직 책갈피한 절이 없어요. 암송 화면에서 ☆ 를 눌러 저장하세요.",
+    "remove": "책갈피 해제"
+  },
+  "memorize": {
+    "back": "← 뒤로",
+    "gradeGreen": "🟢 완벽해요!",
+    "gradeYellow": "🟡 조금 더!",
+    "gradeRed": "🔴 다시 해보세요",
+    "outOfLivesTitle": "목숨이 없어요",
+    "outOfLivesDesc": "잠시 후 목숨이 채워지면 다시 도전하세요",
+    "goBack": "뒤로 가기",
+    "modeDrag": "타일 탭",
+    "modeType": "타이핑",
+    "startRecall": "암송 시작",
+    "dragHint": "절을 기억해서 아래에 배치하세요",
+    "typePlaceholder": "절을 입력하세요",
+    "submitting": "제출 중...",
+    "submit": "제출",
+    "complete": "완료!",
+    "perfect": "완벽해요!",
+    "serverConfirmed": "서버 채점으로 확정됐어요",
+    "retry": "다시 시도",
+    "sectionComplete": "섹션 완료!",
+    "next": "다음으로",
+    "retryAgain": "다시하기",
+    "bookmark": "책갈피",
+    "removeBookmark": "책갈피 해제"
+  },
+  "section": {
+    "backToCourse": "← {title}로",
+    "fallbackCourse": "코스",
+    "loading": "불러오는 중..."
+  },
+  "complete": {
+    "backToCourse": "← 코스로",
+    "sectionComplete": "섹션 완료!",
+    "nextSection": "다음 섹션: {title} →",
+    "courseComplete": "코스 완료! 돌아가기",
+    "reviewSection": "이 섹션 다시 보기"
+  },
+  "categories": {
+    "foundations": "기초",
+    "warmup": "워밍업",
+    "messiah": "예언",
+    "ot": "구약",
+    "nt": "신약",
+    "topic": "주제별"
+  },
+  "meta": {
+    "landingTitle": "PIX BIBLE — 성경 암기 앱",
+    "landingDesc": "성경 암기 앱 PIX BIBLE. KJV 킹제임스 성경 66권을 절 단위로 암기하세요. 타일 배치·직접 입력으로 말씀을 마음에 새기는 레트로 픽셀 성경 암송 앱.",
+    "landingOgDesc": "KJV 킹제임스 성경 66권을 절 단위로 암기. 주제별·권별 성경 암송 코스 제공.",
+    "coursesTitle": "성경 암송 코스",
+    "coursesDesc": "KJV 성경 66권을 주제별·카테고리별로 암송하는 코스 목록. 기초, 워밍업, 구약, 신약, 주제별 코스 제공.",
+    "coursesOgTitle": "성경 암송 코스 | PIX BIBLE",
+    "coursesOgDesc": "KJV 성경 66권을 주제별·카테고리별로 암송하는 코스 목록.",
+    "courseDetailDesc": "{title} — KJV 성경 {count}구절 암송 코스. 절별로 암기하며 말씀을 마음에 새기세요.",
+    "courseDetailOgTitle": "{title} | PIX BIBLE",
+    "courseDetailOgDesc": "KJV 성경 {count}구절 암송 코스.",
+    "courseDetailFallback": "코스 상세",
+    "categoryTitle": "{label} 코스",
+    "categoryDesc": "KJV 성경 {label} 카테고리 암송 코스 목록."
+  }
+}

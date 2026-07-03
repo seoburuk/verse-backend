@@ -12,7 +12,7 @@ import (
 )
 
 const getCourseBySlug = `-- name: GetCourseBySlug :one
-SELECT id, slug, title, theme, ord, hidden, category FROM courses WHERE slug = $1
+SELECT id, slug, title, theme, ord, hidden, category, title_en FROM courses WHERE slug = $1
 `
 
 func (q *Queries) GetCourseBySlug(ctx context.Context, slug string) (Course, error) {
@@ -26,6 +26,7 @@ func (q *Queries) GetCourseBySlug(ctx context.Context, slug string) (Course, err
 		&i.Ord,
 		&i.Hidden,
 		&i.Category,
+		&i.TitleEn,
 	)
 	return i, err
 }
@@ -65,23 +66,32 @@ func (q *Queries) GetCourseItemVerse(ctx context.Context, id int64) (GetCourseIt
 }
 
 const getSectionByID = `-- name: GetSectionByID :one
-SELECT id, course_id, title, ord FROM course_sections WHERE id = $1
+SELECT id, course_id, title, title_en, ord FROM course_sections WHERE id = $1
 `
 
-func (q *Queries) GetSectionByID(ctx context.Context, id int64) (CourseSection, error) {
+type GetSectionByIDRow struct {
+	ID       int64       `json:"id"`
+	CourseID int64       `json:"course_id"`
+	Title    string      `json:"title"`
+	TitleEn  pgtype.Text `json:"title_en"`
+	Ord      int32       `json:"ord"`
+}
+
+func (q *Queries) GetSectionByID(ctx context.Context, id int64) (GetSectionByIDRow, error) {
 	row := q.db.QueryRow(ctx, getSectionByID, id)
-	var i CourseSection
+	var i GetSectionByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.CourseID,
 		&i.Title,
+		&i.TitleEn,
 		&i.Ord,
 	)
 	return i, err
 }
 
 const listCourseItems = `-- name: ListCourseItems :many
-SELECT id, course_id, verse_id, ord, topic, section_id FROM course_items WHERE course_id = $1 ORDER BY ord
+SELECT id, course_id, verse_id, ord, topic, section_id, topic_en FROM course_items WHERE course_id = $1 ORDER BY ord
 `
 
 func (q *Queries) ListCourseItems(ctx context.Context, courseID int64) ([]CourseItem, error) {
@@ -100,6 +110,7 @@ func (q *Queries) ListCourseItems(ctx context.Context, courseID int64) ([]Course
 			&i.Ord,
 			&i.Topic,
 			&i.SectionID,
+			&i.TopicEn,
 		); err != nil {
 			return nil, err
 		}
@@ -116,6 +127,7 @@ SELECT
   ci.id        AS course_item_id,
   ci.ord,
   ci.topic,
+  ci.topic_en,
   bv.book,
   bv.chapter,
   bv.verse,
@@ -130,6 +142,7 @@ type ListCourseItemsWithVerseRow struct {
 	CourseItemID int64       `json:"course_item_id"`
 	Ord          int32       `json:"ord"`
 	Topic        pgtype.Text `json:"topic"`
+	TopicEn      pgtype.Text `json:"topic_en"`
 	Book         int16       `json:"book"`
 	Chapter      int16       `json:"chapter"`
 	Verse        int16       `json:"verse"`
@@ -150,6 +163,7 @@ func (q *Queries) ListCourseItemsWithVerse(ctx context.Context, courseID int64) 
 			&i.CourseItemID,
 			&i.Ord,
 			&i.Topic,
+			&i.TopicEn,
 			&i.Book,
 			&i.Chapter,
 			&i.Verse,
@@ -166,7 +180,7 @@ func (q *Queries) ListCourseItemsWithVerse(ctx context.Context, courseID int64) 
 }
 
 const listCourses = `-- name: ListCourses :many
-SELECT id, slug, title, theme, ord, hidden, category FROM courses WHERE NOT hidden ORDER BY ord
+SELECT id, slug, title, theme, ord, hidden, category, title_en FROM courses WHERE NOT hidden ORDER BY ord
 `
 
 func (q *Queries) ListCourses(ctx context.Context) ([]Course, error) {
@@ -186,6 +200,7 @@ func (q *Queries) ListCourses(ctx context.Context) ([]Course, error) {
 			&i.Ord,
 			&i.Hidden,
 			&i.Category,
+			&i.TitleEn,
 		); err != nil {
 			return nil, err
 		}
@@ -202,6 +217,7 @@ SELECT
   ci.id AS course_item_id,
   ci.ord,
   ci.topic,
+  ci.topic_en,
   bv.book,
   bv.chapter,
   bv.verse,
@@ -216,6 +232,7 @@ type ListItemsBySectionRow struct {
 	CourseItemID int64       `json:"course_item_id"`
 	Ord          int32       `json:"ord"`
 	Topic        pgtype.Text `json:"topic"`
+	TopicEn      pgtype.Text `json:"topic_en"`
 	Book         int16       `json:"book"`
 	Chapter      int16       `json:"chapter"`
 	Verse        int16       `json:"verse"`
@@ -236,6 +253,7 @@ func (q *Queries) ListItemsBySection(ctx context.Context, sectionID pgtype.Int8)
 			&i.CourseItemID,
 			&i.Ord,
 			&i.Topic,
+			&i.TopicEn,
 			&i.Book,
 			&i.Chapter,
 			&i.Verse,
@@ -252,22 +270,31 @@ func (q *Queries) ListItemsBySection(ctx context.Context, sectionID pgtype.Int8)
 }
 
 const listSectionsByCourse = `-- name: ListSectionsByCourse :many
-SELECT id, course_id, title, ord FROM course_sections WHERE course_id = $1 ORDER BY ord
+SELECT id, course_id, title, title_en, ord FROM course_sections WHERE course_id = $1 ORDER BY ord
 `
 
-func (q *Queries) ListSectionsByCourse(ctx context.Context, courseID int64) ([]CourseSection, error) {
+type ListSectionsByCourseRow struct {
+	ID       int64       `json:"id"`
+	CourseID int64       `json:"course_id"`
+	Title    string      `json:"title"`
+	TitleEn  pgtype.Text `json:"title_en"`
+	Ord      int32       `json:"ord"`
+}
+
+func (q *Queries) ListSectionsByCourse(ctx context.Context, courseID int64) ([]ListSectionsByCourseRow, error) {
 	rows, err := q.db.Query(ctx, listSectionsByCourse, courseID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []CourseSection
+	var items []ListSectionsByCourseRow
 	for rows.Next() {
-		var i CourseSection
+		var i ListSectionsByCourseRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.CourseID,
 			&i.Title,
+			&i.TitleEn,
 			&i.Ord,
 		); err != nil {
 			return nil, err

@@ -1,65 +1,109 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { ThemeProvider } from "next-themes";
-import { AuthProvider } from "../lib/store/AuthContext";
-import "./globals.css";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, setRequestLocale } from "next-intl/server";
+import { AuthProvider } from "@/lib/store/AuthContext";
+import { routing, type Locale } from "@/i18n/routing";
+import "../globals.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://pixbible.example";
 
-const SITE_DESC = "성경 암기 앱 PIX BIBLE — 킹제임스 성경(KJV) 66권을 절 단위로 암기하세요. 주제별·권별 성경 암송 코스 제공.";
-
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: "PIX BIBLE — 성경 암기 앱",
+const SITE_META: Record<Locale, { title: string; template: string; desc: string; ogLocale: string }> = {
+  ko: {
+    title: "PIX BIBLE — 성경 암기 앱",
     template: "%s | PIX BIBLE 성경 암기",
+    desc: "성경 암기 앱 PIX BIBLE — 킹제임스 성경(KJV) 66권을 절 단위로 암기하세요. 주제별·권별 성경 암송 코스 제공.",
+    ogLocale: "ko_KR",
   },
-  description: SITE_DESC,
-  openGraph: {
-    siteName: "PIX BIBLE",
-    locale: "ko_KR",
-    type: "website",
-  },
-  // 소유 확인 값은 Google Search Console / 네이버 서치어드바이저 등록 후 채울 것
-  verification: {
-    google: "REPLACE_WITH_GOOGLE_VERIFICATION",
-    other: { "naver-site-verification": "REPLACE_WITH_NAVER_VERIFICATION" },
+  en: {
+    title: "PIX BIBLE — Memorize the Bible",
+    template: "%s | PIX BIBLE",
+    desc: "PIX BIBLE is a retro-pixel Bible memory app. Memorize the King James Version (KJV) verse by verse with tile-ordering and typing drills. Topic and book courses included.",
+    ogLocale: "en_US",
   },
 };
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebSite",
-      "@id": `${SITE_URL}/#website`,
-      url: SITE_URL,
-      name: "PIX BIBLE",
-      description: SITE_DESC,
-      inLanguage: "ko",
-    },
-    {
-      "@type": "WebApplication",
-      "@id": `${SITE_URL}/#app`,
-      name: "PIX BIBLE",
-      url: SITE_URL,
-      applicationCategory: "EducationalApplication",
-      operatingSystem: "All",
-      inLanguage: "ko",
-      description: SITE_DESC,
-    },
-  ],
-};
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export async function generateMetadata({
+  params: { locale },
+}: {
+  params: { locale: Locale };
+}): Promise<Metadata> {
+  const meta = SITE_META[locale] ?? SITE_META.ko;
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: { default: meta.title, template: meta.template },
+    description: meta.desc,
+    alternates: {
+      canonical: locale === "ko" ? "/" : "/en",
+      languages: { ko: "/", en: "/en" },
+    },
+    openGraph: {
+      siteName: "PIX BIBLE",
+      locale: meta.ogLocale,
+      type: "website",
+    },
+    // 소유 확인 값은 Google Search Console / 네이버 서치어드바이저 등록 후 채울 것
+    verification: {
+      google: "REPLACE_WITH_GOOGLE_VERIFICATION",
+      other: { "naver-site-verification": "REPLACE_WITH_NAVER_VERIFICATION" },
+    },
+  };
+}
+
+export default async function LocaleLayout({
+  children,
+  params: { locale },
+}: {
+  children: React.ReactNode;
+  params: { locale: string };
+}) {
+  if (!routing.locales.includes(locale as Locale)) {
+    notFound();
+  }
+  setRequestLocale(locale);
+  const messages = await getMessages();
+  const meta = SITE_META[locale as Locale];
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${SITE_URL}/#website`,
+        url: SITE_URL,
+        name: "PIX BIBLE",
+        description: meta.desc,
+        inLanguage: locale,
+      },
+      {
+        "@type": "WebApplication",
+        "@id": `${SITE_URL}/#app`,
+        name: "PIX BIBLE",
+        url: SITE_URL,
+        applicationCategory: "EducationalApplication",
+        operatingSystem: "All",
+        inLanguage: locale,
+        description: meta.desc,
+      },
+    ],
+  };
+
   return (
-    <html lang="ko" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem={false}>
-          <AuthProvider>{children}</AuthProvider>
+          <NextIntlClientProvider messages={messages}>
+            <AuthProvider>{children}</AuthProvider>
+          </NextIntlClientProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -5,6 +5,7 @@ type CourseResponse struct {
 	ID       int64  `json:"id"`
 	Slug     string `json:"slug"`
 	Title    string `json:"title"`
+	TitleEn  string `json:"title_en,omitempty"`
 	Theme    string `json:"theme"`
 	Ord      int    `json:"ord"`
 	Category string `json:"category"`
@@ -14,6 +15,7 @@ type CourseItemResponse struct {
 	CourseItemID int64  `json:"course_item_id"`
 	Ord          int    `json:"ord"`
 	Topic        string `json:"topic"`
+	TopicEn      string `json:"topic_en,omitempty"`
 	Book         int16  `json:"book"`
 	Chapter      int16  `json:"chapter"`
 	Verse        int16  `json:"verse"`
@@ -23,6 +25,7 @@ type CourseItemResponse struct {
 type SectionDetailResponse struct {
 	SectionID int64                `json:"section_id"`
 	Title     string               `json:"title"`
+	TitleEn   string               `json:"title_en,omitempty"`
 	Ord       int                  `json:"ord"`
 	Items     []CourseItemResponse `json:"items"`
 }
@@ -30,6 +33,7 @@ type SectionDetailResponse struct {
 type CourseSectionResponse struct {
 	SectionID int64                `json:"section_id"`
 	Title     string               `json:"title"`
+	TitleEn   string               `json:"title_en,omitempty"`
 	Ord       int                  `json:"ord"`
 	Items     []CourseItemResponse `json:"items"`
 }

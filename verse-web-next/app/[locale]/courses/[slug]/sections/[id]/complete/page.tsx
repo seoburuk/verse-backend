@@ -1,13 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
-import { getCourse, getSection, type SectionDetail, type CourseDetail } from "../../../../../../lib/api/courses";
+import { useTranslations, useLocale } from "next-intl";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
+import { getCourse, getSection, pickLocalized, type SectionDetail, type CourseDetail } from "@/lib/api/courses";
 
 export default function SectionCompletePage() {
   const params = useParams<{ slug: string; id: string }>();
   const { slug, id: sectionId } = params;
   const router = useRouter();
+  const t = useTranslations("complete");
+  const locale = useLocale();
 
   const [section, setSection] = useState<SectionDetail | null>(null);
   const [course, setCourse] = useState<CourseDetail | null>(null);
@@ -25,7 +29,7 @@ export default function SectionCompletePage() {
       .finally(() => setLoading(false));
   }, [sectionId, slug]);
 
-  if (loading) return <div className="page"><p className="muted">불러오는 중...</p></div>;
+  if (loading) return <div className="page"><p className="muted">{t("loading")}</p></div>;
   if (!section || !course) return null;
 
   const sections = course.sections ?? [];
@@ -37,7 +41,7 @@ export default function SectionCompletePage() {
   return (
     <div className="page">
       <header className="page-header">
-        <button className="btn-link" onClick={() => router.push(`/courses/${slug}`)}>← 코스로</button>
+        <button className="btn-link" onClick={() => router.push(`/courses/${slug}`)}>{t("backToCourse")}</button>
       </header>
 
       <main className="complete-main">
@@ -54,8 +58,8 @@ export default function SectionCompletePage() {
             />
           ))}
           <div className="complete-icon">★</div>
-          <h1 className="complete-title">섹션 완료!</h1>
-          <p className="complete-section-name">{section.title}</p>
+          <h1 className="complete-title">{t("sectionComplete")}</h1>
+          <p className="complete-section-name">{pickLocalized(section.title, section.title_en, locale)}</p>
         </div>
 
         <div className="complete-actions">
@@ -64,15 +68,15 @@ export default function SectionCompletePage() {
               className="btn-primary"
               onClick={() => router.push(`/courses/${slug}/sections/${nextSection.section_id}`)}
             >
-              다음 섹션: {nextSection.title} →
+              {t("nextSection", { title: pickLocalized(nextSection.title, nextSection.title_en, locale) })}
             </button>
           ) : (
             <button className="btn-primary" onClick={() => router.push(`/courses/${slug}`)}>
-              코스 완료! 돌아가기
+              {t("courseComplete")}
             </button>
           )}
           <button className="btn-secondary" onClick={() => router.push(`/courses/${slug}/sections/${sectionId}`)}>
-            이 섹션 다시 보기
+            {t("reviewSection")}
           </button>
         </div>
       </main>
