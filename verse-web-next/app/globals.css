@@ -63,6 +63,13 @@ body {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-wrap: wrap;
+  row-gap: 0.4rem;
+  justify-content: flex-end;
+}
+
+.header-right > * {
+  white-space: nowrap;
 }
 
 .content {
@@ -323,7 +330,9 @@ body {
   border: 1px solid var(--border);
   border-radius: 4px;
   padding: 1.25rem;
-  flex: 1;
+  flex: 0 1 auto;
+  max-height: 40vh;
+  overflow-y: auto;
 }
 
 .mode-toggle {
@@ -880,3 +889,42 @@ body {
 }
 
 .landing-feature-title { font-size: 1.1rem; font-weight: bold; }
+
+/* ── 모바일 최적화 ──────────────────────────────── */
+@media (max-width: 480px) {
+  .title { font-size: 1.15rem; white-space: nowrap; }
+
+  .page-header {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+  }
+
+  .header-right {
+    gap: 0.5rem;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .header-right .btn-link {
+    font-size: 0.8rem;
+  }
+
+  .header-right .streak-badge,
+  .header-right .lives-badge {
+    font-size: 0.8rem;
+  }
+
+  .header-right .user-name {
+    display: none;
+  }
+
+  .complete-actions,
+  .result-actions {
+    flex-direction: column;
+  }
+
+  .complete-actions > button,
+  .result-actions > button {
+    width: 100%;
+  }
+}

@@ -52,7 +52,7 @@ export default function LoginPage() {
   return (
     <div className="page-center">
       <div className="card">
-        <h1 className="title">Pixel KJV</h1>
+        <h1 className="title">PIX BIBLE</h1>
         <p className="subtitle">KJV 성경 암송</p>
         <form onSubmit={handleSubmit} className="form">
           <input
