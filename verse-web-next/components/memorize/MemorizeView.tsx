@@ -1,21 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl";
+import { useRouter } from "@/i18n/routing";
 import { useMemorize } from "./useMemorize";
 import { DragTiles } from "./DragTiles";
 import { TypeScaffold } from "./TypeScaffold";
 import { recordGrade, clearGrades } from "../../lib/sessionGrades";
 import { getFavorites, addFavorite, removeFavorite } from "../../lib/api/favorites";
 import { getLives } from "../../lib/api/lives";
-import type { CourseItem } from "../../lib/api/courses";
-
-const gradeLabel: Record<string, string> = {
-  green: "🟢 완벽해요!",
-  yellow: "🟡 조금 더!",
-  red: "🔴 다시 해보세요",
-  none: "",
-};
+import { pickLocalized, type CourseItem } from "../../lib/api/courses";
+import { PixelIcon } from "../PixelIcon";
 
 const confettiColors = ["var(--green)", "var(--yellow)", "var(--pink)", "var(--pink-soft)"];
 
@@ -45,6 +40,10 @@ export function MemorizeView({ items, index, sectionId, backHref, doneHref, buil
 
 function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildItemHref }: Props) {
   const router = useRouter();
+  const t = useTranslations("memorize");
+  const locale = useLocale();
+  const gradeText = (g: string | null) =>
+    g === "green" ? t("gradeGreen") : g === "yellow" ? t("gradeYellow") : g === "red" ? t("gradeRed") : "";
   const item = items[index];
   const isLast = index >= items.length - 1;
   const {
@@ -80,16 +79,20 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
     return (
       <div className="page">
         <header className="page-header">
-          <button className="btn-link" onClick={() => router.push(backHref)}>← 뒤로</button>
-          <span className="lives-badge">❤️ 0</span>
+          <button className="btn-link" onClick={() => router.push(backHref)}>{t("back")}</button>
+          <span className="lives-badge">
+            <PixelIcon name="heart" /> 0
+          </span>
         </header>
         <main className="page-center">
           <div className="card out-of-lives">
-            <div className="out-of-lives-icon">💔</div>
-            <h2 className="title">목숨이 없어요</h2>
-            <p className="muted">잠시 후 목숨이 채워지면 다시 도전하세요</p>
+            <div className="out-of-lives-icon">
+              <PixelIcon name="heart" size={40} />
+            </div>
+            <h2 className="title">{t("outOfLivesTitle")}</h2>
+            <p className="muted">{t("outOfLivesDesc")}</p>
             <button className="btn-primary" onClick={() => router.push(backHref)}>
-              뒤로 가기
+              {t("goBack")}
             </button>
           </div>
         </main>
@@ -100,13 +103,17 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
   return (
     <div className="page">
       <header className="page-header">
-        <button className="btn-link" onClick={() => router.push(backHref)}>← 뒤로</button>
-        <span className="item-ref">{item.topic}</span>
+        <button className="btn-link" onClick={() => router.push(backHref)}>{t("back")}</button>
+        <span className="item-ref">{pickLocalized(item.topic, item.topic_en, locale)}</span>
         <div className="header-right">
-          {lives !== null && <span className="lives-badge">❤️ {lives}</span>}
+          {lives !== null && (
+            <span className="lives-badge">
+              <PixelIcon name="heart" /> {lives}
+            </span>
+          )}
           <button
             className="fav-btn"
-            aria-label={favorited ? "책갈피 해제" : "책갈피"}
+            aria-label={favorited ? t("removeBookmark") : t("bookmark")}
             onClick={toggleFavorite}
           >
             {favorited ? "★" : "☆"}
@@ -125,17 +132,17 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
                 className={mode === "drag" ? "mode-btn mode-active" : "mode-btn"}
                 onClick={() => setMode("drag")}
               >
-                타일 탭
+                {t("modeDrag")}
               </button>
               <button
                 className={mode === "type" ? "mode-btn mode-active" : "mode-btn"}
                 onClick={() => setMode("type")}
               >
-                타이핑
+                {t("modeType")}
               </button>
             </div>
             <button className="btn-primary" onClick={startRecall}>
-              암송 시작
+              {t("startRecall")}
             </button>
           </div>
         )}
@@ -145,7 +152,7 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
             {mode === "drag" ? (
               <>
                 <div className="verse-box verse-hidden">
-                  <p className="muted">절을 기억해서 아래에 배치하세요</p>
+                  <p className="muted">{t("dragHint")}</p>
                 </div>
                 <DragTiles
                   placed={placed}
@@ -173,7 +180,7 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
                         if (!submitting && typed.trim() !== "") submit();
                       }
                     }}
-                    placeholder="절을 입력하세요"
+                    placeholder={t("typePlaceholder")}
                     rows={4}
                     autoFocus
                   />
@@ -188,7 +195,7 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
                 (mode === "drag" ? placed.length === 0 : typed.trim() === "")
               }
             >
-              {submitting ? "제출 중..." : "제출"}
+              {submitting ? t("submitting") : t("submit")}
             </button>
           </div>
         )}
@@ -208,12 +215,14 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
                     }}
                   />
                 ))}
-                <div className="complete-icon">★</div>
-                <h1 className="complete-title">{isLast ? "완료!" : "완벽해요!"}</h1>
+                <div className="complete-icon">
+                  <PixelIcon name="star" size={48} />
+                </div>
+                <h1 className="complete-title">{isLast ? t("complete") : t("perfect")}</h1>
               </div>
             ) : (
               <div className={`result-badge grade-${serverGrade}`}>
-                {gradeLabel[serverGrade ?? "none"]}
+                {gradeText(serverGrade)}
               </div>
             )}
             {mismatch && (
