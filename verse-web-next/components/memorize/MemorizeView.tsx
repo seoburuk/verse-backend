@@ -159,6 +159,7 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
                   pool={tiles}
                   liveGrade={liveGrade}
                   onTap={tapTile}
+                  placeholder={t("tilePlaceholder")}
                 />
               </>
             ) : (
@@ -237,7 +238,7 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
               {serverGrade === "green" ? (
                 <>
                   <button className="btn-secondary" onClick={reset}>
-                    다시 시도
+                    {t("retry")}
                   </button>
                   <button
                     className="btn-primary"
@@ -250,12 +251,12 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
                       }
                     }}
                   >
-                    {isLast ? "섹션 완료!" : "다음으로"}
+                    {isLast ? t("sectionComplete") : t("next")}
                   </button>
                 </>
               ) : (
                 <button className="btn-primary" onClick={() => { clearGrades(sectionId); reset(); }}>
-                  다시하기
+                  {t("retryAll")}
                 </button>
               )}
             </div>

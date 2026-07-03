@@ -25,16 +25,18 @@ func (h *Handler) GetMyFavorites(w http.ResponseWriter, r *http.Request) {
 	out := make([]dto.FavoriteItemDTO, len(items))
 	for i, it := range items {
 		out[i] = dto.FavoriteItemDTO{
-			CourseItemID: it.CourseItemID,
-			Topic:        it.Topic,
-			CourseSlug:   it.CourseSlug,
-			CourseTitle:  it.CourseTitle,
-			SectionID:    it.SectionID,
-			SectionTitle: it.SectionTitle,
-			Book:         it.Book,
-			Chapter:      it.Chapter,
-			Verse:        it.Verse,
-			Text:         it.Text,
+			CourseItemID:   it.CourseItemID,
+			Topic:          it.Topic,
+			CourseSlug:     it.CourseSlug,
+			CourseTitle:    it.CourseTitle,
+			CourseTitleEn:  it.CourseTitleEn,
+			SectionID:      it.SectionID,
+			SectionTitle:   it.SectionTitle,
+			SectionTitleEn: it.SectionTitleEn,
+			Book:           it.Book,
+			Chapter:        it.Chapter,
+			Verse:          it.Verse,
+			Text:           it.Text,
 		}
 	}
 	writeJSON(w, http.StatusOK, dto.FavoritesResponse{Items: out})

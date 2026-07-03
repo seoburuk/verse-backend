@@ -33,8 +33,10 @@ SELECT
   ci.topic,
   co.slug        AS course_slug,
   co.title       AS course_title,
+  co.title_en    AS course_title_en,
   cs.id          AS section_id,
   cs.title       AS section_title,
+  cs.title_en    AS section_title_en,
   bv.book,
   bv.chapter,
   bv.verse,
@@ -50,17 +52,19 @@ ORDER BY f.created_at DESC
 `
 
 type ListFavoriteItemsRow struct {
-	CourseItemID int64              `json:"course_item_id"`
-	Topic        pgtype.Text        `json:"topic"`
-	CourseSlug   string             `json:"course_slug"`
-	CourseTitle  string             `json:"course_title"`
-	SectionID    pgtype.Int8        `json:"section_id"`
-	SectionTitle pgtype.Text        `json:"section_title"`
-	Book         int16              `json:"book"`
-	Chapter      int16              `json:"chapter"`
-	Verse        int16              `json:"verse"`
-	Text         string             `json:"text"`
-	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	CourseItemID   int64              `json:"course_item_id"`
+	Topic          pgtype.Text        `json:"topic"`
+	CourseSlug     string             `json:"course_slug"`
+	CourseTitle    string             `json:"course_title"`
+	CourseTitleEn  pgtype.Text        `json:"course_title_en"`
+	SectionID      pgtype.Int8        `json:"section_id"`
+	SectionTitle   pgtype.Text        `json:"section_title"`
+	SectionTitleEn pgtype.Text        `json:"section_title_en"`
+	Book           int16              `json:"book"`
+	Chapter        int16              `json:"chapter"`
+	Verse          int16              `json:"verse"`
+	Text           string             `json:"text"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) ListFavoriteItems(ctx context.Context, userID int64) ([]ListFavoriteItemsRow, error) {
@@ -77,8 +81,10 @@ func (q *Queries) ListFavoriteItems(ctx context.Context, userID int64) ([]ListFa
 			&i.Topic,
 			&i.CourseSlug,
 			&i.CourseTitle,
+			&i.CourseTitleEn,
 			&i.SectionID,
 			&i.SectionTitle,
+			&i.SectionTitleEn,
 			&i.Book,
 			&i.Chapter,
 			&i.Verse,
