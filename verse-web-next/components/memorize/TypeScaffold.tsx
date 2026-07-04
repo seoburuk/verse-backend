@@ -1,4 +1,5 @@
 import type { TypeHintWord, HitFx } from "./useMemorize";
+import { PixelBurst } from "./PixelBurst";
 
 interface Props {
   reveal: TypeHintWord[];
@@ -29,6 +30,7 @@ export function TypeScaffold({ reveal, fx }: Props) {
                 {filled || j === 0 ? ch : ""}
               </i>
             ))}
+            {isHit && <PixelBurst seq={fx.seq} />}
           </span>
         );
       })}

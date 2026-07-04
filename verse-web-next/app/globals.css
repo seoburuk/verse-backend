@@ -474,6 +474,7 @@ body {
 /* 점선 픽셀 밑줄 위에 단어 블록이 올라감 */
 .placed-area {
   --line: var(--text);
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
@@ -514,6 +515,7 @@ body {
 }
 
 .hint-word {
+  position: relative;
   display: inline-flex;
   gap: 3px;
 }
@@ -568,6 +570,57 @@ body {
 .type-input.fx-hit-b { animation: input-pulse-b 0.25s steps(3); }
 .type-input.fx-miss-a { animation: input-shake-a 0.2s steps(4); }
 .type-input.fx-miss-b { animation: input-shake-b 0.2s steps(4); }
+
+/* 드래그 모드 오답 배치 시 답안열 흔들림 (textarea shake 재사용) */
+.placed-area.fx-miss-a { animation: input-shake-a 0.2s steps(4); }
+.placed-area.fx-miss-b { animation: input-shake-b 0.2s steps(4); }
+
+/* 드래그 모드 정답 타일 팝 — word-pop/char-flash 재사용 */
+.tile-hit {
+  position: relative;
+  animation: word-pop 0.18s steps(3);
+}
+
+.tile-hit::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  animation: char-flash 0.18s steps(2);
+  pointer-events: none;
+}
+
+/* ── 픽셀 파티클 버스트 ──────────────────────────── */
+.pixel-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.pixel-burst-particle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin: -2px;
+  animation: burst-fly 0.35s steps(6) forwards;
+}
+
+@keyframes burst-fly {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(0.4); opacity: 0; }
+}
+
+/* 5콤보 배수 마일스톤 — 확대 팝 + 플래시 */
+.combo-badge.milestone {
+  animation: combo-milestone-pop 0.3s steps(4);
+}
+
+@keyframes combo-milestone-pop {
+  0% { transform: scale(1.6); box-shadow: 3px 3px 0 var(--yellow); }
+  100% { transform: scale(1); box-shadow: 2px 2px 0 var(--text); }
+}
 
 @keyframes input-pulse-a {
   0% { box-shadow: 4px 4px 0 var(--pink); border-color: var(--pink); }
@@ -625,8 +678,9 @@ body {
 }
 
 .tile-placed {
-  background: #252525;
-  border-color: #555;
+  position: relative;
+  background: var(--surface);
+  border-color: var(--border);
 }
 
 .tile-placed:hover { border-color: var(--red); }

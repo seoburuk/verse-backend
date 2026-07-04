@@ -39,3 +39,11 @@ export function playHit(combo: number) {
 export function playMiss() {
   blip("sawtooth", 110, 0.1, 0.2);
 }
+
+// 콤보 마일스톤(5의 배수) 알림음 — 상승 아르페지오 3음
+export function playMilestone() {
+  const notes = [440, 554.37, 659.25]; // A4, C#5, E5
+  notes.forEach((freq, i) => {
+    setTimeout(() => blip("square", freq, 0.08, 0.22), i * 60);
+  });
+}

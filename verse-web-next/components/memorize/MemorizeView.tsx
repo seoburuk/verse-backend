@@ -158,6 +158,8 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
                   placed={placed}
                   pool={tiles}
                   liveGrade={liveGrade}
+                  combo={combo}
+                  fx={fx}
                   onTap={tapTile}
                   placeholder={t("tilePlaceholder")}
                 />
@@ -168,7 +170,14 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
                   <TypeScaffold reveal={typeReveal} fx={fx} />
                 </div>
                 <div className="type-input-wrap">
-                  {combo >= 5 && <span className="combo-badge">x{combo}</span>}
+                  {combo >= 5 && (
+                    <span
+                      key={fx?.kind === "hit" && combo % 5 === 0 ? `combo-${combo}` : "combo"}
+                      className={fx?.kind === "hit" && combo % 5 === 0 ? "combo-badge milestone" : "combo-badge"}
+                    >
+                      x{combo}
+                    </span>
+                  )}
                   <textarea
                     className={`type-input grade-border-${liveGrade}${
                       fx ? ` fx-${fx.kind}-${fx.seq % 2 ? "a" : "b"}` : ""

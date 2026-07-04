@@ -5,7 +5,8 @@ import { normalize, tokenizeDisplay } from "../../lib/grading/normalize";
 import { gradeRecall, type Grade } from "../../lib/grading/grade";
 import { submitAttempt } from "../../lib/api/attempts";
 import { ApiError } from "../../lib/api/client";
-import { playHit, playMiss } from "../../lib/fx/sound";
+import { playHit, playMiss, playMilestone } from "../../lib/fx/sound";
+import { vibrateHit, vibrateMiss, vibrateMilestone } from "../../lib/fx/haptics";
 import { getStoredMode, setStoredMode } from "../../lib/recallMode";
 
 export type RecallMode = "drag" | "type";
@@ -102,11 +103,19 @@ export function useMemorize(
     setFx({ seq: fxSeqRef.current, index, kind });
     if (kind === "hit") {
       setCombo((c) => {
-        playHit(c + 1);
-        return c + 1;
+        const next = c + 1;
+        if (next > 0 && next % 5 === 0) {
+          playMilestone();
+          vibrateMilestone();
+        } else {
+          playHit(next);
+          vibrateHit();
+        }
+        return next;
       });
     } else {
       playMiss();
+      vibrateMiss();
       setCombo(0);
     }
   }, []);
