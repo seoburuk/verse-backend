@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Script from "next/script";
 import { ThemeProvider } from "next-themes";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { AuthProvider } from "@/lib/store/AuthContext";
+import { Footer } from "@/components/Footer";
 import { routing, type Locale } from "@/i18n/routing";
 import "../globals.css";
+
+const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://pixbible.example";
 
@@ -103,11 +107,20 @@ export default async function LocaleLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        {ADSENSE_CLIENT && (
+          <Script
+            async
+            strategy="afterInteractive"
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+            crossOrigin="anonymous"
+          />
+        )}
         <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem={false}>
           <NextIntlClientProvider messages={messages}>
             <AuthProvider>{children}</AuthProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
+        <Footer />
       </body>
     </html>
   );
