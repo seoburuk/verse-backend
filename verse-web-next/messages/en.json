@@ -124,6 +124,16 @@
     "nt": "New Testament",
     "topic": "By topic"
   },
+  "footer": {
+    "about": "About",
+    "terms": "Terms",
+    "privacy": "Privacy"
+  },
+  "legal": {
+    "aboutTitle": "About PIX BIBLE",
+    "termsTitle": "Terms of Service",
+    "privacyTitle": "Privacy Policy"
+  },
   "meta": {
     "landingTitle": "PIX BIBLE — Memorize the Bible",
     "landingDesc": "PIX BIBLE is a retro-pixel Bible memory app. Memorize the King James Version (KJV) verse by verse with tile-ordering and typing drills.",

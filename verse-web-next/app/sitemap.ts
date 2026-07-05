@@ -28,6 +28,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base: MetadataRoute.Sitemap = [
     ...entries("/", { changeFrequency: "monthly", priority: 1 }),
     ...entries("/courses", { changeFrequency: "weekly", priority: 0.9 }),
+    ...entries("/about", { changeFrequency: "yearly", priority: 0.3 }),
+    ...entries("/terms", { changeFrequency: "yearly", priority: 0.2 }),
+    ...entries("/privacy", { changeFrequency: "yearly", priority: 0.2 }),
   ];
 
   let courses: { slug: string; category: string }[] = [];

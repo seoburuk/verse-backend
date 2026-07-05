@@ -124,6 +124,16 @@
     "nt": "신약",
     "topic": "주제별"
   },
+  "footer": {
+    "about": "소개",
+    "terms": "이용약관",
+    "privacy": "개인정보처리방침"
+  },
+  "legal": {
+    "aboutTitle": "PIX BIBLE 소개",
+    "termsTitle": "이용약관",
+    "privacyTitle": "개인정보처리방침"
+  },
   "meta": {
     "landingTitle": "PIX BIBLE — 성경 암기 앱",
     "landingDesc": "성경 암기 앱 PIX BIBLE. KJV 킹제임스 성경 66권을 절 단위로 암기하세요. 타일 배치·직접 입력으로 말씀을 마음에 새기는 레트로 픽셀 성경 암송 앱.",
