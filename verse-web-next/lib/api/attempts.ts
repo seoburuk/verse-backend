@@ -3,7 +3,7 @@ import type { Grade } from "../grading/grade";
 
 export interface AttemptRequest {
   course_item_id: number;
-  mode: "drag" | "type";
+  mode: "drag" | "type" | "dictation";
   client_grade: Grade;
   tokens: string[];
 }

@@ -15,13 +15,17 @@ export default function SettingsPage() {
   const pathname = usePathname();
   const locale = useLocale();
   const t = useTranslations("settings");
-  const { user, logout } = useAuth();
+  const { user, logout, updateDisplayName } = useAuth();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [warmup, setWarmup] = useState<CourseDetail | null>(null);
   const [showReference, setShowReference] = useState<"warmup" | "messiah" | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState("");
+  const [savingName, setSavingName] = useState(false);
+  const [nameMsg, setNameMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -40,6 +44,31 @@ export default function SettingsPage() {
     setShowReference(key);
     if (key === "warmup" && !warmup) {
       getCourse("warmup").then(setWarmup).catch(() => {});
+    }
+  }
+
+  function startEditName() {
+    setNameInput(user?.display_name ?? "");
+    setNameMsg(null);
+    setEditingName(true);
+  }
+
+  async function handleSaveName() {
+    const name = nameInput.trim();
+    if (name === "" || name.length > 30) {
+      setNameMsg({ ok: false, text: t("nameInvalid") });
+      return;
+    }
+    setSavingName(true);
+    setNameMsg(null);
+    try {
+      await updateDisplayName(name);
+      setEditingName(false);
+      setNameMsg({ ok: true, text: t("nameUpdated") });
+    } catch {
+      setNameMsg({ ok: false, text: t("nameUpdateFailed") });
+    } finally {
+      setSavingName(false);
     }
   }
 
@@ -91,8 +120,32 @@ export default function SettingsPage() {
           <h2 className="section-title">{t("account")}</h2>
           <div className="settings-row">
             <span>{t("username")}</span>
-            <span className="muted">{user?.display_name}</span>
+            {editingName ? (
+              <div className="name-edit">
+                <input
+                  className="name-input"
+                  value={nameInput}
+                  onChange={(e) => setNameInput(e.target.value)}
+                  maxLength={30}
+                  autoFocus
+                />
+                <button className="btn-secondary" onClick={handleSaveName} disabled={savingName}>
+                  {savingName ? t("saving") : t("save")}
+                </button>
+                <button className="btn-link" onClick={() => setEditingName(false)} disabled={savingName}>
+                  {t("cancel")}
+                </button>
+              </div>
+            ) : (
+              <div className="name-edit">
+                <span className="muted">{user?.display_name}</span>
+                <button className="btn-link" onClick={startEditName}>{t("editName")}</button>
+              </div>
+            )}
           </div>
+          {nameMsg && (
+            <p className={nameMsg.ok ? "success-msg" : "error-msg"}>{nameMsg.text}</p>
+          )}
           <button className="btn-secondary" onClick={logout}>{t("logout")}</button>
           <button className="btn-danger" onClick={handleDeleteAccount} disabled={deleting}>
             {deleting ? t("deleting") : t("deleteAccount")}

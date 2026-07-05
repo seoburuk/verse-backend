@@ -24,10 +24,18 @@
   "nav": {
     "bookmarks": "Bookmarks",
     "dashboard": "Dashboard",
+    "rankings": "Rankings",
     "settings": "Settings",
     "logout": "Log out",
     "login": "Log in",
     "resume": "▶ Resume"
+  },
+  "rankings": {
+    "title": "Rankings",
+    "back": "← Back",
+    "loading": "Loading...",
+    "empty": "No one is on the leaderboard yet",
+    "myRank": "My rank"
   },
   "courses": {
     "verseCount": "{count} verses",
@@ -43,6 +51,13 @@
     "language": "Language",
     "account": "Account",
     "username": "Username",
+    "editName": "Edit",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "nameUpdated": "Name updated",
+    "nameInvalid": "Enter a name (1–30 characters)",
+    "nameUpdateFailed": "Failed to update name",
     "logout": "Log out",
     "deleteAccount": "Delete account",
     "deleting": "Deleting...",
@@ -87,6 +102,7 @@
     "goBack": "Go back",
     "modeDrag": "Tap tiles",
     "modeType": "Typing",
+    "modeDictation": "Dictation",
     "startRecall": "Start reciting",
     "dragHint": "Recall the verse and arrange it below",
     "tilePlaceholder": "Tap words to place them",
@@ -125,8 +141,8 @@
     "topic": "By topic"
   },
   "meta": {
-    "landingTitle": "PIX BIBLE — Memorize the Bible",
-    "landingDesc": "PIX BIBLE is a retro-pixel Bible memory app. Memorize the King James Version (KJV) verse by verse with tile-ordering and typing drills.",
+    "landingTitle": "PIX BIBLE — Memorize Scripture",
+    "landingDesc": "PIX BIBLE is a retro-pixel Bible memory app. Memorize Scripture from the King James Version (KJV) verse by verse with tile-ordering and typing drills.",
     "landingOgDesc": "Memorize the King James Version (KJV) verse by verse. Topic and book memory courses included.",
     "coursesTitle": "Bible memory courses",
     "coursesDesc": "Browse KJV Bible memory courses by topic and category — foundations, warm-up, Old Testament, New Testament, and topical courses.",

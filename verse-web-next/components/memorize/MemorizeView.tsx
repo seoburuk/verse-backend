@@ -8,7 +8,7 @@ import { DragTiles } from "./DragTiles";
 import { TypeScaffold } from "./TypeScaffold";
 import { recordGrade, clearGrades } from "../../lib/sessionGrades";
 import { getFavorites, addFavorite, removeFavorite } from "../../lib/api/favorites";
-import { getLives } from "../../lib/api/lives";
+import { getLives, consumeLife } from "../../lib/api/lives";
 import { pickLocalized, type CourseItem } from "../../lib/api/courses";
 import { PixelIcon } from "../PixelIcon";
 
@@ -65,10 +65,50 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
     req.catch(() => setFavorited(!next));
   }
 
+  // 타이핑·받아쓰기 공용 입력 블록. 콤보 배지 + 채점 테두리 + 타격 이펙트.
+  const typeInput = (
+    <div className="type-input-wrap">
+      {combo >= 5 && (
+        <span
+          key={fx?.kind === "hit" && combo % 5 === 0 ? `combo-${combo}` : "combo"}
+          className={fx?.kind === "hit" && combo % 5 === 0 ? "combo-badge milestone" : "combo-badge"}
+          data-tier={combo >= 15 ? 3 : combo >= 10 ? 2 : 1}
+        >
+          x{combo}
+        </span>
+      )}
+      <textarea
+        className={`type-input grade-border-${liveGrade}${
+          fx ? ` fx-${fx.kind}-${fx.seq % 2 ? "a" : "b"}` : ""
+        }`}
+        value={typed}
+        onChange={(e) => setTyped(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            if (!submitting && typed.trim() !== "") submit();
+          }
+        }}
+        placeholder={t("typePlaceholder")}
+        rows={4}
+        autoFocus
+      />
+    </div>
+  );
+
   const [lives, setLives] = useState<number | null>(null);
   useEffect(() => {
     getLives().then((l) => setLives(l.lives)).catch(() => {});
   }, []);
+
+  // 뒤로가기 — 암송(recall) 진행 중 이탈은 목숨 1을 소모한다(포기 페널티).
+  function handleBack() {
+    if (phase === "recall") {
+      setLives((prev) => (prev !== null ? Math.max(0, prev - 1) : prev));
+      consumeLife().catch(() => {});
+    }
+    router.push(backHref);
+  }
   useEffect(() => {
     if (phase === "result") {
       getLives().then((l) => setLives(l.lives)).catch(() => {});
@@ -103,7 +143,7 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
   return (
     <div className="page">
       <header className="page-header">
-        <button className="btn-link" onClick={() => router.push(backHref)}>{t("back")}</button>
+        <button className="btn-link" onClick={handleBack}>{t("back")}</button>
         <span className="item-ref">{pickLocalized(item.topic, item.topic_en, locale)}</span>
         <div className="header-right">
           {lives !== null && (
@@ -140,6 +180,12 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
               >
                 {t("modeType")}
               </button>
+              <button
+                className={mode === "dictation" ? "mode-btn mode-active" : "mode-btn"}
+                onClick={() => setMode("dictation")}
+              >
+                {t("modeDictation")}
+              </button>
             </div>
             <button className="btn-primary" onClick={startRecall}>
               {t("startRecall")}
@@ -164,37 +210,19 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
                   placeholder={t("tilePlaceholder")}
                 />
               </>
+            ) : mode === "dictation" ? (
+              <>
+                <div className="verse-box">
+                  <p className="verse-text">{item.text}</p>
+                </div>
+                {typeInput}
+              </>
             ) : (
               <>
                 <div className="verse-box">
                   <TypeScaffold reveal={typeReveal} fx={fx} />
                 </div>
-                <div className="type-input-wrap">
-                  {combo >= 5 && (
-                    <span
-                      key={fx?.kind === "hit" && combo % 5 === 0 ? `combo-${combo}` : "combo"}
-                      className={fx?.kind === "hit" && combo % 5 === 0 ? "combo-badge milestone" : "combo-badge"}
-                    >
-                      x{combo}
-                    </span>
-                  )}
-                  <textarea
-                    className={`type-input grade-border-${liveGrade}${
-                      fx ? ` fx-${fx.kind}-${fx.seq % 2 ? "a" : "b"}` : ""
-                    }`}
-                    value={typed}
-                    onChange={(e) => setTyped(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        if (!submitting && typed.trim() !== "") submit();
-                      }
-                    }}
-                    placeholder={t("typePlaceholder")}
-                    rows={4}
-                    autoFocus
-                  />
-                </div>
+                {typeInput}
               </>
             )}
             <button

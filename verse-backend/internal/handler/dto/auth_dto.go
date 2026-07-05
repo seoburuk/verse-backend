@@ -21,3 +21,11 @@ type TokenResponse struct {
 	UserID      int64  `json:"user_id"`
 	DisplayName string `json:"display_name"`
 }
+
+type UpdateProfileRequest struct {
+	DisplayName string `json:"display_name"`
+}
+
+type ProfileResponse struct {
+	DisplayName string `json:"display_name"`
+}

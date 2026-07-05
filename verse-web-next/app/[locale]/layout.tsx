@@ -9,17 +9,19 @@ import "../globals.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://pixbible.example";
 
-const SITE_META: Record<Locale, { title: string; template: string; desc: string; ogLocale: string }> = {
+const SITE_META: Record<Locale, { title: string; template: string; desc: string; keywords: string[]; ogLocale: string }> = {
   ko: {
     title: "PIX BIBLE — 성경 암기 앱",
     template: "%s | PIX BIBLE 성경 암기",
-    desc: "성경 암기 앱 PIX BIBLE — 킹제임스 성경(KJV) 66권을 절 단위로 암기하세요. 주제별·권별 성경 암송 코스 제공.",
+    desc: "성경 암기 앱 PIX BIBLE — 킹제임스 성경(KJV)으로 영어 성경 암기를 절 단위로 하세요. 주제별·권별 성경 암송 코스 제공.",
+    keywords: ["성경 암기", "영어 성경 암기", "성경 암송", "KJV 암기", "킹제임스 성경 암기"],
     ogLocale: "ko_KR",
   },
   en: {
-    title: "PIX BIBLE — Memorize the Bible",
+    title: "PIX BIBLE — Memorize Scripture",
     template: "%s | PIX BIBLE",
-    desc: "PIX BIBLE is a retro-pixel Bible memory app. Memorize the King James Version (KJV) verse by verse with tile-ordering and typing drills. Topic and book courses included.",
+    desc: "PIX BIBLE is a retro-pixel Bible memory app. Memorize Scripture from the King James Version (KJV) verse by verse with tile-ordering and typing drills. Topic and book courses included.",
+    keywords: ["Bible memory", "memorize Scripture", "Bible memorize", "KJV memorization", "Scripture memory app"],
     ogLocale: "en_US",
   },
 };
@@ -38,6 +40,7 @@ export async function generateMetadata({
     metadataBase: new URL(SITE_URL),
     title: { default: meta.title, template: meta.template },
     description: meta.desc,
+    keywords: meta.keywords,
     alternates: {
       canonical: locale === "ko" ? "/" : "/en",
       languages: { ko: "/", en: "/en" },

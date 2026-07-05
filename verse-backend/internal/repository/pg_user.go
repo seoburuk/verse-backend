@@ -43,6 +43,20 @@ func (r *pgUserRepo) GetUserByUsername(ctx context.Context, username string) (do
 	return toDomainUser(row), nil
 }
 
+func (r *pgUserRepo) UpdateDisplayName(ctx context.Context, userID int64, displayName string) (domain.User, error) {
+	row, err := r.q.UpdateDisplayName(ctx, db.UpdateDisplayNameParams{
+		ID:          userID,
+		DisplayName: displayName,
+	})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.User{}, domain.ErrNotFound
+		}
+		return domain.User{}, err
+	}
+	return toDomainUser(row), nil
+}
+
 // DeleteUser — 사용자 데이터 전체 삭제. FK에 CASCADE가 없어 자식 테이블을 먼저 지운다.
 func (r *pgUserRepo) DeleteUser(ctx context.Context, userID int64) error {
 	tx, err := r.pool.Begin(ctx)

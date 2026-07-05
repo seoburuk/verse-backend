@@ -9,7 +9,7 @@ import { playHit, playMiss, playMilestone } from "../../lib/fx/sound";
 import { vibrateHit, vibrateMiss, vibrateMilestone } from "../../lib/fx/haptics";
 import { getStoredMode, setStoredMode } from "../../lib/recallMode";
 
-export type RecallMode = "drag" | "type";
+export type RecallMode = "drag" | "type" | "dictation";
 
 // 타자 모드 밑줄 스캐폴드 한 단어. filled = 해당 위치를 정확히 입력함.
 export interface TypeHintWord {
@@ -138,7 +138,7 @@ export function useMemorize(
     const filledCount = typeReveal.filter((w) => w.filled).length;
     const prev = prevFilledRef.current;
     prevFilledRef.current = filledCount;
-    if (mode !== "type" || phase !== "recall") return;
+    if ((mode !== "type" && mode !== "dictation") || phase !== "recall") return;
     if (filledCount > prev) {
       let lastIdx = -1;
       typeReveal.forEach((w, i) => {

@@ -81,22 +81,26 @@ func (s *AttemptService) SubmitAttempt(
 	// 4. 진도 업데이트(cleared = 서버 기준 green)
 	// 같은 절(verse_id)을 공유하는 모든 course_item(다른 코스/섹터에 속한 사본 포함)에
 	// 진도를 함께 반영해, 한 곳에서 외운 절이 다른 코스에서도 완료로 집계되게 한다.
+	// 단, 받아쓰기(ModeDictation)는 본문을 보고 따라 적는 연습 모드라 진도를 갱신하지 않는다
+	// (완료 체크가 생기지 않음). 시도 기록·연속일·목숨은 다른 모드와 동일하게 처리한다.
 	cleared := serverGrade == domain.GradeGreen
-	siblingIDs, err := s.courses.ListSiblingCourseItemIDs(ctx, courseItemID)
-	if err != nil {
-		return AttemptResult{}, err
-	}
-	if len(siblingIDs) == 0 {
-		siblingIDs = []int64{courseItemID}
-	}
-	for _, id := range siblingIDs {
-		if err := s.attempts.UpsertProgress(ctx, repository.UpsertProgressParams{
-			UserID:       userID,
-			CourseItemID: id,
-			Grade:        string(serverGrade),
-			Cleared:      cleared,
-		}); err != nil {
+	if mode != domain.ModeDictation {
+		siblingIDs, err := s.courses.ListSiblingCourseItemIDs(ctx, courseItemID)
+		if err != nil {
 			return AttemptResult{}, err
+		}
+		if len(siblingIDs) == 0 {
+			siblingIDs = []int64{courseItemID}
+		}
+		for _, id := range siblingIDs {
+			if err := s.attempts.UpsertProgress(ctx, repository.UpsertProgressParams{
+				UserID:       userID,
+				CourseItemID: id,
+				Grade:        string(serverGrade),
+				Cleared:      cleared,
+			}); err != nil {
+				return AttemptResult{}, err
+			}
 		}
 	}
 
@@ -119,6 +123,15 @@ func (s *AttemptService) SubmitAttempt(
 // GetLives — 현재 목숨 상태(정산 반영)를 조회한다.
 func (s *AttemptService) GetLives(ctx context.Context, userID int64) (domain.Lives, error) {
 	return GetLives(ctx, s.users, userID)
+}
+
+// ConsumeLife — 목숨 1을 소모한다(암송 중 이탈 페널티 등). 남은 목숨이 없으면 현재 상태를 반환한다.
+func (s *AttemptService) ConsumeLife(ctx context.Context, userID int64) (domain.Lives, error) {
+	lives, err := ConsumeLife(ctx, s.users, userID)
+	if errors.Is(err, domain.ErrNoLives) {
+		return lives, nil
+	}
+	return lives, err
 }
 
 // ProgressSummary — 사용자 진도 조회 결과(스트릭 + 코스별 집계 + 절별 진도).

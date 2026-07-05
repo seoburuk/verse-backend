@@ -24,10 +24,18 @@
   "nav": {
     "bookmarks": "책갈피",
     "dashboard": "대시보드",
+    "rankings": "랭킹",
     "settings": "설정",
     "logout": "로그아웃",
     "login": "로그인",
     "resume": "▶ 이어가기"
+  },
+  "rankings": {
+    "title": "랭킹",
+    "back": "← 뒤로",
+    "loading": "불러오는 중...",
+    "empty": "아직 랭킹에 오른 사람이 없어요",
+    "myRank": "내 순위"
   },
   "courses": {
     "verseCount": "{count}구절",
@@ -42,7 +50,14 @@
     "light": "☀️ 라이트",
     "language": "언어",
     "account": "계정",
-    "username": "아이디",
+    "username": "이름",
+    "editName": "수정",
+    "save": "저장",
+    "saving": "저장 중...",
+    "cancel": "취소",
+    "nameUpdated": "이름을 변경했어요",
+    "nameInvalid": "이름을 입력해 주세요 (1~30자)",
+    "nameUpdateFailed": "이름 변경에 실패했어요",
     "logout": "로그아웃",
     "deleteAccount": "계정 삭제",
     "deleting": "삭제 중...",
@@ -87,6 +102,7 @@
     "goBack": "뒤로 가기",
     "modeDrag": "타일 탭",
     "modeType": "타이핑",
+    "modeDictation": "받아쓰기",
     "startRecall": "암송 시작",
     "dragHint": "절을 기억해서 아래에 배치하세요",
     "tilePlaceholder": "단어를 탭해서 배치하세요",
@@ -126,7 +142,7 @@
   },
   "meta": {
     "landingTitle": "PIX BIBLE — 성경 암기 앱",
-    "landingDesc": "성경 암기 앱 PIX BIBLE. KJV 킹제임스 성경 66권을 절 단위로 암기하세요. 타일 배치·직접 입력으로 말씀을 마음에 새기는 레트로 픽셀 성경 암송 앱.",
+    "landingDesc": "성경 암기 앱 PIX BIBLE. 영어 성경 암기(KJV 킹제임스 성경 66권)를 절 단위로 하세요. 타일 배치·직접 입력으로 말씀을 마음에 새기는 레트로 픽셀 성경 암송 앱.",
     "landingOgDesc": "KJV 킹제임스 성경 66권을 절 단위로 암기. 주제별·권별 성경 암송 코스 제공.",
     "coursesTitle": "성경 암송 코스",
     "coursesDesc": "KJV 성경 66권을 주제별·카테고리별로 암송하는 코스 목록. 기초, 워밍업, 구약, 신약, 주제별 코스 제공.",

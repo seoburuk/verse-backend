@@ -52,6 +52,7 @@ export function CourseHeaderPersonal() {
           <span className="user-name">{user?.display_name}</span>
           <button className="btn-link" onClick={() => router.push("/bookmarks")}>{t("bookmarks")}</button>
           <button className="btn-link" onClick={() => router.push("/dashboard")}>{t("dashboard")}</button>
+          <button className="btn-link" onClick={() => router.push("/rankings")}>{t("rankings")}</button>
           <button className="btn-link" onClick={() => router.push("/settings")}>{t("settings")}</button>
           <button className="btn-link" onClick={logout}>{t("logout")}</button>
         </>

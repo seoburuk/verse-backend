@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
-import { login as apiLogin, signup as apiSignup } from "../api/auth";
+import { login as apiLogin, signup as apiSignup, updateProfile as apiUpdateProfile } from "../api/auth";
 import { getToken, setToken, clearToken } from "../api/client";
 import { USER_KEY, type StoredUser } from "./authStore";
 
@@ -15,6 +15,7 @@ interface AuthContextValue extends AuthState {
   ready: boolean;
   login: (username: string, password: string) => Promise<void>;
   signup: (username: string, password: string, displayName: string) => Promise<void>;
+  updateDisplayName: (displayName: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -53,6 +54,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState({ token: res.access_token, user });
   }, []);
 
+  const updateDisplayName = useCallback(async (displayName: string) => {
+    const res = await apiUpdateProfile(displayName);
+    setState((prev) => {
+      if (!prev.user) return prev;
+      const user: StoredUser = { ...prev.user, display_name: res.display_name };
+      localStorage.setItem(USER_KEY, JSON.stringify(user));
+      return { ...prev, user };
+    });
+  }, []);
+
   const logout = useCallback(() => {
     clearToken();
     localStorage.removeItem(USER_KEY);
@@ -61,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ ...state, ready, isAuthed: !!state.token, login, signup, logout }}
+      value={{ ...state, ready, isAuthed: !!state.token, login, signup, updateDisplayName, logout }}
     >
       {children}
     </AuthContext.Provider>

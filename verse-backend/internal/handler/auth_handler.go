@@ -50,6 +50,28 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (h *Handler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(mw.CtxUserID).(int64)
+	if !ok {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "unauthorized"})
+		return
+	}
+
+	var req dto.UpdateProfileRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid json"})
+		return
+	}
+
+	user, err := h.auth.UpdateDisplayName(r.Context(), userID, req.DisplayName)
+	if err != nil {
+		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, dto.ProfileResponse{DisplayName: user.DisplayName})
+}
+
 func (h *Handler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(mw.CtxUserID).(int64)
 	if !ok {

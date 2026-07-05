@@ -82,6 +82,31 @@ func (q *Queries) GetUserLives(ctx context.Context, id int64) (GetUserLivesRow, 
 	return i, err
 }
 
+const updateDisplayName = `-- name: UpdateDisplayName :one
+UPDATE users SET display_name = $2 WHERE id = $1
+RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at
+`
+
+type UpdateDisplayNameParams struct {
+	ID          int64  `json:"id"`
+	DisplayName string `json:"display_name"`
+}
+
+func (q *Queries) UpdateDisplayName(ctx context.Context, arg UpdateDisplayNameParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateDisplayName, arg.ID, arg.DisplayName)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.DisplayName,
+		&i.PasswordHash,
+		&i.CreatedAt,
+		&i.Username,
+		&i.Lives,
+		&i.LivesUpdatedAt,
+	)
+	return i, err
+}
+
 const updateUserLives = `-- name: UpdateUserLives :exec
 UPDATE users SET lives = $2, lives_updated_at = $3 WHERE id = $1
 `

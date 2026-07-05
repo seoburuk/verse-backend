@@ -5,8 +5,10 @@ SELECT
   co.id          AS course_id,
   co.slug,
   co.title       AS course_title,
+  co.title_en    AS course_title_en,
   cs.id          AS section_id,
   cs.title       AS section_title,
+  cs.title_en    AS section_title_en,
   bv.book,
   bv.chapter,
   bv.verse,
@@ -26,6 +28,7 @@ SELECT
   ci.ord,
   cs.id          AS section_id,
   cs.title       AS section_title,
+  cs.title_en    AS section_title_en,
   bv.book,
   bv.chapter,
   bv.verse

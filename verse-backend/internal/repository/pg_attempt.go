@@ -228,3 +228,21 @@ func (r *pgAttemptRepo) UpsertStreak(ctx context.Context, params UpsertStreakPar
 		LastDay:    pgDate, // pgtype.Date
 	})
 }
+
+func (r *pgAttemptRepo) GetRankingRaw(ctx context.Context) ([]domain.RankingRaw, error) {
+	rows, err := r.q.GetRankingRaw(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]domain.RankingRaw, len(rows))
+	for i, row := range rows {
+		out[i] = domain.RankingRaw{
+			UserID:        row.UserID,
+			Username:      row.Username,
+			Streak:        int(row.Streak),
+			ClearedVerses: int(row.ClearedVerses),
+			DictationPts:  int(row.DictationPts),
+		}
+	}
+	return out, nil
+}

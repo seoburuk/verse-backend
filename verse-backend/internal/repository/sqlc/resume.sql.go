@@ -37,19 +37,19 @@ LIMIT 1
 `
 
 type GetLastAttemptRow struct {
-	CourseItemID    int64              `json:"course_item_id"`
-	ItemOrd         int32              `json:"item_ord"`
-	CourseID        int64              `json:"course_id"`
-	Slug            string             `json:"slug"`
-	CourseTitle     string             `json:"course_title"`
-	CourseTitleEn   pgtype.Text        `json:"course_title_en"`
-	SectionID       pgtype.Int8        `json:"section_id"`
-	SectionTitle    pgtype.Text        `json:"section_title"`
-	SectionTitleEn  pgtype.Text        `json:"section_title_en"`
-	Book            int16              `json:"book"`
-	Chapter         int16              `json:"chapter"`
-	Verse           int16              `json:"verse"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	CourseItemID   int64              `json:"course_item_id"`
+	ItemOrd        int32              `json:"item_ord"`
+	CourseID       int64              `json:"course_id"`
+	Slug           string             `json:"slug"`
+	CourseTitle    string             `json:"course_title"`
+	CourseTitleEn  pgtype.Text        `json:"course_title_en"`
+	SectionID      pgtype.Int8        `json:"section_id"`
+	SectionTitle   pgtype.Text        `json:"section_title"`
+	SectionTitleEn pgtype.Text        `json:"section_title_en"`
+	Book           int16              `json:"book"`
+	Chapter        int16              `json:"chapter"`
+	Verse          int16              `json:"verse"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) GetLastAttempt(ctx context.Context, userID int64) (GetLastAttemptRow, error) {

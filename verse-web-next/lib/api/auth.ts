@@ -27,3 +27,14 @@ export function signup(
 export function deleteAccount(): Promise<void> {
   return apiFetch<void>("/me", { method: "DELETE" });
 }
+
+export interface ProfileResponse {
+  display_name: string;
+}
+
+export function updateProfile(display_name: string): Promise<ProfileResponse> {
+  return apiFetch<ProfileResponse>("/me/profile", {
+    method: "PATCH",
+    body: JSON.stringify({ display_name }),
+  });
+}

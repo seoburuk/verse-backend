@@ -9,6 +9,10 @@ SELECT * FROM users WHERE username = $1;
 -- name: DeleteUser :exec
 DELETE FROM users WHERE id = $1;
 
+-- name: UpdateDisplayName :one
+UPDATE users SET display_name = $2 WHERE id = $1
+RETURNING *;
+
 -- name: GetUserLives :one
 SELECT lives, lives_updated_at FROM users WHERE id = $1;
 

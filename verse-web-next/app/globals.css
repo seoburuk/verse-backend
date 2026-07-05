@@ -117,6 +117,23 @@ body {
 .muted { color: var(--muted); font-size: 0.875rem; }
 .user-name { color: var(--muted); font-size: 0.875rem; }
 .error-msg { color: var(--red); font-size: 0.875rem; }
+.success-msg { color: var(--green); font-size: 0.875rem; }
+
+.name-edit {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.name-input {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  color: var(--text);
+  padding: 0.25rem 0.5rem;
+  font: inherit;
+  width: 10rem;
+  max-width: 45vw;
+}
 
 /* ── Form ────────────────────────────────────────── */
 .form {
@@ -601,25 +618,32 @@ body {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 4px;
-  height: 4px;
-  margin: -2px;
-  animation: burst-fly 0.35s steps(6) forwards;
+  width: 6px;
+  height: 6px;
+  margin: -3px;
+  animation: burst-fly 0.5s steps(8) forwards;
 }
 
 @keyframes burst-fly {
-  0% { transform: translate(0, 0) scale(1); opacity: 1; }
-  100% { transform: translate(var(--dx), var(--dy)) scale(0.4); opacity: 0; }
+  0% { transform: translate(0, 0) scale(1.4); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(0.3); opacity: 0; }
 }
 
-/* 5콤보 배수 마일스톤 — 확대 팝 + 플래시 */
+/* 5콤보 배수 마일스톤 — 확대 팝 + 글로우 플래시 */
 .combo-badge.milestone {
-  animation: combo-milestone-pop 0.3s steps(4);
+  animation: combo-milestone-pop 0.4s steps(6);
 }
 
 @keyframes combo-milestone-pop {
-  0% { transform: scale(1.6); box-shadow: 3px 3px 0 var(--yellow); }
-  100% { transform: scale(1); box-shadow: 2px 2px 0 var(--text); }
+  0% {
+    transform: scale(2);
+    box-shadow: 4px 4px 0 var(--text), 0 0 12px 4px var(--yellow);
+  }
+  50% { box-shadow: 3px 3px 0 var(--text), 0 0 8px 2px var(--yellow); }
+  100% {
+    transform: scale(1);
+    box-shadow: 3px 3px 0 var(--text);
+  }
 }
 
 @keyframes input-pulse-a {
@@ -648,16 +672,27 @@ body {
 /* 5콤보 이상일 때만 표시되는 픽셀 콤보 뱃지 */
 .combo-badge {
   position: absolute;
-  top: -0.75rem;
+  top: -0.85rem;
   right: 0.5rem;
   background: var(--pink);
   color: #0f0f0f;
   border: 2px solid var(--text);
-  box-shadow: 2px 2px 0 var(--text);
-  padding: 0.1rem 0.4rem;
-  font-size: 0.8rem;
+  box-shadow: 3px 3px 0 var(--text);
+  padding: 0.15rem 0.5rem;
+  font-size: 0.95rem;
   font-weight: bold;
   z-index: 1;
+}
+
+/* 콤보 단계별 강조색 — 높을수록 뜨겁게 */
+.combo-badge[data-tier="2"] {
+  background: var(--yellow);
+  box-shadow: 3px 3px 0 var(--text), 0 0 6px 1px var(--yellow);
+}
+.combo-badge[data-tier="3"] {
+  background: var(--green);
+  color: #0f0f0f;
+  box-shadow: 3px 3px 0 var(--text), 0 0 10px 2px var(--green);
 }
 
 .pool-area {
@@ -847,6 +882,58 @@ body {
 .out-of-lives-icon { font-size: 2.5rem; }
 
 /* ── Dashboard ───────────────────────────────────── */
+.rank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rank-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.75rem;
+}
+
+.rank-row.rank-me {
+  border-color: var(--green);
+}
+
+.rank-pos {
+  min-width: 2rem;
+  font-weight: bold;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.rank-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rank-score {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+  flex-shrink: 0;
+  max-width: 45%;
+  text-align: right;
+}
+
+.rank-sub {
+  white-space: normal;
+}
+
+.rank-score-value { font-weight: bold; }
+.rank-sub { font-size: 0.7rem; }
+
 .dash-summary {
   display: flex;
   gap: 0.75rem;

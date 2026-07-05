@@ -17,9 +17,10 @@ const (
 type Mode string
 
 const (
-	ModeDrag Mode = "drag"
-	ModeType Mode = "type"
-	ModeHard Mode = "hard"
+	ModeDrag      Mode = "drag"
+	ModeType      Mode = "type"
+	ModeHard      Mode = "hard"
+	ModeDictation Mode = "dictation" // 받아쓰기: 본문을 보며 따라 적기. 절 완료로 치지 않음.
 )
 
 // Attempt — 한 번의 암송 시도 기록.

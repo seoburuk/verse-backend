@@ -47,6 +47,9 @@ func (s *stubAttemptRepo) GetTotalCleared(_ context.Context, _ int64) (int, erro
 func (s *stubAttemptRepo) GetResume(_ context.Context, _ int64) (*domain.ResumeTarget, error) {
 	panic("not implemented")
 }
+func (s *stubAttemptRepo) GetRankingRaw(_ context.Context) ([]domain.RankingRaw, error) {
+	panic("not implemented")
+}
 
 func dayStr(d time.Time) string { return d.UTC().Format("2006-01-02") }
 func ptr(s string) *string      { return &s }

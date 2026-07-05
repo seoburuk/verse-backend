@@ -37,7 +37,11 @@ export function DragTiles({ placed, pool, liveGrade, combo, fx, onTap, placehold
           <span className="placeholder">{placeholder}</span>
         )}
         {combo >= 5 && (
-          <span key={isMilestone ? `combo-${combo}` : "combo"} className={isMilestone ? "combo-badge milestone" : "combo-badge"}>
+          <span
+            key={isMilestone ? `combo-${combo}` : "combo"}
+            className={isMilestone ? "combo-badge milestone" : "combo-badge"}
+            data-tier={combo >= 15 ? 3 : combo >= 10 ? 2 : 1}
+          >
             x{combo}
           </span>
         )}

@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/seoburuk/verse-backend/internal/domain"
@@ -93,6 +94,18 @@ func (s *AuthService) Login(ctx context.Context, username, password string) (dom
 // DeleteAccount — 사용자 데이터 전체 삭제.
 func (s *AuthService) DeleteAccount(ctx context.Context, userID int64) error {
 	return s.users.DeleteUser(ctx, userID)
+}
+
+// maxDisplayNameLen — 표시이름 최대 길이(룬 기준).
+const maxDisplayNameLen = 30
+
+// UpdateDisplayName — 표시이름 변경. 공백 트림 후 1~30자만 허용한다.
+func (s *AuthService) UpdateDisplayName(ctx context.Context, userID int64, displayName string) (domain.User, error) {
+	name := strings.TrimSpace(displayName)
+	if name == "" || utf8.RuneCountInString(name) > maxDisplayNameLen {
+		return domain.User{}, domain.ErrInvalidInput
+	}
+	return s.users.UpdateDisplayName(ctx, userID, name)
 }
 
 // VerifyToken — JWT 검증 후 userID 반환. 미들웨어에서 사용.
