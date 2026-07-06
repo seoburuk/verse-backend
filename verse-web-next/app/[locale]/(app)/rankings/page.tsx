@@ -22,15 +22,20 @@ export default function RankingsPage() {
 
   const meInTop = data?.me != null && data.entries.some((e) => e.rank === data.me!.rank && e.username === data.me!.username);
 
-  const row = (e: RankingEntry, isMe: boolean) => (
-    <div key={`${e.rank}-${e.username}`} className={isMe ? "rank-row rank-me" : "rank-row"}>
+  const row = (e: RankingEntry, isMe: boolean) => {
+    const classes = ["rank-row"];
+    if (e.rank >= 1 && e.rank <= 3) classes.push(`rank-${e.rank}`);
+    if (isMe) classes.push("rank-me");
+    return (
+    <div key={`${e.rank}-${e.username}`} className={classes.join(" ")}>
       <span className="rank-pos">{e.rank}</span>
       <span className="rank-name">{e.username}</span>
       <span className="rank-score">
         <span className="rank-score-value">{e.score}</span>
       </span>
     </div>
-  );
+    );
+  };
 
   return (
     <div className="page">

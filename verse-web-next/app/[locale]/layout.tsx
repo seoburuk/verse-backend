@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import Script from "next/script";
 import { ThemeProvider } from "next-themes";
@@ -28,6 +28,12 @@ const SITE_META: Record<Locale, { title: string; template: string; desc: string;
     keywords: ["Bible memory", "memorize Scripture", "Bible memorize", "KJV memorization", "Scripture memory app"],
     ogLocale: "en_US",
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export function generateStaticParams() {

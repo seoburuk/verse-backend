@@ -51,6 +51,13 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
     setMode, tapTile, setTyped, startRecall, submit, reset,
   } = useMemorize(item.course_item_id, item.text);
 
+  // 진행 게이지 — recall 단계에서 채운 단어 비율 (드래그: 배치 수, 타자: 정확히 채운 수)
+  const totalWords = typeReveal.length;
+  const filledWords =
+    mode === "drag" ? Math.min(placed.length, totalWords) : typeReveal.filter((w) => w.filled).length;
+  const progressPct =
+    phase === "study" ? 0 : phase === "result" ? 100 : totalWords === 0 ? 0 : Math.round((filledWords / totalWords) * 100);
+
   const [favorited, setFavorited] = useState(false);
   useEffect(() => {
     getFavorites()
@@ -160,6 +167,10 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
           </button>
         </div>
       </header>
+
+      <div className="memorize-progress" role="progressbar" aria-valuenow={progressPct} aria-valuemin={0} aria-valuemax={100}>
+        <div className="memorize-progress-fill" style={{ width: `${progressPct}%` }} />
+      </div>
 
       <main className="memorize-main">
         {phase === "study" && (
