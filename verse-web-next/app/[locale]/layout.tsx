@@ -62,8 +62,8 @@ export async function generateMetadata({
     },
     // 소유 확인 값은 Google Search Console / 네이버 서치어드바이저 등록 후 채울 것
     verification: {
-      google: "REPLACE_WITH_GOOGLE_VERIFICATION",
-      other: { "naver-site-verification": "REPLACE_WITH_NAVER_VERIFICATION" },
+      google: "hDNPi-Jwwi_CJFq7Xd57qrWpcDuLDcIuyKw6eiPyJy8",
+      other: { "naver-site-verification": "d43f7075412f4534b2557997ebf50ca9e76e01e4" },
     },
   };
 }
