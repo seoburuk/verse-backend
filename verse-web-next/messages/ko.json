@@ -6,7 +6,14 @@
     "brandTagline": "KJV 성경 암송"
   },
   "landing": {
-    "cta": "시작하기"
+    "cta": "시작하기",
+    "tagline": "재밌게 성경을 암송해요. 암송하면서 영어 공부까지!",
+    "feature1Title": "📖 매일 1절 습관",
+    "feature1Desc": "쉐마처럼 말씀을 마음에 새기며, 매일 한 절씩 암송하는 습관을 만들어가요.",
+    "feature2Title": "🧩 놀이처럼 암송",
+    "feature2Desc": "단어 타일 배치와 직접 타이핑으로 게임하듯 재밌게 외워요.",
+    "feature3Title": "🇬🇧 영어 공부는 덤",
+    "feature3Desc": "KJV 영어 성경 66권을 절 단위로 암송하며 자연스럽게 영어 실력도 쑥쑥."
   },
   "login": {
     "subtitle": "KJV 성경 암송",

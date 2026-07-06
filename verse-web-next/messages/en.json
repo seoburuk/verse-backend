@@ -6,7 +6,14 @@
     "brandTagline": "Memorize the KJV Bible"
   },
   "landing": {
-    "cta": "Get started"
+    "cta": "Get started",
+    "tagline": "Memorize Scripture the fun way — and pick up English along the way!",
+    "feature1Title": "📖 One Verse a Day",
+    "feature1Desc": "Build a daily habit of memorizing Scripture, one verse at a time — like the Shema, written on your heart.",
+    "feature2Title": "🧩 Learn by Playing",
+    "feature2Desc": "Arrange word tiles or type it out yourself — memorizing feels like a game.",
+    "feature3Title": "🇬🇧 Bonus: English Practice",
+    "feature3Desc": "Memorize all 66 books of the KJV verse by verse, and your English improves naturally along the way."
   },
   "login": {
     "subtitle": "Memorize the KJV Bible",

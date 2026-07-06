@@ -33,10 +33,25 @@ export default async function LandingPage({
       <main className="landing-main">
         <section className="landing-hero">
           <h1 className="landing-title">PIX BIBLE</h1>
+          <p className="landing-tagline">{t("tagline")}</p>
           <div className="landing-cta">
             <Link href="/login" className="btn-primary landing-cta-link">
               {t("cta")}
             </Link>
+          </div>
+        </section>
+        <section className="landing-features">
+          <div className="landing-feature-card">
+            <h2 className="landing-feature-title">{t("feature1Title")}</h2>
+            <p className="landing-feature-desc">{t("feature1Desc")}</p>
+          </div>
+          <div className="landing-feature-card">
+            <h2 className="landing-feature-title">{t("feature2Title")}</h2>
+            <p className="landing-feature-desc">{t("feature2Desc")}</p>
+          </div>
+          <div className="landing-feature-card">
+            <h2 className="landing-feature-title">{t("feature3Title")}</h2>
+            <p className="landing-feature-desc">{t("feature3Desc")}</p>
           </div>
         </section>
       </main>
