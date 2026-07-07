@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { useRouter } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
+import { useAuth } from "../../lib/hooks/useAuth";
 import { useMemorize } from "./useMemorize";
 import { DragTiles } from "./DragTiles";
 import { TypeScaffold } from "./TypeScaffold";
@@ -40,6 +41,7 @@ export function MemorizeView({ items, index, sectionId, backHref, doneHref, buil
 
 function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildItemHref }: Props) {
   const router = useRouter();
+  const { isAuthed } = useAuth();
   const t = useTranslations("memorize");
   const locale = useLocale();
   const gradeText = (g: string | null) =>
@@ -60,10 +62,11 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
 
   const [favorited, setFavorited] = useState(false);
   useEffect(() => {
+    if (!isAuthed) return;
     getFavorites()
       .then(({ items }) => setFavorited(items.some((f) => f.course_item_id === item.course_item_id)))
       .catch(() => {});
-  }, [item.course_item_id]);
+  }, [item.course_item_id, isAuthed]);
 
   function toggleFavorite() {
     const next = !favorited;
@@ -105,22 +108,23 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
 
   const [lives, setLives] = useState<number | null>(null);
   useEffect(() => {
+    if (!isAuthed) return;
     getLives().then((l) => setLives(l.lives)).catch(() => {});
-  }, []);
+  }, [isAuthed]);
 
-  // 뒤로가기 — 암송(recall) 진행 중 이탈은 목숨 1을 소모한다(포기 페널티).
+  // 뒤로가기 — 암송(recall) 진행 중 이탈은 목숨 1을 소모한다(포기 페널티). 게스트는 페널티 없음.
   function handleBack() {
-    if (phase === "recall") {
+    if (phase === "recall" && isAuthed) {
       setLives((prev) => (prev !== null ? Math.max(0, prev - 1) : prev));
       consumeLife().catch(() => {});
     }
     router.push(backHref);
   }
   useEffect(() => {
-    if (phase === "result") {
+    if (phase === "result" && isAuthed) {
       getLives().then((l) => setLives(l.lives)).catch(() => {});
     }
-  }, [phase]);
+  }, [phase, isAuthed]);
 
   if (outOfLives) {
     return (
@@ -158,13 +162,15 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
               <PixelIcon name="heart" /> {lives}
             </span>
           )}
-          <button
-            className="fav-btn"
-            aria-label={favorited ? t("removeBookmark") : t("bookmark")}
-            onClick={toggleFavorite}
-          >
-            {favorited ? "★" : "☆"}
-          </button>
+          {isAuthed && (
+            <button
+              className="fav-btn"
+              aria-label={favorited ? t("removeBookmark") : t("bookmark")}
+              onClick={toggleFavorite}
+            >
+              {favorited ? "★" : "☆"}
+            </button>
+          )}
         </div>
       </header>
 
@@ -308,6 +314,14 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
                 </button>
               )}
             </div>
+            {!isAuthed && (
+              <div className="guest-cta-banner">
+                <p className="guest-cta-text">{t("guestCta")}</p>
+                <Link href="/login?mode=signup" className="btn-primary">
+                  {t("guestCtaButton")}
+                </Link>
+              </div>
+            )}
           </div>
         )}
       </main>

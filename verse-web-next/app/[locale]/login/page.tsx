@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, type FormEvent } from "react";
+import { useState, useEffect, Suspense, type FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { useAuth } from "@/lib/hooks/useAuth";
@@ -9,10 +10,19 @@ import { ApiError } from "@/lib/api/client";
 const SAVED_USERNAME_KEY = "kjv_saved_username";
 
 export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const { login, signup } = useAuth();
   const router = useRouter();
   const t = useTranslations("login");
-  const [isSignup, setIsSignup] = useState(false);
+  const searchParams = useSearchParams();
+  const [isSignup, setIsSignup] = useState(searchParams.get("mode") === "signup");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");

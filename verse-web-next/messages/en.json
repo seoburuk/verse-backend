@@ -13,7 +13,8 @@
     "feature2Title": "🧩 Learn by Playing",
     "feature2Desc": "Arrange word tiles or type it out yourself — memorizing feels like a game.",
     "feature3Title": "🇬🇧 Bonus: English Practice",
-    "feature3Desc": "Memorize all 66 books of the KJV verse by verse, and your English improves naturally along the way."
+    "feature3Desc": "Memorize all 66 books of the KJV verse by verse, and your English improves naturally along the way.",
+    "ctaTrial": "Try it free"
   },
   "login": {
     "subtitle": "Memorize the KJV Bible",
@@ -46,7 +47,8 @@
   },
   "courses": {
     "verseCount": "{count} verses",
-    "bookCount": "{count} books"
+    "bookCount": "{count} books",
+    "lockedHint": "Sign up to unlock"
   },
   "settings": {
     "title": "Settings",
@@ -125,7 +127,9 @@
     "next": "Next",
     "retryAgain": "Retry",
     "bookmark": "Bookmark",
-    "removeBookmark": "Remove bookmark"
+    "removeBookmark": "Remove bookmark",
+    "guestCta": "Sign up to save your progress, lives, and rankings!",
+    "guestCtaButton": "Sign up"
   },
   "section": {
     "backToCourse": "← Back to {title}",

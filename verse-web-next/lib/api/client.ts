@@ -37,8 +37,11 @@ export async function apiFetch<T>(
   const res = await fetch(`/v1${path}`, { ...init, headers });
 
   if (res.status === 401) {
-    clearToken();
-    window.location.href = "/login";
+    // 토큰이 있었는데 401이면 만료 → 로그인으로. 게스트(토큰 없음)는 리다이렉트하지 않는다.
+    if (token) {
+      clearToken();
+      window.location.href = "/login";
+    }
     throw new ApiError(401, "unauthorized");
   }
 

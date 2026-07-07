@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Link, type Locale } from "@/i18n/routing";
+import { type Locale } from "@/i18n/routing";
 import { listCoursesServer } from "@/lib/api/server";
 import { CATEGORY_ORDER } from "@/lib/categories";
+import { isTrialCourse } from "@/lib/guest";
 import type { Course } from "@/lib/api/courses";
 import { CourseHeaderPersonal, ResumeCard } from "@/components/courses/CourseListPersonal";
+import { GuestLockLink } from "@/components/courses/GuestLockLink";
 
 export async function generateMetadata({
   params: { locale },
@@ -60,16 +62,17 @@ export default async function CourseListPage({
         <ResumeCard />
         <div className="course-list">
           {grouped.map(([category, group]) => (
-            <Link
+            <GuestLockLink
               key={category}
               href={group.length === 1 ? `/courses/${group[0].slug}` : `/courses/category/${category}`}
+              unlockedForGuest={group.some((c) => isTrialCourse(c.slug))}
               className="course-card"
             >
               <span className="course-title">{tc(category)}</span>
               <span className="course-meta">
                 <span className="course-progress">{group.length > 1 ? t("bookCount", { count: group.length }) : ""}</span>
               </span>
-            </Link>
+            </GuestLockLink>
           ))}
         </div>
       </main>

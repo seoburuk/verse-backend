@@ -24,7 +24,8 @@ export default function SectionDetailPage() {
 
   useEffect(() => {
     if (!sectionId) return;
-    Promise.all([getSection(Number(sectionId)), getCourse(slug), getProgress()])
+    // 게스트는 진행도 조회(401)가 실패해도 구절 목록은 보여준다.
+    Promise.all([getSection(Number(sectionId)), getCourse(slug), getProgress().catch(() => ({ items: [] }))])
       .then(([s, c, p]) => {
         setSection(s);
         setCourseTitle(pickLocalized(c.title, c.title_en, locale));

@@ -13,7 +13,8 @@
     "feature2Title": "🧩 놀이처럼 암송",
     "feature2Desc": "단어 타일 배치와 직접 타이핑으로 게임하듯 재밌게 외워요.",
     "feature3Title": "🇬🇧 영어 공부는 덤",
-    "feature3Desc": "KJV 영어 성경 66권을 절 단위로 암송하며 자연스럽게 영어 실력도 쑥쑥."
+    "feature3Desc": "KJV 영어 성경 66권을 절 단위로 암송하며 자연스럽게 영어 실력도 쑥쑥.",
+    "ctaTrial": "체험해보기"
   },
   "login": {
     "subtitle": "KJV 성경 암송",
@@ -46,7 +47,8 @@
   },
   "courses": {
     "verseCount": "{count}구절",
-    "bookCount": "{count}권"
+    "bookCount": "{count}권",
+    "lockedHint": "가입하고 잠금 해제"
   },
   "settings": {
     "title": "설정",
@@ -125,7 +127,9 @@
     "next": "다음으로",
     "retryAgain": "다시하기",
     "bookmark": "책갈피",
-    "removeBookmark": "책갈피 해제"
+    "removeBookmark": "책갈피 해제",
+    "guestCta": "가입하면 진행도 저장 · 목숨 · 랭킹까지!",
+    "guestCtaButton": "가입하기"
   },
   "section": {
     "backToCourse": "← {title}로",

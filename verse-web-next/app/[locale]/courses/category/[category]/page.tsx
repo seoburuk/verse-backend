@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link, type Locale } from "@/i18n/routing";
 import { listCoursesServer } from "@/lib/api/server";
+import { isTrialCourse } from "@/lib/guest";
 import { pickLocalized, type Course } from "@/lib/api/courses";
+import { GuestLockLink } from "@/components/courses/GuestLockLink";
 
 export async function generateMetadata({
   params,
@@ -47,12 +49,17 @@ export default async function CategoryPage({
       <main className="content">
         <div className="course-list">
           {courses.map((c) => (
-            <Link key={c.id} href={`/courses/${c.slug}`} className="course-card">
+            <GuestLockLink
+              key={c.id}
+              href={`/courses/${c.slug}`}
+              unlockedForGuest={isTrialCourse(c.slug)}
+              className="course-card"
+            >
               <span className="course-title">{pickLocalized(c.title, c.title_en, locale)}</span>
               <span className="course-meta">
                 <span className="course-theme">{c.theme}</span>
               </span>
-            </Link>
+            </GuestLockLink>
           ))}
         </div>
       </main>

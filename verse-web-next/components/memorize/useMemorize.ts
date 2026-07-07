@@ -8,6 +8,7 @@ import { ApiError } from "../../lib/api/client";
 import { playHit, playMiss, playMilestone } from "../../lib/fx/sound";
 import { vibrateHit, vibrateMiss, vibrateMilestone } from "../../lib/fx/haptics";
 import { getStoredMode, setStoredMode } from "../../lib/recallMode";
+import { useAuth } from "../../lib/hooks/useAuth";
 
 export type RecallMode = "drag" | "type" | "dictation";
 
@@ -70,6 +71,7 @@ export function useMemorize(
   courseItemId: number,
   text: string,
 ): UseMemorizeReturn {
+  const { isAuthed } = useAuth();
   const answerTokens = useMemo(() => normalize(text), [text]);
   const answerDisplay = useMemo(() => tokenizeDisplay(text), [text]);
 
@@ -182,6 +184,13 @@ export function useMemorize(
   }, []);
 
   const submit = useCallback(async () => {
+    // 게스트 체험: 서버 제출 없이 클라이언트 채점을 그대로 결과로 사용.
+    if (!isAuthed) {
+      setServerGrade(liveGrade === "none" ? "red" : liveGrade);
+      setMismatch(false);
+      setPhase("result");
+      return;
+    }
     setSubmitting(true);
     try {
       const result = await submitAttempt({
@@ -202,7 +211,7 @@ export function useMemorize(
     } finally {
       setSubmitting(false);
     }
-  }, [courseItemId, mode, liveGrade, attemptTokens]);
+  }, [courseItemId, mode, liveGrade, attemptTokens, isAuthed]);
 
   const reset = useCallback(() => {
     setPhase("study");
