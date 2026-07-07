@@ -123,6 +123,22 @@ func (r *pgAttemptRepo) GetCategoryProgress(ctx context.Context, userID int64) (
 	return out, nil
 }
 
+func (r *pgAttemptRepo) GetBookProgress(ctx context.Context, userID int64) ([]domain.BookProgress, error) {
+	rows, err := r.q.GetBookProgress(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]domain.BookProgress, len(rows))
+	for i, row := range rows {
+		out[i] = domain.BookProgress{
+			Book:    row.Book,
+			Cleared: int(row.Cleared),
+			Total:   int(row.Total),
+		}
+	}
+	return out, nil
+}
+
 func (r *pgAttemptRepo) GetGradeDistribution(ctx context.Context, userID int64) (domain.GradeDistribution, error) {
 	row, err := r.q.GetGradeDistribution(ctx, userID)
 	if err != nil {

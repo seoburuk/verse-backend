@@ -75,6 +75,13 @@ type GradeDistribution struct {
 	Red    int
 }
 
+// BookProgress — 성경 권(book) 단위 완료 집계. 대시보드 권별 진도용.
+type BookProgress struct {
+	Book    int16
+	Cleared int
+	Total   int
+}
+
 // FavoriteItem — 북마크한 절(course_item) + 표시용 상세.
 type FavoriteItem struct {
 	CourseItemID   int64

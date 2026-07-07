@@ -12,10 +12,17 @@ export interface GradeDistribution {
   red: number;
 }
 
+export interface BookProgress {
+  book: number;
+  cleared: number;
+  total: number;
+}
+
 export interface Stats {
   streak: { current: number; longest: number };
   total_cleared: number;
   categories: CategoryProgress[];
+  books: BookProgress[];
   grades: GradeDistribution;
 }
 

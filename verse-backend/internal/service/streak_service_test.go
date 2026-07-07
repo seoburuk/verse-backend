@@ -38,6 +38,9 @@ func (s *stubAttemptRepo) ListCourseProgress(_ context.Context, _ int64) ([]doma
 func (s *stubAttemptRepo) GetCategoryProgress(_ context.Context, _ int64) ([]domain.CategoryProgress, error) {
 	panic("not implemented")
 }
+func (s *stubAttemptRepo) GetBookProgress(_ context.Context, _ int64) ([]domain.BookProgress, error) {
+	panic("not implemented")
+}
 func (s *stubAttemptRepo) GetGradeDistribution(_ context.Context, _ int64) (domain.GradeDistribution, error) {
 	panic("not implemented")
 }

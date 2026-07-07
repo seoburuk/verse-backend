@@ -5,7 +5,9 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
+	"github.com/seoburuk/verse-backend/internal/domain"
 	"github.com/seoburuk/verse-backend/internal/handler/dto"
 	mw "github.com/seoburuk/verse-backend/internal/handler/middleware"
 )
@@ -26,7 +28,10 @@ func (h *Handler) Signup(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusCreated, dto.TokenResponse{
 		AccessToken: token,
 		UserID:      user.ID,
+		Username:    user.Username,
 		DisplayName: user.DisplayName,
+		Theme:       user.Theme,
+		Language:    user.Language,
 	})
 }
 
@@ -46,7 +51,10 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, dto.TokenResponse{
 		AccessToken: token,
 		UserID:      user.ID,
+		Username:    user.Username,
 		DisplayName: user.DisplayName,
+		Theme:       user.Theme,
+		Language:    user.Language,
 	})
 }
 
@@ -63,13 +71,51 @@ func (h *Handler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.auth.UpdateDisplayName(r.Context(), userID, req.DisplayName)
+	var user domain.User
+	var err error
+	if req.DisplayName != nil {
+		user, err = h.auth.UpdateDisplayName(r.Context(), userID, *req.DisplayName)
+		if err != nil {
+			writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+			return
+		}
+	}
+	if req.Theme != nil || req.Language != nil {
+		user, err = h.auth.UpdateThemeLanguage(r.Context(), userID, req.Theme, req.Language)
+		if err != nil {
+			writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+			return
+		}
+	}
+
+	writeJSON(w, http.StatusOK, dto.ProfileResponse{
+		DisplayName: user.DisplayName,
+		Theme:       user.Theme,
+		Language:    user.Language,
+	})
+}
+
+func (h *Handler) GetMe(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(mw.CtxUserID).(int64)
+	if !ok {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "unauthorized"})
+		return
+	}
+
+	user, err := h.auth.GetMe(r.Context(), userID)
 	if err != nil {
 		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
 		return
 	}
 
-	writeJSON(w, http.StatusOK, dto.ProfileResponse{DisplayName: user.DisplayName})
+	writeJSON(w, http.StatusOK, dto.MeResponse{
+		UserID:      user.ID,
+		Username:    user.Username,
+		DisplayName: user.DisplayName,
+		Theme:       user.Theme,
+		Language:    user.Language,
+		CreatedAt:   user.CreatedAt.Format(time.RFC3339),
+	})
 }
 
 func (h *Handler) DeleteAccount(w http.ResponseWriter, r *http.Request) {

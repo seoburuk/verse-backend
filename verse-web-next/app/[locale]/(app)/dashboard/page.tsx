@@ -1,14 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { getStats, type Stats } from "@/lib/api/stats";
 import { CATEGORY_ORDER } from "@/lib/categories";
+import { bookName } from "@/lib/bookRef";
 import { PixelIcon } from "@/components/PixelIcon";
+
+const HIDDEN_CATEGORIES = new Set(["ot", "nt", "topic"]);
 
 export default function DashboardPage() {
   const router = useRouter();
+  const locale = useLocale();
   const t = useTranslations("dashboard");
   const tc = useTranslations("categories");
   const [stats, setStats] = useState<Stats | null>(null);
@@ -23,10 +27,12 @@ export default function DashboardPage() {
   }, []);
 
   const categories = stats
-    ? CATEGORY_ORDER.filter((cat) => stats.categories.some((c) => c.category === cat)).map(
-        (cat) => stats.categories.find((c) => c.category === cat)!,
-      )
+    ? CATEGORY_ORDER.filter(
+        (cat) => !HIDDEN_CATEGORIES.has(cat) && stats.categories.some((c) => c.category === cat),
+      ).map((cat) => stats.categories.find((c) => c.category === cat)!)
     : [];
+
+  const books = stats ? stats.books.filter((b) => b.cleared > 0) : [];
 
   const totalGrades = stats ? stats.grades.green + stats.grades.yellow + stats.grades.red : 0;
 
@@ -77,6 +83,28 @@ export default function DashboardPage() {
                 })}
               </div>
             </div>
+
+            {books.length > 0 && (
+              <div className="section-group">
+                <h2 className="section-title">{t("bookProgress")}</h2>
+                <div className="dash-category-list">
+                  {books.map((b) => {
+                    const pct = b.total > 0 ? Math.round((b.cleared / b.total) * 100) : 0;
+                    return (
+                      <div key={b.book} className="dash-category-row">
+                        <div className="dash-category-head">
+                          <span>{bookName(b.book, locale)}</span>
+                          <span className="muted">{b.cleared}/{b.total} ({pct}%)</span>
+                        </div>
+                        <div className="dash-bar-track">
+                          <div className="dash-bar-fill" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className="section-group">
               <h2 className="section-title">{t("gradeDistribution")}</h2>

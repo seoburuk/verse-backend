@@ -71,6 +71,7 @@ func NewRouter(pool *pgxpool.Pool, h *Handler, auth *service.AuthService, corsOr
 			r.Put("/me/favorites/{itemId}", h.AddFavorite)
 			r.Delete("/me/favorites/{itemId}", h.RemoveFavorite)
 			r.Patch("/me/profile", h.UpdateProfile)
+			r.Get("/me", h.GetMe)
 			r.Delete("/me", h.DeleteAccount)
 		})
 	})

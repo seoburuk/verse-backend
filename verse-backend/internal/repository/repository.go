@@ -11,7 +11,9 @@ import (
 type UserRepo interface {
 	CreateUser(ctx context.Context, username, displayName, passwordHash string) (domain.User, error)
 	GetUserByUsername(ctx context.Context, username string) (domain.User, error)
+	GetUserByID(ctx context.Context, userID int64) (domain.User, error)
 	UpdateDisplayName(ctx context.Context, userID int64, displayName string) (domain.User, error)
+	UpdateThemeLanguage(ctx context.Context, userID int64, theme, language *string) (domain.User, error)
 	DeleteUser(ctx context.Context, userID int64) error
 	GetLives(ctx context.Context, userID int64) (domain.Lives, error)
 	UpdateLives(ctx context.Context, userID int64, lives domain.Lives) error
@@ -49,6 +51,7 @@ type AttemptRepo interface {
 	ListUserProgress(ctx context.Context, userID int64) ([]domain.ItemProgress, error)
 	ListCourseProgress(ctx context.Context, userID int64) ([]domain.CourseProgress, error)
 	GetCategoryProgress(ctx context.Context, userID int64) ([]domain.CategoryProgress, error)
+	GetBookProgress(ctx context.Context, userID int64) ([]domain.BookProgress, error)
 	GetGradeDistribution(ctx context.Context, userID int64) (domain.GradeDistribution, error)
 	GetTotalCleared(ctx context.Context, userID int64) (int, error)
 	GetResume(ctx context.Context, userID int64) (*domain.ResumeTarget, error)

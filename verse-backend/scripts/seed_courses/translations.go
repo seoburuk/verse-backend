@@ -12,6 +12,7 @@ var themeEn = map[string]string{
 	"기초":     "Foundations",
 	"말씀":     "The Word",
 	"기도":     "Prayer",
+	"주기도문":   "The Lord's Prayer",
 	"성령":     "The Holy Spirit",
 	"회개":     "Repentance",
 	"마귀":     "The Devil",

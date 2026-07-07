@@ -19,13 +19,29 @@ type LoginRequest struct {
 type TokenResponse struct {
 	AccessToken string `json:"access_token"`
 	UserID      int64  `json:"user_id"`
+	Username    string `json:"username"`
 	DisplayName string `json:"display_name"`
+	Theme       string `json:"theme"`
+	Language    string `json:"language"`
 }
 
 type UpdateProfileRequest struct {
-	DisplayName string `json:"display_name"`
+	DisplayName *string `json:"display_name"`
+	Theme       *string `json:"theme"`
+	Language    *string `json:"language"`
 }
 
 type ProfileResponse struct {
 	DisplayName string `json:"display_name"`
+	Theme       string `json:"theme"`
+	Language    string `json:"language"`
+}
+
+type MeResponse struct {
+	UserID      int64  `json:"user_id"`
+	Username    string `json:"username"`
+	DisplayName string `json:"display_name"`
+	Theme       string `json:"theme"`
+	Language    string `json:"language"`
+	CreatedAt   string `json:"created_at"`
 }

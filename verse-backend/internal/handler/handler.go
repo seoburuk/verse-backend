@@ -41,6 +41,10 @@ func errStatus(err error) int {
 		return http.StatusBadRequest
 	case errors.Is(err, domain.ErrNoLives):
 		return http.StatusForbidden
+	case errors.Is(err, domain.ErrRateLimited):
+		return http.StatusTooManyRequests
+	case errors.Is(err, domain.ErrProfanity):
+		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
 	}

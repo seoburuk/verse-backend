@@ -1,7 +1,14 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
-import { login as apiLogin, signup as apiSignup, updateProfile as apiUpdateProfile } from "../api/auth";
+import {
+  login as apiLogin,
+  signup as apiSignup,
+  updateProfile as apiUpdateProfile,
+  getMe as apiGetMe,
+  type AuthResponse,
+  type UpdateProfilePatch,
+} from "../api/auth";
 import { getToken, setToken, clearToken } from "../api/client";
 import { USER_KEY, type StoredUser } from "./authStore";
 
@@ -13,9 +20,10 @@ interface AuthState {
 interface AuthContextValue extends AuthState {
   isAuthed: boolean;
   ready: boolean;
-  login: (username: string, password: string) => Promise<void>;
-  signup: (username: string, password: string, displayName: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<AuthResponse>;
+  signup: (username: string, password: string, displayName: string) => Promise<AuthResponse>;
   updateDisplayName: (displayName: string) => Promise<void>;
+  updateProfile: (patch: UpdateProfilePatch) => Promise<void>;
   logout: () => void;
 }
 
@@ -34,31 +42,79 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setState(loadStored());
+    const initial = loadStored();
+    setState(initial);
     setReady(true);
+
+    // 구세션(username/created_at 없음) 갱신.
+    if (initial.token && initial.user && !initial.user.username) {
+      apiGetMe()
+        .then((res) => {
+          const user: StoredUser = {
+            user_id: res.user_id,
+            username: res.username,
+            display_name: res.display_name,
+            theme: res.theme,
+            language: res.language,
+            created_at: res.created_at,
+          };
+          localStorage.setItem(USER_KEY, JSON.stringify(user));
+          setState((prev) => (prev.token ? { ...prev, user } : prev));
+        })
+        .catch(() => {});
+    }
   }, []);
 
   const login = useCallback(async (username: string, password: string) => {
     const res = await apiLogin(username, password);
-    const user: StoredUser = { user_id: res.user_id, display_name: res.display_name };
+    const user: StoredUser = {
+      user_id: res.user_id,
+      username: res.username,
+      display_name: res.display_name,
+      theme: res.theme,
+      language: res.language,
+    };
     setToken(res.access_token);
     localStorage.setItem(USER_KEY, JSON.stringify(user));
     setState({ token: res.access_token, user });
+    return res;
   }, []);
 
   const signup = useCallback(async (username: string, password: string, displayName: string) => {
     const res = await apiSignup(username, password, displayName);
-    const user: StoredUser = { user_id: res.user_id, display_name: res.display_name };
+    const user: StoredUser = {
+      user_id: res.user_id,
+      username: res.username,
+      display_name: res.display_name,
+      theme: res.theme,
+      language: res.language,
+    };
     setToken(res.access_token);
     localStorage.setItem(USER_KEY, JSON.stringify(user));
     setState({ token: res.access_token, user });
+    return res;
   }, []);
 
   const updateDisplayName = useCallback(async (displayName: string) => {
-    const res = await apiUpdateProfile(displayName);
+    const res = await apiUpdateProfile({ display_name: displayName });
     setState((prev) => {
       if (!prev.user) return prev;
       const user: StoredUser = { ...prev.user, display_name: res.display_name };
+      localStorage.setItem(USER_KEY, JSON.stringify(user));
+      return { ...prev, user };
+    });
+  }, []);
+
+  const updateProfile = useCallback(async (patch: UpdateProfilePatch) => {
+    const res = await apiUpdateProfile(patch);
+    setState((prev) => {
+      if (!prev.user) return prev;
+      const user: StoredUser = {
+        ...prev.user,
+        display_name: res.display_name,
+        theme: res.theme,
+        language: res.language,
+      };
       localStorage.setItem(USER_KEY, JSON.stringify(user));
       return { ...prev, user };
     });
@@ -72,7 +128,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ ...state, ready, isAuthed: !!state.token, login, signup, updateDisplayName, logout }}
+      value={{
+        ...state,
+        ready,
+        isAuthed: !!state.token,
+        login,
+        signup,
+        updateDisplayName,
+        updateProfile,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>

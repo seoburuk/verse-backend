@@ -26,10 +26,16 @@ func (h *Handler) GetMyStats(w http.ResponseWriter, r *http.Request) {
 		categories[i] = dto.CategoryProgressDTO{Category: c.Category, Cleared: c.Cleared, Total: c.Total}
 	}
 
+	books := make([]dto.BookProgressDTO, len(stats.Books))
+	for i, b := range stats.Books {
+		books[i] = dto.BookProgressDTO{Book: b.Book, Cleared: b.Cleared, Total: b.Total}
+	}
+
 	writeJSON(w, http.StatusOK, dto.StatsResponse{
 		Streak:       dto.StreakDTO{Current: stats.Streak.CurrentLen, Longest: stats.Streak.LongestLen},
 		TotalCleared: stats.TotalCleared,
 		Categories:   categories,
+		Books:        books,
 		Grades: dto.GradeDistributionDTO{
 			Green:  stats.Grades.Green,
 			Yellow: stats.Grades.Yellow,

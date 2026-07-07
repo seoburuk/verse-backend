@@ -54,7 +54,7 @@ export default async function CourseListPage({
 
   return (
     <div className="page">
-      <header className="page-header">
+      <header className="page-header page-header-title-top">
         <h1 className="title">PIX BIBLE</h1>
         <CourseHeaderPersonal />
       </header>

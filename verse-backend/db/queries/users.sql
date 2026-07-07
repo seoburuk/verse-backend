@@ -10,7 +10,17 @@ SELECT * FROM users WHERE username = $1;
 DELETE FROM users WHERE id = $1;
 
 -- name: UpdateDisplayName :one
-UPDATE users SET display_name = $2 WHERE id = $1
+UPDATE users SET display_name = $2, display_name_updated_at = now() WHERE id = $1
+RETURNING *;
+
+-- name: GetUserByID :one
+SELECT * FROM users WHERE id = $1;
+
+-- name: UpdateUserPrefs :one
+UPDATE users SET
+  theme = COALESCE(sqlc.narg('theme'), theme),
+  language = COALESCE(sqlc.narg('language'), language)
+WHERE id = $1
 RETURNING *;
 
 -- name: GetUserLives :one

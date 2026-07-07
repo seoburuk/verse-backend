@@ -78,13 +78,16 @@ type Streak struct {
 }
 
 type User struct {
-	ID             int64              `json:"id"`
-	DisplayName    string             `json:"display_name"`
-	PasswordHash   string             `json:"password_hash"`
-	CreatedAt      pgtype.Timestamptz `json:"created_at"`
-	Username       string             `json:"username"`
-	Lives          int32              `json:"lives"`
-	LivesUpdatedAt pgtype.Timestamptz `json:"lives_updated_at"`
+	ID                   int64              `json:"id"`
+	DisplayName          string             `json:"display_name"`
+	PasswordHash         string             `json:"password_hash"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	Username             string             `json:"username"`
+	Lives                int32              `json:"lives"`
+	LivesUpdatedAt       pgtype.Timestamptz `json:"lives_updated_at"`
+	Theme                string             `json:"theme"`
+	Language             string             `json:"language"`
+	DisplayNameUpdatedAt pgtype.Timestamptz `json:"display_name_updated_at"`
 }
 
 type VerseSegment struct {

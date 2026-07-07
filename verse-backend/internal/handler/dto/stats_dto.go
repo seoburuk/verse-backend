@@ -13,9 +13,16 @@ type GradeDistributionDTO struct {
 	Red    int `json:"red"`
 }
 
+type BookProgressDTO struct {
+	Book    int16 `json:"book"`
+	Cleared int   `json:"cleared"`
+	Total   int   `json:"total"`
+}
+
 type StatsResponse struct {
 	Streak       StreakDTO             `json:"streak"`
 	TotalCleared int                   `json:"total_cleared"`
 	Categories   []CategoryProgressDTO `json:"categories"`
+	Books        []BookProgressDTO     `json:"books"`
 	Grades       GradeDistributionDTO  `json:"grades"`
 }

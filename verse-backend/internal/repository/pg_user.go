@@ -43,6 +43,32 @@ func (r *pgUserRepo) GetUserByUsername(ctx context.Context, username string) (do
 	return toDomainUser(row), nil
 }
 
+func (r *pgUserRepo) GetUserByID(ctx context.Context, userID int64) (domain.User, error) {
+	row, err := r.q.GetUserByID(ctx, userID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.User{}, domain.ErrNotFound
+		}
+		return domain.User{}, err
+	}
+	return toDomainUser(row), nil
+}
+
+func (r *pgUserRepo) UpdateThemeLanguage(ctx context.Context, userID int64, theme, language *string) (domain.User, error) {
+	row, err := r.q.UpdateUserPrefs(ctx, db.UpdateUserPrefsParams{
+		ID:       userID,
+		Theme:    toPgText(theme),
+		Language: toPgText(language),
+	})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.User{}, domain.ErrNotFound
+		}
+		return domain.User{}, err
+	}
+	return toDomainUser(row), nil
+}
+
 func (r *pgUserRepo) UpdateDisplayName(ctx context.Context, userID int64, displayName string) (domain.User, error) {
 	row, err := r.q.UpdateDisplayName(ctx, db.UpdateDisplayNameParams{
 		ID:          userID,
@@ -95,12 +121,26 @@ func (r *pgUserRepo) UpdateLives(ctx context.Context, userID int64, lives domain
 	})
 }
 
+func toPgText(s *string) pgtype.Text {
+	if s == nil {
+		return pgtype.Text{}
+	}
+	return pgtype.Text{String: *s, Valid: true}
+}
+
 func toDomainUser(u db.User) domain.User {
-	return domain.User{
+	user := domain.User{
 		ID:           u.ID,
 		Username:     u.Username,
 		DisplayName:  u.DisplayName,
 		PasswordHash: u.PasswordHash,
 		CreatedAt:    u.CreatedAt.Time, // pgtype.Timestamptz → time.Time
+		Theme:        u.Theme,
+		Language:     u.Language,
 	}
+	if u.DisplayNameUpdatedAt.Valid {
+		t := u.DisplayNameUpdatedAt.Time
+		user.DisplayNameUpdatedAt = &t
+	}
+	return user
 }

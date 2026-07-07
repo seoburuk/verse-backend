@@ -9,7 +9,9 @@ import "errors"
 var (
 	ErrNotFound     = errors.New("not found")
 	ErrUnauthorized = errors.New("unauthorized")
-	ErrConflict     = errors.New("conflict")       // 중복 가입 등
+	ErrConflict     = errors.New("conflict") // 중복 가입 등
 	ErrInvalidInput = errors.New("invalid input")
 	ErrNoLives      = errors.New("no lives remaining")
+	ErrRateLimited  = errors.New("rate limited")
+	ErrProfanity    = errors.New("username or display name contains banned words")
 )

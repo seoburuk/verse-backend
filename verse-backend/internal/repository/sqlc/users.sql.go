@@ -14,7 +14,7 @@ import (
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (username, display_name, password_hash)
 VALUES ($1, $2, $3)
-RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at
+RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at
 `
 
 type CreateUserParams struct {
@@ -34,6 +34,9 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Username,
 		&i.Lives,
 		&i.LivesUpdatedAt,
+		&i.Theme,
+		&i.Language,
+		&i.DisplayNameUpdatedAt,
 	)
 	return i, err
 }
@@ -47,8 +50,30 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 	return err
 }
 
+const getUserByID = `-- name: GetUserByID :one
+SELECT id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at FROM users WHERE id = $1
+`
+
+func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByID, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.DisplayName,
+		&i.PasswordHash,
+		&i.CreatedAt,
+		&i.Username,
+		&i.Lives,
+		&i.LivesUpdatedAt,
+		&i.Theme,
+		&i.Language,
+		&i.DisplayNameUpdatedAt,
+	)
+	return i, err
+}
+
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, display_name, password_hash, created_at, username, lives, lives_updated_at FROM users WHERE username = $1
+SELECT id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at FROM users WHERE username = $1
 `
 
 func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
@@ -62,6 +87,9 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 		&i.Username,
 		&i.Lives,
 		&i.LivesUpdatedAt,
+		&i.Theme,
+		&i.Language,
+		&i.DisplayNameUpdatedAt,
 	)
 	return i, err
 }
@@ -83,8 +111,8 @@ func (q *Queries) GetUserLives(ctx context.Context, id int64) (GetUserLivesRow, 
 }
 
 const updateDisplayName = `-- name: UpdateDisplayName :one
-UPDATE users SET display_name = $2 WHERE id = $1
-RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at
+UPDATE users SET display_name = $2, display_name_updated_at = now() WHERE id = $1
+RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at
 `
 
 type UpdateDisplayNameParams struct {
@@ -103,6 +131,9 @@ func (q *Queries) UpdateDisplayName(ctx context.Context, arg UpdateDisplayNamePa
 		&i.Username,
 		&i.Lives,
 		&i.LivesUpdatedAt,
+		&i.Theme,
+		&i.Language,
+		&i.DisplayNameUpdatedAt,
 	)
 	return i, err
 }
@@ -120,4 +151,36 @@ type UpdateUserLivesParams struct {
 func (q *Queries) UpdateUserLives(ctx context.Context, arg UpdateUserLivesParams) error {
 	_, err := q.db.Exec(ctx, updateUserLives, arg.ID, arg.Lives, arg.LivesUpdatedAt)
 	return err
+}
+
+const updateUserPrefs = `-- name: UpdateUserPrefs :one
+UPDATE users SET
+  theme = COALESCE($2, theme),
+  language = COALESCE($3, language)
+WHERE id = $1
+RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at
+`
+
+type UpdateUserPrefsParams struct {
+	ID       int64       `json:"id"`
+	Theme    pgtype.Text `json:"theme"`
+	Language pgtype.Text `json:"language"`
+}
+
+func (q *Queries) UpdateUserPrefs(ctx context.Context, arg UpdateUserPrefsParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUserPrefs, arg.ID, arg.Theme, arg.Language)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.DisplayName,
+		&i.PasswordHash,
+		&i.CreatedAt,
+		&i.Username,
+		&i.Lives,
+		&i.LivesUpdatedAt,
+		&i.Theme,
+		&i.Language,
+		&i.DisplayNameUpdatedAt,
+	)
+	return i, err
 }

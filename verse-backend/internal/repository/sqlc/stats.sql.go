@@ -9,6 +9,43 @@ import (
 	"context"
 )
 
+const getBookProgress = `-- name: GetBookProgress :many
+SELECT bv.book AS book,
+       COUNT(DISTINCT bv.id) FILTER (WHERE p.cleared) AS cleared,
+       COUNT(DISTINCT bv.id)                          AS total
+FROM course_items ci
+JOIN bible_verses bv ON bv.id = ci.verse_id
+LEFT JOIN progress p ON p.course_item_id = ci.id AND p.user_id = $1
+GROUP BY bv.book
+ORDER BY bv.book
+`
+
+type GetBookProgressRow struct {
+	Book    int16 `json:"book"`
+	Cleared int64 `json:"cleared"`
+	Total   int64 `json:"total"`
+}
+
+func (q *Queries) GetBookProgress(ctx context.Context, userID int64) ([]GetBookProgressRow, error) {
+	rows, err := q.db.Query(ctx, getBookProgress, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetBookProgressRow
+	for rows.Next() {
+		var i GetBookProgressRow
+		if err := rows.Scan(&i.Book, &i.Cleared, &i.Total); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCategoryProgress = `-- name: GetCategoryProgress :many
 SELECT c.category AS category,
        COUNT(*) FILTER (WHERE p.cleared) AS cleared,

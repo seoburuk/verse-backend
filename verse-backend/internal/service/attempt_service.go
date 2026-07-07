@@ -146,6 +146,7 @@ type Stats struct {
 	Streak       domain.Streak
 	TotalCleared int
 	Categories   []domain.CategoryProgress
+	Books        []domain.BookProgress
 	Grades       domain.GradeDistribution
 }
 
@@ -167,7 +168,11 @@ func (s *AttemptService) GetStats(ctx context.Context, userID int64) (Stats, err
 	if err != nil {
 		return Stats{}, err
 	}
-	return Stats{Streak: streak, TotalCleared: totalCleared, Categories: categories, Grades: grades}, nil
+	books, err := s.attempts.GetBookProgress(ctx, userID)
+	if err != nil {
+		return Stats{}, err
+	}
+	return Stats{Streak: streak, TotalCleared: totalCleared, Categories: categories, Books: books, Grades: grades}, nil
 }
 
 // GetProgress — 사용자의 스트릭, 코스별 완료 집계, 절별 진도를 한 번에 조회.

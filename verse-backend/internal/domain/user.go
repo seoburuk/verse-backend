@@ -4,11 +4,14 @@ package domain
 import "time"
 
 type User struct {
-	ID           int64
-	Username     string
-	DisplayName  string
-	PasswordHash string // argon2id. 절대 외부로 노출 금지.
-	CreatedAt    time.Time
+	ID                   int64
+	Username             string
+	DisplayName          string
+	PasswordHash         string // argon2id. 절대 외부로 노출 금지.
+	CreatedAt            time.Time
+	Theme                string
+	Language             string
+	DisplayNameUpdatedAt *time.Time
 }
 
 // Lives — 목숨 상태(코스 §Phase4). 실패 시도(비초록)마다 1 소모, 시간 경과로 자동 리필.

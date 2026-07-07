@@ -3,9 +3,11 @@
 import { useState, useEffect, Suspense, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useTheme } from "next-themes";
 import { useRouter } from "@/i18n/routing";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { ApiError } from "@/lib/api/client";
+import type { AuthResponse } from "@/lib/api/auth";
 
 const SAVED_USERNAME_KEY = "kjv_saved_username";
 
@@ -20,6 +22,7 @@ export default function LoginPage() {
 function LoginForm() {
   const { login, signup } = useAuth();
   const router = useRouter();
+  const { setTheme } = useTheme();
   const t = useTranslations("login");
   const searchParams = useSearchParams();
   const [isSignup, setIsSignup] = useState(searchParams.get("mode") === "signup");
@@ -43,17 +46,19 @@ function LoginForm() {
     setError(null);
     setLoading(true);
     try {
+      let res: AuthResponse;
       if (isSignup) {
-        await signup(username, password, displayName);
+        res = await signup(username, password, displayName);
       } else {
-        await login(username, password);
+        res = await login(username, password);
       }
       if (saveUsername) {
         localStorage.setItem(SAVED_USERNAME_KEY, username);
       } else {
         localStorage.removeItem(SAVED_USERNAME_KEY);
       }
-      router.push("/courses");
+      setTheme(res.theme);
+      router.push("/courses", { locale: res.language as "ko" | "en" });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t("genericError"));
     } finally {
@@ -62,7 +67,7 @@ function LoginForm() {
   }
 
   return (
-    <div className="page-center">
+    <div className="page-center login-center">
       <div className="card">
         <h1 className="title">PIX BIBLE</h1>
         <p className="subtitle">{t("subtitle")}</p>

@@ -57,6 +57,10 @@ export default async function LandingPage({
             <h2 className="landing-feature-title">{t("feature3Title")}</h2>
             <p className="landing-feature-desc">{t("feature3Desc")}</p>
           </div>
+          <div className="landing-feature-card">
+            <h2 className="landing-feature-title">{t("feature4Title")}</h2>
+            <p className="landing-feature-desc">{t("feature4Desc")}</p>
+          </div>
         </section>
       </main>
     </div>

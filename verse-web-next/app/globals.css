@@ -80,6 +80,11 @@ body {
   min-height: 100vh;
 }
 
+.login-center {
+  align-items: flex-start;
+  padding-top: 8vh;
+}
+
 /* 2줄 헤더 — 1줄: 내비/배지, 2줄: 타이틀 전체 폭 */
 .page-header {
   display: grid;
@@ -95,6 +100,12 @@ body {
 }
 
 .page-header > .btn-link { grid-area: nav; justify-self: start; }
+
+.page-header-title-top {
+  grid-template-areas:
+    "title title"
+    "nav right";
+}
 .page-header > .title,
 .page-header > .item-ref { grid-area: title; }
 .page-header > .header-right { grid-area: right; }
@@ -320,6 +331,45 @@ body {
 
 .btn-danger:hover:not(:disabled) { background: var(--red); color: #000; }
 .btn-danger:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.modal-box {
+  background: var(--surface);
+  border: 2px solid var(--red);
+  box-shadow: 6px 6px 0 var(--shadow);
+  padding: 1.5rem;
+  max-width: 420px;
+  width: 100%;
+}
+
+.modal-box h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+  color: var(--red);
+}
+
+.modal-box p {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.modal-actions .btn-danger,
+.modal-actions .btn-secondary { width: auto; flex: 1; }
 
 .btn-link {
   background: none;

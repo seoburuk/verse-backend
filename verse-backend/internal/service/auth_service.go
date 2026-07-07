@@ -47,6 +47,9 @@ func (s *AuthService) SignUp(ctx context.Context, username, displayName, passwor
 	if username == "" || displayName == "" || password == "" {
 		return domain.User{}, "", domain.ErrInvalidInput
 	}
+	if containsProfanity(username) || containsProfanity(displayName) {
+		return domain.User{}, "", domain.ErrProfanity
+	}
 
 	hash, err := hashPassword(password)
 	if err != nil {
@@ -99,13 +102,44 @@ func (s *AuthService) DeleteAccount(ctx context.Context, userID int64) error {
 // maxDisplayNameLen — 표시이름 최대 길이(룬 기준).
 const maxDisplayNameLen = 30
 
-// UpdateDisplayName — 표시이름 변경. 공백 트림 후 1~30자만 허용한다.
+// displayNameChangeCooldown — 닉네임 변경 최소 간격.
+const displayNameChangeCooldown = 24 * time.Hour
+
+// UpdateDisplayName — 표시이름 변경. 공백 트림 후 1~30자만 허용하고, 하루 1회로 제한한다.
 func (s *AuthService) UpdateDisplayName(ctx context.Context, userID int64, displayName string) (domain.User, error) {
 	name := strings.TrimSpace(displayName)
 	if name == "" || utf8.RuneCountInString(name) > maxDisplayNameLen {
 		return domain.User{}, domain.ErrInvalidInput
 	}
+	if containsProfanity(name) {
+		return domain.User{}, domain.ErrProfanity
+	}
+
+	user, err := s.users.GetUserByID(ctx, userID)
+	if err != nil {
+		return domain.User{}, err
+	}
+	if user.DisplayNameUpdatedAt != nil && time.Since(*user.DisplayNameUpdatedAt) < displayNameChangeCooldown {
+		return domain.User{}, domain.ErrRateLimited
+	}
+
 	return s.users.UpdateDisplayName(ctx, userID, name)
+}
+
+// UpdateThemeLanguage — 테마·언어 선호도를 서버에 저장한다(기기 간 동기화용). 부분 갱신 지원.
+func (s *AuthService) UpdateThemeLanguage(ctx context.Context, userID int64, theme, language *string) (domain.User, error) {
+	if theme != nil && *theme != "light" && *theme != "dark" {
+		return domain.User{}, domain.ErrInvalidInput
+	}
+	if language != nil && *language != "ko" && *language != "en" {
+		return domain.User{}, domain.ErrInvalidInput
+	}
+	return s.users.UpdateThemeLanguage(ctx, userID, theme, language)
+}
+
+// GetMe — 프로필 전체 조회(테마/언어/가입일 포함).
+func (s *AuthService) GetMe(ctx context.Context, userID int64) (domain.User, error) {
+	return s.users.GetUserByID(ctx, userID)
 }
 
 // VerifyToken — JWT 검증 후 userID 반환. 미들웨어에서 사용.
