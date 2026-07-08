@@ -1,5 +1,6 @@
 export const CATEGORY_LABELS: Record<string, string> = {
   foundations: "기초",
+  "lords-prayer": "주기도문",
   warmup: "워밍업",
   messiah: "예언",
   ot: "구약",
@@ -7,4 +8,4 @@ export const CATEGORY_LABELS: Record<string, string> = {
   topic: "주제별",
 };
 
-export const CATEGORY_ORDER = ["foundations", "warmup", "messiah", "ot", "nt", "topic"];
+export const CATEGORY_ORDER = ["foundations", "lords-prayer", "warmup", "messiah", "ot", "nt"];

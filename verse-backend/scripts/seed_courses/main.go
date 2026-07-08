@@ -24,12 +24,13 @@ type verseRef struct {
 
 // seedCourse — 시드할 코스 정의
 type seedCourse struct {
-	slug   string
-	title  string
-	theme  string
-	ord    int
-	hidden bool
-	verses []verseRef
+	slug     string
+	title    string
+	theme    string
+	ord      int
+	hidden   bool
+	category string // 빈 값이면 DB 기본값('topic') 사용
+	verses   []verseRef
 }
 
 // seedSection — 코스 내 주제 섹션
@@ -66,10 +67,11 @@ func sec(title string, refs ...r) seedSection { return seedSection{title: title,
 // courses — 섹션 없는 기존 코스 (beginnings + 30개 주제 개별 코스).
 var courses = []seedCourse{
 	{
-		slug:  "beginnings",
-		title: "기초",
-		theme: "faith",
-		ord:   1,
+		slug:     "beginnings",
+		title:    "기초",
+		theme:    "faith",
+		ord:      1,
+		category: "foundations",
 		verses: []verseRef{
 			{43, 3, 16, "God so loved"},             // John 3:16
 			{19, 23, 1, "The Lord is my shepherd"},  // Psalm 23:1
@@ -79,10 +81,11 @@ var courses = []seedCourse{
 		},
 	},
 	{
-		slug:  "lords-prayer",
-		title: "주기도문",
-		theme: "prayer",
-		ord:   2,
+		slug:     "lords-prayer",
+		title:    "주기도문",
+		theme:    "prayer",
+		ord:      2,
+		category: "lords-prayer",
 		verses: []verseRef{
 			{40, 6, 9, "주기도문"},
 			{40, 6, 10, "주기도문"},
@@ -201,11 +204,11 @@ func main() {
 func insertCourse(ctx context.Context, pool *pgxpool.Pool, co seedCourse) error {
 	var courseID int64
 	err := pool.QueryRow(ctx, `
-		INSERT INTO courses(slug, title, title_en, theme, ord, hidden)
-		VALUES ($1, $2, $3, $4, $5, $6)
-		ON CONFLICT (slug) DO UPDATE SET hidden = EXCLUDED.hidden, title = EXCLUDED.title, title_en = EXCLUDED.title_en
+		INSERT INTO courses(slug, title, title_en, theme, ord, hidden, category)
+		VALUES ($1, $2, $3, $4, $5, $6, COALESCE(NULLIF($7, ''), 'topic'))
+		ON CONFLICT (slug) DO UPDATE SET hidden = EXCLUDED.hidden, title = EXCLUDED.title, title_en = EXCLUDED.title_en, category = EXCLUDED.category
 		RETURNING id
-	`, co.slug, co.title, nz(themeEn[co.title]), co.theme, co.ord, co.hidden).Scan(&courseID)
+	`, co.slug, co.title, nz(themeEn[co.title]), co.theme, co.ord, co.hidden, co.category).Scan(&courseID)
 	if err != nil {
 		return fmt.Errorf("upsert course: %w", err)
 	}
