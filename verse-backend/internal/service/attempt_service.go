@@ -120,6 +120,66 @@ func (s *AttemptService) SubmitAttempt(
 	return AttemptResult{Attempt: attempt, ServerGrade: serverGrade}, nil
 }
 
+// BatchAttemptInput — SubmitAttemptsBatch 항목 하나의 입력.
+type BatchAttemptInput struct {
+	ClientSeq    string
+	CourseItemID int64
+	Mode         domain.Mode
+	ClientGrade  domain.Grade
+	Tokens       []string
+}
+
+// BatchAttemptOutput — 배치 항목 하나의 처리 결과. 오프라인 우선 클라이언트가
+// 로컬 큐 항목을 서버 확정값으로 갱신하거나 재시도 여부를 판단하는 데 쓴다.
+type BatchAttemptOutput struct {
+	ClientSeq   string
+	Status      string // "ok" | "skipped_no_lives" | "error"
+	Attempt     domain.Attempt
+	ServerGrade domain.Grade
+	Err         error
+}
+
+// SubmitAttemptsBatch — 오프라인 큐에 쌓인 시도들을 순서대로(로컬 발생 순서 =
+// 배치 내 순서 가정) 처리한다. 각 항목은 SubmitAttempt와 동일한 로직을 타므로
+// 목숨·연속일·진도가 실시간 제출과 동일하게 누적 반영된다.
+//
+// 목숨이 0이 되면 이후 항목은 채점하지 않고 "skipped_no_lives"로 표시한다
+// (실시간 제출에서 목숨 0일 때 거부되는 것과 동일한 정책을 배치에도 적용).
+// 그 외 개별 항목 에러는 배치 전체를 중단시키지 않고 해당 항목만 "error"로
+// 기록한 뒤 다음 항목을 계속 처리한다 — 클라이언트가 부분 성공을 받아
+// 실패한 항목만 재동기화할 수 있게 하기 위함이다.
+func (s *AttemptService) SubmitAttemptsBatch(ctx context.Context, userID int64, items []BatchAttemptInput) ([]BatchAttemptOutput, error) {
+	results := make([]BatchAttemptOutput, 0, len(items))
+	noLives := false
+
+	for _, item := range items {
+		if noLives {
+			results = append(results, BatchAttemptOutput{ClientSeq: item.ClientSeq, Status: "skipped_no_lives"})
+			continue
+		}
+
+		result, err := s.SubmitAttempt(ctx, userID, item.CourseItemID, item.Mode, item.ClientGrade, item.Tokens)
+		if err != nil {
+			if errors.Is(err, domain.ErrNoLives) {
+				noLives = true
+				results = append(results, BatchAttemptOutput{ClientSeq: item.ClientSeq, Status: "skipped_no_lives"})
+				continue
+			}
+			results = append(results, BatchAttemptOutput{ClientSeq: item.ClientSeq, Status: "error", Err: err})
+			continue
+		}
+
+		results = append(results, BatchAttemptOutput{
+			ClientSeq:   item.ClientSeq,
+			Status:      "ok",
+			Attempt:     result.Attempt,
+			ServerGrade: result.ServerGrade,
+		})
+	}
+
+	return results, nil
+}
+
 // GetLives — 현재 목숨 상태(정산 반영)를 조회한다.
 func (s *AttemptService) GetLives(ctx context.Context, userID int64) (domain.Lives, error) {
 	return GetLives(ctx, s.users, userID)

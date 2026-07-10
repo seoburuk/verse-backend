@@ -43,3 +43,10 @@ type CourseDetailResponse struct {
 	Items    []CourseItemResponse    `json:"items,omitempty"`
 	Sections []CourseSectionResponse `json:"sections,omitempty"`
 }
+
+// CoursesVersionResponse — 오프라인 우선 클라이언트가 로컬 번들 콘텐츠를
+// 재다운로드해야 하는지 가볍게 확인하는 용도. course 목록의
+// (id, slug, ord, category) 조합을 해시한 값이라 콘텐츠가 바뀌면 값이 바뀐다.
+type CoursesVersionResponse struct {
+	Version string `json:"version"`
+}

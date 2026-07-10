@@ -51,6 +51,7 @@ func NewRouter(pool *pgxpool.Pool, h *Handler, auth *service.AuthService, corsOr
 			r.Post("/auth/login", h.Login)
 		})
 		r.Get("/courses", h.ListCourses)
+		r.Get("/courses/version", h.GetCoursesVersion)
 		r.Get("/courses/{slug}", h.GetCourse)
 		r.Get("/sections/{id}", h.GetSection)
 
@@ -60,6 +61,12 @@ func NewRouter(pool *pgxpool.Pool, h *Handler, auth *service.AuthService, corsOr
 			r.Group(func(r chi.Router) {
 				r.Use(httprate.LimitByIP(30, time.Minute))
 				r.Post("/attempts", h.SubmitAttempt)
+			})
+			// 오프라인 우선 클라이언트(Flutter)의 배치 동기화 — 호출 빈도는
+			// 낮지만 요청당 항목이 많으므로 단건 시도와 별도 레이트리밋을 둔다.
+			r.Group(func(r chi.Router) {
+				r.Use(httprate.LimitByIP(10, time.Minute))
+				r.Post("/sync/attempts", h.SubmitAttemptsBatch)
 			})
 			r.Get("/me/progress", h.GetMyProgress)
 			r.Get("/me/lives", h.GetMyLives)
