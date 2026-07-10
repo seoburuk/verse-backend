@@ -24,6 +24,7 @@ type Config struct {
 	JWTSecret       string
 	JWTAccessTTL    time.Duration // 액세스 토큰 유효기간
 	CORSOrigin      string        // 프론트(Next.js) origin. 콤마로 여러 개 지정 가능.
+	GoogleClientID  string        // 구글 OAuth 웹 클라이언트 ID. ID 토큰 audience 검증에 사용.
 }
 
 // Load — 환경변수에서 설정을 읽어 검증한다. 필수값 누락 시 에러.
@@ -44,6 +45,7 @@ func Load() (*Config, error) {
 		JWTSecret:       getEnv("JWT_SECRET", ""),
 		JWTAccessTTL:    time.Duration(ttlMinutes) * time.Minute,
 		CORSOrigin:      getEnv("CORS_ORIGIN", "http://localhost:3000"),
+		GoogleClientID:  getEnv("GOOGLE_CLIENT_ID", ""),
 	}
 
 	// fail fast: 잘못된 설정으로 조용히 뜨는 것보다

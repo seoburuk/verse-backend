@@ -11,10 +11,48 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createGoogleUser = `-- name: CreateGoogleUser :one
+INSERT INTO users (username, display_name, password_hash, email, google_sub)
+VALUES ($1, $2, '', $3, $4)
+RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub
+`
+
+type CreateGoogleUserParams struct {
+	Username    string      `json:"username"`
+	DisplayName string      `json:"display_name"`
+	Email       pgtype.Text `json:"email"`
+	GoogleSub   pgtype.Text `json:"google_sub"`
+}
+
+func (q *Queries) CreateGoogleUser(ctx context.Context, arg CreateGoogleUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, createGoogleUser,
+		arg.Username,
+		arg.DisplayName,
+		arg.Email,
+		arg.GoogleSub,
+	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.DisplayName,
+		&i.PasswordHash,
+		&i.CreatedAt,
+		&i.Username,
+		&i.Lives,
+		&i.LivesUpdatedAt,
+		&i.Theme,
+		&i.Language,
+		&i.DisplayNameUpdatedAt,
+		&i.Email,
+		&i.GoogleSub,
+	)
+	return i, err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (username, display_name, password_hash)
 VALUES ($1, $2, $3)
-RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at
+RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub
 `
 
 type CreateUserParams struct {
@@ -37,6 +75,8 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Theme,
 		&i.Language,
 		&i.DisplayNameUpdatedAt,
+		&i.Email,
+		&i.GoogleSub,
 	)
 	return i, err
 }
@@ -50,8 +90,32 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 	return err
 }
 
+const getUserByGoogleSub = `-- name: GetUserByGoogleSub :one
+SELECT id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub FROM users WHERE google_sub = $1
+`
+
+func (q *Queries) GetUserByGoogleSub(ctx context.Context, googleSub pgtype.Text) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByGoogleSub, googleSub)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.DisplayName,
+		&i.PasswordHash,
+		&i.CreatedAt,
+		&i.Username,
+		&i.Lives,
+		&i.LivesUpdatedAt,
+		&i.Theme,
+		&i.Language,
+		&i.DisplayNameUpdatedAt,
+		&i.Email,
+		&i.GoogleSub,
+	)
+	return i, err
+}
+
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at FROM users WHERE id = $1
+SELECT id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
@@ -68,12 +132,14 @@ func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
 		&i.Theme,
 		&i.Language,
 		&i.DisplayNameUpdatedAt,
+		&i.Email,
+		&i.GoogleSub,
 	)
 	return i, err
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at FROM users WHERE username = $1
+SELECT id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub FROM users WHERE username = $1
 `
 
 func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
@@ -90,6 +156,8 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 		&i.Theme,
 		&i.Language,
 		&i.DisplayNameUpdatedAt,
+		&i.Email,
+		&i.GoogleSub,
 	)
 	return i, err
 }
@@ -112,7 +180,7 @@ func (q *Queries) GetUserLives(ctx context.Context, id int64) (GetUserLivesRow, 
 
 const updateDisplayName = `-- name: UpdateDisplayName :one
 UPDATE users SET display_name = $2, display_name_updated_at = now() WHERE id = $1
-RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at
+RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub
 `
 
 type UpdateDisplayNameParams struct {
@@ -134,6 +202,8 @@ func (q *Queries) UpdateDisplayName(ctx context.Context, arg UpdateDisplayNamePa
 		&i.Theme,
 		&i.Language,
 		&i.DisplayNameUpdatedAt,
+		&i.Email,
+		&i.GoogleSub,
 	)
 	return i, err
 }
@@ -158,7 +228,7 @@ UPDATE users SET
   theme = COALESCE($2, theme),
   language = COALESCE($3, language)
 WHERE id = $1
-RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at
+RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub
 `
 
 type UpdateUserPrefsParams struct {
@@ -181,6 +251,8 @@ func (q *Queries) UpdateUserPrefs(ctx context.Context, arg UpdateUserPrefsParams
 		&i.Theme,
 		&i.Language,
 		&i.DisplayNameUpdatedAt,
+		&i.Email,
+		&i.GoogleSub,
 	)
 	return i, err
 }

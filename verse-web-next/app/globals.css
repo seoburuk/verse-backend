@@ -384,6 +384,14 @@ body {
 
 .btn-link:hover { color: var(--text); }
 
+/* 구글 로그인 버튼 — GIS 렌더 버튼을 가운데 정렬 */
+.google-signin {
+  display: flex;
+  justify-content: center;
+  margin: 0.75rem 0;
+}
+.google-signin:empty { display: none; }
+
 /* ── Course List ─────────────────────────────────── */
 .course-list {
   display: flex;

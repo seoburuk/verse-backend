@@ -27,6 +27,13 @@ export function signup(
   });
 }
 
+export function googleLogin(id_token: string): Promise<AuthResponse> {
+  return apiFetch<AuthResponse>("/auth/google", {
+    method: "POST",
+    body: JSON.stringify({ id_token }),
+  });
+}
+
 export function deleteAccount(): Promise<void> {
   return apiFetch<void>("/me", { method: "DELETE" });
 }

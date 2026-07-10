@@ -8,6 +8,7 @@ import { useRouter } from "@/i18n/routing";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { ApiError } from "@/lib/api/client";
 import type { AuthResponse } from "@/lib/api/auth";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 
 const SAVED_USERNAME_KEY = "kjv_saved_username";
 
@@ -20,7 +21,7 @@ export default function LoginPage() {
 }
 
 function LoginForm() {
-  const { login, signup } = useAuth();
+  const { login, signup, googleLogin } = useAuth();
   const router = useRouter();
   const { setTheme } = useTheme();
   const t = useTranslations("login");
@@ -57,6 +58,20 @@ function LoginForm() {
       } else {
         localStorage.removeItem(SAVED_USERNAME_KEY);
       }
+      setTheme(res.theme);
+      router.push("/courses", { locale: res.language as "ko" | "en" });
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t("genericError"));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleGoogle(idToken: string) {
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await googleLogin(idToken);
       setTheme(res.theme);
       router.push("/courses", { locale: res.language as "ko" | "en" });
     } catch (err) {
@@ -122,6 +137,9 @@ function LoginForm() {
             {loading ? t("processing") : isSignup ? t("signup") : t("login")}
           </button>
         </form>
+        <div className="google-signin">
+          <GoogleSignInButton onCredential={handleGoogle} onError={setError} />
+        </div>
         <button
           className="btn-link"
           onClick={() => { setIsSignup(!isSignup); setError(null); }}

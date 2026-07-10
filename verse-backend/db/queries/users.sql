@@ -6,6 +6,14 @@ RETURNING *;
 -- name: GetUserByUsername :one
 SELECT * FROM users WHERE username = $1;
 
+-- name: GetUserByGoogleSub :one
+SELECT * FROM users WHERE google_sub = $1;
+
+-- name: CreateGoogleUser :one
+INSERT INTO users (username, display_name, password_hash, email, google_sub)
+VALUES ($1, $2, '', $3, $4)
+RETURNING *;
+
 -- name: DeleteUser :exec
 DELETE FROM users WHERE id = $1;
 

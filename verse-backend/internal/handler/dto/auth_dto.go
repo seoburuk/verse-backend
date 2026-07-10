@@ -16,6 +16,10 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
+type GoogleLoginRequest struct {
+	IDToken string `json:"id_token"`
+}
+
 type TokenResponse struct {
 	AccessToken string `json:"access_token"`
 	UserID      int64  `json:"user_id"`

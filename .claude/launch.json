@@ -25,6 +25,7 @@
         "JWT_SECRET=change-me-in-production",
         "JWT_ACCESS_TTL=15",
         "KJV_DATA_DIR=../files/data/kjv",
+        "GOOGLE_CLIENT_ID=197050406553-4dg4u8r6n56fr2knpunp0vdg0oj1noro.apps.googleusercontent.com",
         "go", "run", "./cmd/api"
       ],
       "cwd": "verse-backend",

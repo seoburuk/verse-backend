@@ -17,6 +17,7 @@ import (
 	"github.com/seoburuk/verse-backend/internal/domain"
 	"github.com/seoburuk/verse-backend/internal/repository"
 	"golang.org/x/crypto/argon2"
+	"google.golang.org/api/idtoken"
 )
 
 // argon2id 파라미터 — OWASP 권장값(메모리 64MB, 시간 1, 병렬 4)
@@ -29,16 +30,18 @@ const (
 )
 
 type AuthService struct {
-	users     repository.UserRepo
-	jwtSecret []byte
-	accessTTL time.Duration
+	users          repository.UserRepo
+	jwtSecret      []byte
+	accessTTL      time.Duration
+	googleClientID string
 }
 
-func NewAuthService(users repository.UserRepo, jwtSecret string, accessTTL time.Duration) *AuthService {
+func NewAuthService(users repository.UserRepo, jwtSecret string, accessTTL time.Duration, googleClientID string) *AuthService {
 	return &AuthService{
-		users:     users,
-		jwtSecret: []byte(jwtSecret),
-		accessTTL: accessTTL,
+		users:          users,
+		jwtSecret:      []byte(jwtSecret),
+		accessTTL:      accessTTL,
+		googleClientID: googleClientID,
 	}
 }
 
@@ -92,6 +95,95 @@ func (s *AuthService) Login(ctx context.Context, username, password string) (dom
 	}
 
 	return user, token, nil
+}
+
+// GoogleLogin — 구글 ID 토큰을 검증하고, 해당 계정으로 로그인 또는 신규 가입 후 JWT 발급.
+// 구글 계정은 sub(고유 ID)로 식별한다. 이메일은 변경될 수 있으므로 식별자로 쓰지 않는다.
+func (s *AuthService) GoogleLogin(ctx context.Context, idToken string) (domain.User, string, error) {
+	if s.googleClientID == "" {
+		return domain.User{}, "", fmt.Errorf("google login not configured")
+	}
+	if idToken == "" {
+		return domain.User{}, "", domain.ErrInvalidInput
+	}
+
+	// audience(=우리 클라이언트 ID)와 구글 서명을 검증한다.
+	payload, err := idtoken.Validate(ctx, idToken, s.googleClientID)
+	if err != nil {
+		return domain.User{}, "", domain.ErrUnauthorized
+	}
+
+	sub := payload.Subject
+	email, _ := payload.Claims["email"].(string)
+	name, _ := payload.Claims["name"].(string)
+	if name == "" {
+		name = defaultDisplayName(email)
+	}
+
+	// 기존 구글 계정이면 그대로 로그인.
+	user, err := s.users.GetUserByGoogleSub(ctx, sub)
+	if err == nil {
+		token, err := s.issueToken(user.ID)
+		if err != nil {
+			return domain.User{}, "", err
+		}
+		return user, token, nil
+	}
+	if !errors.Is(err, domain.ErrNotFound) {
+		return domain.User{}, "", err
+	}
+
+	// 신규 가입 — username 충돌 시 랜덤 접미사를 붙여 재시도.
+	base := usernameFromEmail(email)
+	for attempt := 0; attempt < 5; attempt++ {
+		username := base
+		if attempt > 0 {
+			username = base + "_" + randomSuffix()
+		}
+		user, err = s.users.CreateGoogleUser(ctx, username, name, email, sub)
+		if err == nil {
+			token, err := s.issueToken(user.ID)
+			if err != nil {
+				return domain.User{}, "", err
+			}
+			return user, token, nil
+		}
+		if !isDuplicateError(err) {
+			return domain.User{}, "", err
+		}
+	}
+	return domain.User{}, "", domain.ErrConflict
+}
+
+// usernameFromEmail — 이메일 로컬파트에서 영숫자만 추려 username 후보를 만든다.
+func usernameFromEmail(email string) string {
+	local, _, _ := strings.Cut(email, "@")
+	var b strings.Builder
+	for _, r := range strings.ToLower(local) {
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '_' {
+			b.WriteRune(r)
+		}
+	}
+	s := b.String()
+	if s == "" {
+		return "user"
+	}
+	return s
+}
+
+// defaultDisplayName — 이름이 없을 때 이메일 로컬파트를 표시이름으로 쓴다.
+func defaultDisplayName(email string) string {
+	if local, _, ok := strings.Cut(email, "@"); ok && local != "" {
+		return local
+	}
+	return "사용자"
+}
+
+// randomSuffix — username 충돌 회피용 짧은 랜덤 문자열.
+func randomSuffix() string {
+	b := make([]byte, 3)
+	_, _ = rand.Read(b)
+	return base64.RawURLEncoding.EncodeToString(b)
 }
 
 // DeleteAccount — 사용자 데이터 전체 삭제.

@@ -11,6 +11,8 @@ import (
 type UserRepo interface {
 	CreateUser(ctx context.Context, username, displayName, passwordHash string) (domain.User, error)
 	GetUserByUsername(ctx context.Context, username string) (domain.User, error)
+	GetUserByGoogleSub(ctx context.Context, googleSub string) (domain.User, error)
+	CreateGoogleUser(ctx context.Context, username, displayName, email, googleSub string) (domain.User, error)
 	GetUserByID(ctx context.Context, userID int64) (domain.User, error)
 	UpdateDisplayName(ctx context.Context, userID int64, displayName string) (domain.User, error)
 	UpdateThemeLanguage(ctx context.Context, userID int64, theme, language *string) (domain.User, error)

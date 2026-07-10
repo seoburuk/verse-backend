@@ -32,6 +32,30 @@ func (r *pgUserRepo) CreateUser(ctx context.Context, username, displayName, pass
 	return toDomainUser(row), nil
 }
 
+func (r *pgUserRepo) GetUserByGoogleSub(ctx context.Context, googleSub string) (domain.User, error) {
+	row, err := r.q.GetUserByGoogleSub(ctx, pgtype.Text{String: googleSub, Valid: true})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.User{}, domain.ErrNotFound
+		}
+		return domain.User{}, err
+	}
+	return toDomainUser(row), nil
+}
+
+func (r *pgUserRepo) CreateGoogleUser(ctx context.Context, username, displayName, email, googleSub string) (domain.User, error) {
+	row, err := r.q.CreateGoogleUser(ctx, db.CreateGoogleUserParams{
+		Username:    username,
+		DisplayName: displayName,
+		Email:       pgtype.Text{String: email, Valid: email != ""},
+		GoogleSub:   pgtype.Text{String: googleSub, Valid: true},
+	})
+	if err != nil {
+		return domain.User{}, err
+	}
+	return toDomainUser(row), nil
+}
+
 func (r *pgUserRepo) GetUserByUsername(ctx context.Context, username string) (domain.User, error) {
 	row, err := r.q.GetUserByUsername(ctx, username)
 	if err != nil {
@@ -137,6 +161,8 @@ func toDomainUser(u db.User) domain.User {
 		CreatedAt:    u.CreatedAt.Time, // pgtype.Timestamptz → time.Time
 		Theme:        u.Theme,
 		Language:     u.Language,
+		Email:        u.Email.String,
+		GoogleSub:    u.GoogleSub.String,
 	}
 	if u.DisplayNameUpdatedAt.Valid {
 		t := u.DisplayNameUpdatedAt.Time

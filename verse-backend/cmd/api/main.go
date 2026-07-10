@@ -67,7 +67,7 @@ func run() error {
 	courseRepo  := repository.NewCourseRepo(pool)
 	attemptRepo := repository.NewAttemptRepo(pool)
 
-	authSvc    := service.NewAuthService(userRepo, cfg.JWTSecret, cfg.JWTAccessTTL)
+	authSvc    := service.NewAuthService(userRepo, cfg.JWTSecret, cfg.JWTAccessTTL, cfg.GoogleClientID)
 	courseSvc  := service.NewCourseService(courseRepo)
 	attemptSvc := service.NewAttemptService(courseRepo, attemptRepo, userRepo)
 	rankingSvc := service.NewRankingService(attemptRepo)
