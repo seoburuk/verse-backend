@@ -16,6 +16,16 @@
       "autoPort": true
     },
     {
+      "name": "verse-web-next-prod-api",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "API_URL=https://www.pixbible.cloud/v1",
+        "npm", "run", "--prefix", "verse-web-next", "dev"
+      ],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
       "name": "verse-backend",
       "runtimeExecutable": "env",
       "runtimeArgs": [

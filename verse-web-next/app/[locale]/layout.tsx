@@ -7,11 +7,10 @@ import { getMessages, setRequestLocale } from "next-intl/server";
 import { AuthProvider } from "@/lib/store/AuthContext";
 import { Footer } from "@/components/Footer";
 import { routing, type Locale } from "@/i18n/routing";
+import { SITE_URL } from "@/lib/site";
 import "../globals.css";
 
 const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://pixbible.example";
 
 const SITE_META: Record<Locale, { title: string; template: string; desc: string; keywords: string[]; ogLocale: string }> = {
   ko: {

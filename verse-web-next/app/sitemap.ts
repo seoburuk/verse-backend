@@ -1,8 +1,7 @@
 import type { MetadataRoute } from "next";
-import { listCoursesServer } from "../lib/api/server";
+import { getCourseServer, listCoursesServer } from "../lib/api/server";
 import { CATEGORY_ORDER } from "../lib/categories";
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://pixbible.example";
+import { SITE_URL } from "../lib/site";
 
 // path는 "/"로 시작하는 로케일 비의존 경로. ko(기본, 프리픽스 없음)와 en(/en) 두 URL을
 // 각각 항목으로 내보내고, 둘 다 동일한 hreflang alternates를 갖게 한다.
@@ -48,5 +47,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entries(`/courses/${c.slug}`, { changeFrequency: "monthly", priority: 0.8 }),
   );
 
-  return [...base, ...categoryEntries, ...courseEntries];
+  // 섹션(구절 목록) 페이지 — 실제 구절 텍스트가 담긴 SEO 핵심 페이지.
+  // 코스별 조회 실패는 건너뛰고 나머지는 계속 수집한다.
+  const sectionEntries: MetadataRoute.Sitemap = [];
+  for (const c of courses) {
+    try {
+      const detail = await getCourseServer(c.slug);
+      for (const s of detail.sections ?? []) {
+        sectionEntries.push(
+          ...entries(`/courses/${c.slug}/sections/${s.section_id}`, { changeFrequency: "monthly", priority: 0.6 }),
+        );
+      }
+    } catch {
+      // skip
+    }
+  }
+
+  return [...base, ...categoryEntries, ...courseEntries, ...sectionEntries];
 }

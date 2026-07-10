@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://pixbible.example";
+import { SITE_URL } from "../lib/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -16,6 +15,11 @@ export default function robots(): MetadataRoute.Robots {
         "/en/dashboard",
         "/en/settings",
         "/en/bookmarks",
+        // 인터랙티브 학습 페이지 — 클라이언트 렌더링 씬 콘텐츠라 색인 대상에서 제외
+        "/courses/*/memorize",
+        "/courses/*/complete",
+        "/en/courses/*/memorize",
+        "/en/courses/*/complete",
       ],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,

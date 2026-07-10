@@ -1,6 +1,6 @@
-import type { Course, CourseDetail } from "./courses";
+import type { Course, CourseDetail, SectionDetail } from "./courses";
 
-export type { Course, CourseDetail };
+export type { Course, CourseDetail, SectionDetail };
 
 const API = process.env.API_URL ?? "http://localhost:8080/v1";
 
@@ -16,4 +16,8 @@ export function listCoursesServer(): Promise<Course[]> {
 
 export function getCourseServer(slug: string): Promise<CourseDetail> {
   return serverFetch<CourseDetail>(`/courses/${slug}`);
+}
+
+export function getSectionServer(id: number): Promise<SectionDetail> {
+  return serverFetch<SectionDetail>(`/sections/${id}`);
 }

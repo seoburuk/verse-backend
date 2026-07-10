@@ -6,6 +6,7 @@ import { getCourseServer, listCoursesServer } from "@/lib/api/server";
 import { pickLocalized } from "@/lib/api/courses";
 import CourseDetailPersonal from "@/components/courses/CourseDetailPersonal";
 import CourseItemList from "@/components/courses/CourseItemList";
+import { SITE_URL } from "@/lib/site";
 
 export async function generateStaticParams() {
   try {
@@ -83,11 +84,27 @@ export default async function CourseDetailPage({
         })),
   };
 
+  const prefix = locale === "ko" ? "" : "/en";
+  const tMeta = await getTranslations("meta");
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "PIX BIBLE", item: `${SITE_URL}${prefix || "/"}` },
+      { "@type": "ListItem", position: 2, name: tMeta("coursesTitle"), item: `${SITE_URL}${prefix}/courses` },
+      { "@type": "ListItem", position: 3, name: courseTitle },
+    ],
+  };
+
   return (
     <div className="page">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <header className="page-header">
         <Link href="/courses" className="btn-link">{t("backToCourses")}</Link>

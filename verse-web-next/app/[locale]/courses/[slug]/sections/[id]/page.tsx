@@ -1,86 +1,93 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { useTranslations, useLocale } from "next-intl";
-import { useParams } from "next/navigation";
-import { useRouter } from "@/i18n/routing";
-import { getSection, getCourse, pickLocalized, type SectionDetail } from "@/lib/api/courses";
-import { getProgress } from "@/lib/api/progress";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Link, type Locale } from "@/i18n/routing";
+import { getCourseServer, getSectionServer } from "@/lib/api/server";
+import { pickLocalized } from "@/lib/api/courses";
 import { bookRef } from "@/lib/bookRef";
-import { itemsCacheKey } from "@/lib/itemsCache";
-import { PixelIcon } from "@/components/PixelIcon";
+import { SITE_URL } from "@/lib/site";
+import SectionItemList from "@/components/courses/SectionItemList";
 
-export default function SectionDetailPage() {
-  const params = useParams<{ slug: string; id: string }>();
-  const { slug, id: sectionId } = params;
-  const router = useRouter();
-  const t = useTranslations("section");
-  const locale = useLocale();
-  const [section, setSection] = useState<SectionDetail | null>(null);
-  const [courseTitle, setCourseTitle] = useState<string | null>(null);
-  const [cleared, setCleared] = useState<Set<string>>(new Set());
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+// 구절 텍스트가 초기 HTML에 담기도록 서버에서 fetch해 렌더링한다 (SEO 핵심 페이지).
 
-  useEffect(() => {
-    if (!sectionId) return;
-    // 게스트는 진행도 조회(401)가 실패해도 구절 목록은 보여준다.
-    Promise.all([getSection(Number(sectionId)), getCourse(slug), getProgress().catch(() => ({ items: [] }))])
-      .then(([s, c, p]) => {
-        setSection(s);
-        setCourseTitle(pickLocalized(c.title, c.title_en, locale));
-        setCleared(new Set(p.items.filter((it) => it.cleared).map((it) => `${it.book}-${it.chapter}-${it.verse}`)));
-      })
-      .catch((e: Error) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, [sectionId, slug]);
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale; slug: string; id: string }>;
+}): Promise<Metadata> {
+  const { locale, slug, id } = await params;
+  const path = `/courses/${slug}/sections/${id}`;
+  try {
+    const [section, course] = await Promise.all([getSectionServer(Number(id)), getCourseServer(slug)]);
+    const sectionTitle = pickLocalized(section.title, section.title_en, locale);
+    const courseTitle = pickLocalized(course.title, course.title_en, locale);
+    const first = section.items[0];
+    const description = first
+      ? `${bookRef(first.book, first.chapter, first.verse)} — ${first.text.slice(0, 140)}`
+      : sectionTitle;
+    return {
+      title: `${sectionTitle} — ${courseTitle}`,
+      description,
+      alternates: {
+        canonical: locale === "ko" ? path : `/en${path}`,
+        languages: { ko: path, en: `/en${path}` },
+      },
+      openGraph: {
+        title: `${sectionTitle} — ${courseTitle}`,
+        description,
+      },
+    };
+  } catch {
+    return { title: pickLocalized("구절 목록", "Verse list", locale) };
+  }
+}
+
+export default async function SectionDetailPage({
+  params,
+}: {
+  params: Promise<{ locale: Locale; slug: string; id: string }>;
+}) {
+  const { locale, slug, id } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("section");
+  const tMeta = await getTranslations("meta");
+
+  let section, course;
+  try {
+    [section, course] = await Promise.all([getSectionServer(Number(id)), getCourseServer(slug)]);
+  } catch {
+    notFound();
+  }
+
+  const sectionTitle = pickLocalized(section.title, section.title_en, locale);
+  const courseTitle = pickLocalized(course.title, course.title_en, locale);
+  const prefix = locale === "ko" ? "" : "/en";
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "PIX BIBLE", item: `${SITE_URL}${prefix || "/"}` },
+      { "@type": "ListItem", position: 2, name: tMeta("coursesTitle"), item: `${SITE_URL}${prefix}/courses` },
+      { "@type": "ListItem", position: 3, name: courseTitle, item: `${SITE_URL}${prefix}/courses/${slug}` },
+      { "@type": "ListItem", position: 4, name: sectionTitle },
+    ],
+  };
 
   return (
     <div className="page">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <header className="page-header">
-        <button className="btn-link" onClick={() => router.push(`/courses/${slug}`)}>{t("backToCourse", { title: courseTitle ?? t("fallbackCourse") })}</button>
+        <Link href={`/courses/${slug}`} className="btn-link">
+          {t("backToCourse", { title: courseTitle })}
+        </Link>
+        <h1 className="title">{sectionTitle}</h1>
       </header>
       <main className="content">
-        {loading && <p className="muted">{t("loading")}</p>}
-        {error && <p className="error-msg">{error}</p>}
-        <div className="item-list">
-          {section && (() => {
-            // 연속된 topic 기준으로 그룹핑 (전체 인덱스는 memorize ?i= 파라미터에 그대로 사용)
-            const groups: { topic: string; items: { item: typeof section.items[0]; index: number }[] }[] = [];
-            section.items.forEach((item, index) => {
-              const last = groups[groups.length - 1];
-              if (last && last.topic === item.topic) {
-                last.items.push({ item, index });
-              } else {
-                groups.push({ topic: item.topic, items: [{ item, index }] });
-              }
-            });
-            return groups.map((group) => (
-              <div key={group.topic + group.items[0].index} className="item-group">
-                {group.items.map(({ item, index }) => (
-                  <button
-                    key={item.course_item_id}
-                    className="item-card"
-                    onClick={() => {
-                      localStorage.setItem(itemsCacheKey.section(sectionId), JSON.stringify(section.items));
-                      router.push(`/courses/${slug}/sections/${sectionId}/memorize/${item.course_item_id}?i=${index}`);
-                    }}
-                  >
-                    <span className="item-topic">
-                      {cleared.has(`${item.book}-${item.chapter}-${item.verse}`) && (
-                        <span className="item-cleared">
-                          <PixelIcon name="check" />{" "}
-                        </span>
-                      )}
-                      {item.text.slice(0, 40)}
-                    </span>
-                    <span className="item-ref">{bookRef(item.book, item.chapter, item.verse)}</span>
-                  </button>
-                ))}
-              </div>
-            ));
-          })()}
-        </div>
+        <SectionItemList slug={slug} sectionId={section.section_id} items={section.items} />
       </main>
     </div>
   );
