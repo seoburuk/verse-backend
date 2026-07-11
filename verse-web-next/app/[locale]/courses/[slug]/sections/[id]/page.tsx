@@ -25,15 +25,16 @@ export async function generateMetadata({
     const description = first
       ? `${bookRef(first.book, first.chapter, first.verse)} — ${first.text.slice(0, 140)}`
       : sectionTitle;
+    const title = locale === "en" ? `${sectionTitle} — ${courseTitle} (KJV Memory Verses)` : `${sectionTitle} — ${courseTitle}`;
     return {
-      title: `${sectionTitle} — ${courseTitle}`,
+      title,
       description,
       alternates: {
         canonical: locale === "ko" ? path : `/en${path}`,
         languages: { ko: path, en: `/en${path}` },
       },
       openGraph: {
-        title: `${sectionTitle} — ${courseTitle}`,
+        title,
         description,
       },
     };

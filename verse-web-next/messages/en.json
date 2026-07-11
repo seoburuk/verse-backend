@@ -7,7 +7,7 @@
   },
   "landing": {
     "cta": "Get started",
-    "tagline": "Memorize Scripture the fun way — and pick up English along the way!",
+    "tagline": "Memorize Scripture the fun way with KJV memory verses — and pick up English along the way!",
     "feature1Title": "📖 One Verse a Day",
     "feature1Desc": "Build a daily habit of memorizing Scripture, one verse at a time — like the Shema, written on your heart.",
     "feature2Title": "🧩 Learn by Playing",
@@ -177,18 +177,18 @@
     "privacyTitle": "Privacy Policy"
   },
   "meta": {
-    "landingTitle": "PIX BIBLE — Memorize Scripture",
-    "landingDesc": "PIX BIBLE is a retro-pixel Bible memory app. Memorize Scripture from the King James Version (KJV) verse by verse with tile-ordering and typing drills.",
-    "landingOgDesc": "Memorize the King James Version (KJV) verse by verse. Topic and book memory courses included.",
-    "coursesTitle": "Bible memory courses",
-    "coursesDesc": "Browse KJV Bible memory courses by topic and category — foundations, warm-up, Old Testament, New Testament, and topical courses.",
-    "coursesOgTitle": "Bible memory courses | PIX BIBLE",
-    "coursesOgDesc": "Browse KJV Bible memory courses by topic and category.",
-    "courseDetailDesc": "{title} — a KJV memory course of {count} verses. Memorize verse by verse and write the Word on your heart.",
+    "landingTitle": "PIX BIBLE — KJV Memory Verses · Memorize Scripture",
+    "landingDesc": "Memorize Scripture one tile at a time with KJV memory verses. PIX BIBLE is a retro-pixel Bible memory app — memorize the King James Version verse by verse with tile-ordering and typing drills.",
+    "landingOgDesc": "Memorize Scripture with KJV memory verses, one tile at a time. Topic and book memory courses included.",
+    "coursesTitle": "KJV Memory Verse Courses",
+    "coursesDesc": "Browse KJV memory verse courses by topic and category — foundations, warm-up, Old Testament, New Testament, and topical courses.",
+    "coursesOgTitle": "KJV Memory Verse Courses | PIX BIBLE",
+    "coursesOgDesc": "Browse KJV memory verse courses by topic and category.",
+    "courseDetailDesc": "{title} — a course of {count} KJV memory verses. Memorize verse by verse and write the Word on your heart.",
     "courseDetailOgTitle": "{title} | PIX BIBLE",
-    "courseDetailOgDesc": "A KJV memory course of {count} verses.",
+    "courseDetailOgDesc": "A course of {count} KJV memory verses.",
     "courseDetailFallback": "Course detail",
-    "categoryTitle": "{label} courses",
-    "categoryDesc": "KJV Bible memory courses in the {label} category."
+    "categoryTitle": "{label} KJV memory verses",
+    "categoryDesc": "KJV memory verse courses in the {label} category."
   }
 }

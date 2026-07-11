@@ -21,10 +21,10 @@ const SITE_META: Record<Locale, { title: string; template: string; desc: string;
     ogLocale: "ko_KR",
   },
   en: {
-    title: "PIX BIBLE — Memorize Scripture",
+    title: "PIX BIBLE — KJV Memory Verses · Memorize Scripture",
     template: "%s | PIX BIBLE",
-    desc: "PIX BIBLE is a retro-pixel Bible memory app. Memorize Scripture from the King James Version (KJV) verse by verse with tile-ordering and typing drills. Topic and book courses included.",
-    keywords: ["Bible memory", "memorize Scripture", "Bible memorize", "KJV memorization", "Scripture memory app"],
+    desc: "Memorize Scripture one tile at a time with KJV memory verses. PIX BIBLE is a retro-pixel Bible memory app — memorize the King James Version verse by verse with tile-ordering and typing drills. Topic and book courses included.",
+    keywords: ["kjv memory verse", "kjv memory verses", "memorize scripture", "scripture memory", "king james memory verses", "Bible memory app"],
     ogLocale: "en_US",
   },
 };
