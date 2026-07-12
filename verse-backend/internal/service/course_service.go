@@ -18,10 +18,16 @@ type CourseDetail struct {
 
 type CourseService struct {
 	courses repository.CourseRepo
+	verses  repository.VerseRepo
 }
 
-func NewCourseService(courses repository.CourseRepo) *CourseService {
-	return &CourseService{courses: courses}
+func NewCourseService(courses repository.CourseRepo, verses repository.VerseRepo) *CourseService {
+	return &CourseService{courses: courses, verses: verses}
+}
+
+// GetVerse — 책/장/절 번호로 성경 구절 하나를 반환 (공개 구절 공유 페이지용).
+func (s *CourseService) GetVerse(ctx context.Context, book, chapter, verse int16) (domain.Verse, error) {
+	return s.verses.GetVerse(ctx, book, chapter, verse)
 }
 
 func (s *CourseService) ListCourses(ctx context.Context) ([]domain.Course, error) {

@@ -3,10 +3,13 @@
 import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "@/i18n/routing";
+import { useAuth } from "@/lib/hooks/useAuth";
 import { getStats, type Stats } from "@/lib/api/stats";
 import { CATEGORY_ORDER } from "@/lib/categories";
 import { bookName } from "@/lib/bookRef";
+import { buildMilestoneShareUrl } from "@/lib/share";
 import { PixelIcon } from "@/components/PixelIcon";
+import { ShareButton } from "@/components/ShareButton";
 
 const HIDDEN_CATEGORIES = new Set(["ot", "nt", "topic"]);
 
@@ -15,6 +18,8 @@ export default function DashboardPage() {
   const locale = useLocale();
   const t = useTranslations("dashboard");
   const tc = useTranslations("categories");
+  const tShare = useTranslations("share");
+  const { user } = useAuth();
   const [stats, setStats] = useState<Stats | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -63,6 +68,15 @@ export default function DashboardPage() {
                 <span className="dash-summary-label">{t("longestStreak")}</span>
               </div>
             </div>
+
+            {stats.total_cleared > 0 && (
+              <ShareButton
+                url={buildMilestoneShareUrl(locale, stats.total_cleared, user?.display_name ?? "")}
+                title="PIX BIBLE"
+                text={tShare("dashboardShareText", { count: stats.total_cleared })}
+                label={tShare("milestoneShareButton")}
+              />
+            )}
 
             <div className="section-group">
               <h2 className="section-title">{t("categoryProgress")}</h2>

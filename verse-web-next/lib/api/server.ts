@@ -21,3 +21,14 @@ export function getCourseServer(slug: string): Promise<CourseDetail> {
 export function getSectionServer(id: number): Promise<SectionDetail> {
   return serverFetch<SectionDetail>(`/sections/${id}`);
 }
+
+export interface Verse {
+  book: number;
+  chapter: number;
+  verse: number;
+  text: string;
+}
+
+export function getVerseServer(book: number, chapter: number, verse: number): Promise<Verse> {
+  return serverFetch<Verse>(`/verses/${book}/${chapter}/${verse}`);
+}

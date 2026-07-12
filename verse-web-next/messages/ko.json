@@ -190,5 +190,18 @@
     "courseDetailFallback": "코스 상세",
     "categoryTitle": "{label} 코스",
     "categoryDesc": "KJV 성경 {label} 카테고리 암송 코스 목록."
+  },
+  "share": {
+    "shareButton": "공유하기",
+    "copied": "링크 복사됨!",
+    "verseCta": "나도 외워보기",
+    "verseShareText": "{ref} 외웠어요!",
+    "versePageTagline": "픽셀로 외우는 KJV 성경 — PIX BIBLE",
+    "milestoneTitle": "{count}절 암송 달성!",
+    "milestoneShareText": "성경 {count}절을 외웠어요!",
+    "milestonePageTitle": "{name}님이 성경 {count}절을 외웠어요",
+    "milestoneCta": "나도 도전하기",
+    "dashboardShareText": "지금까지 성경 {count}절을 외웠어요!",
+    "milestoneShareButton": "이 기록 공유하기"
   }
 }

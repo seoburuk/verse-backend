@@ -55,6 +55,7 @@ func NewRouter(pool *pgxpool.Pool, h *Handler, auth *service.AuthService, corsOr
 		r.Get("/courses/version", h.GetCoursesVersion)
 		r.Get("/courses/{slug}", h.GetCourse)
 		r.Get("/sections/{id}", h.GetSection)
+		r.Get("/verses/{book}/{chapter}/{verse}", h.GetVerse)
 
 		// 보호 엔드포인트 — JWT 필수
 		r.Group(func(r chi.Router) {

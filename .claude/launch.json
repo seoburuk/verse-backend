@@ -26,6 +26,13 @@
       "autoPort": true
     },
     {
+      "name": "verse-web-next-prod",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "--prefix", "verse-web-next", "start"],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
       "name": "verse-backend",
       "runtimeExecutable": "env",
       "runtimeArgs": [

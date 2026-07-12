@@ -104,9 +104,13 @@ func (q *Queries) GetGradeDistribution(ctx context.Context, userID int64) (GetGr
 }
 
 const getTotalCleared = `-- name: GetTotalCleared :one
-SELECT COUNT(*) AS total FROM progress WHERE user_id = $1 AND cleared
+SELECT COUNT(DISTINCT ci.verse_id) AS total
+FROM progress p
+JOIN course_items ci ON ci.id = p.course_item_id
+WHERE p.user_id = $1 AND p.cleared
 `
 
+// 같은 구절이 여러 코스에 수록돼 progress 행이 중복돼도 실제 외운 구절 수를 반환.
 func (q *Queries) GetTotalCleared(ctx context.Context, userID int64) (int64, error) {
 	row := q.db.QueryRow(ctx, getTotalCleared, userID)
 	var total int64

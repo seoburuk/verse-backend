@@ -10,8 +10,13 @@ import { TypeScaffold } from "./TypeScaffold";
 import { recordGrade, clearGrades } from "../../lib/sessionGrades";
 import { getFavorites, addFavorite, removeFavorite } from "../../lib/api/favorites";
 import { getLives, consumeLife } from "../../lib/api/lives";
+import { getStats } from "../../lib/api/stats";
 import { pickLocalized, type CourseItem } from "../../lib/api/courses";
+import { claimMilestone } from "../../lib/milestones";
+import { buildVerseShareUrl, buildMilestoneShareUrl } from "../../lib/share";
+import { bookName } from "../../lib/bookRef";
 import { PixelIcon } from "../PixelIcon";
+import { ShareButton } from "../ShareButton";
 
 const confettiColors = ["var(--green)", "var(--yellow)", "var(--pink)", "var(--pink-soft)"];
 
@@ -41,8 +46,9 @@ export function MemorizeView({ items, index, sectionId, backHref, doneHref, buil
 
 function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildItemHref }: Props) {
   const router = useRouter();
-  const { isAuthed } = useAuth();
+  const { isAuthed, user } = useAuth();
   const t = useTranslations("memorize");
+  const tShare = useTranslations("share");
   const locale = useLocale();
   const gradeText = (g: string | null) =>
     g === "green" ? t("gradeGreen") : g === "yellow" ? t("gradeYellow") : g === "red" ? t("gradeRed") : "";
@@ -111,6 +117,16 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
     if (!isAuthed) return;
     getLives().then((l) => setLives(l.lives)).catch(() => {});
   }, [isAuthed]);
+
+  // 마일스톤 감지 — green 판정 직후 최신 total_cleared를 조회해 임계값 통과 시 축하 카드.
+  // 받아쓰기는 progress를 갱신하지 않으므로 제외.
+  const [milestone, setMilestone] = useState<number | null>(null);
+  useEffect(() => {
+    if (phase !== "result" || serverGrade !== "green" || !isAuthed || mode === "dictation") return;
+    getStats()
+      .then((s) => setMilestone(claimMilestone(s.total_cleared)))
+      .catch(() => {});
+  }, [phase, serverGrade, isAuthed, mode]);
 
   // 뒤로가기 — 암송(recall) 진행 중 이탈은 목숨 1을 소모한다(포기 페널티). 게스트는 페널티 없음.
   function handleBack() {
@@ -288,12 +304,33 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
             <div className="verse-box">
               <p className="verse-text">{item.text}</p>
             </div>
+            {milestone !== null && (
+              <div className="milestone-card">
+                <div className="milestone-icon">
+                  <PixelIcon name="star" size={32} />
+                </div>
+                <p className="milestone-title">{tShare("milestoneTitle", { count: milestone })}</p>
+                <ShareButton
+                  url={buildMilestoneShareUrl(locale, milestone, user?.display_name ?? "")}
+                  title="PIX BIBLE"
+                  text={tShare("milestoneShareText", { count: milestone })}
+                  label={tShare("milestoneShareButton")}
+                />
+              </div>
+            )}
             <div className="result-actions">
               {serverGrade === "green" ? (
                 <>
                   <button className="btn-secondary" onClick={reset}>
                     {t("retry")}
                   </button>
+                  <ShareButton
+                    url={buildVerseShareUrl(locale, item.book, item.chapter, item.verse)}
+                    title="PIX BIBLE"
+                    text={tShare("verseShareText", {
+                      ref: `${bookName(item.book, locale)} ${item.chapter}:${item.verse}`,
+                    })}
+                  />
                   <button
                     className="btn-primary"
                     onClick={() => {

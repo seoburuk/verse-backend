@@ -190,5 +190,18 @@
     "courseDetailFallback": "Course detail",
     "categoryTitle": "{label} KJV memory verses",
     "categoryDesc": "KJV memory verse courses in the {label} category."
+  },
+  "share": {
+    "shareButton": "Share",
+    "copied": "Link copied!",
+    "verseCta": "Memorize it too",
+    "verseShareText": "I memorized {ref}!",
+    "versePageTagline": "Memorize the KJV Bible, pixel by pixel — PIX BIBLE",
+    "milestoneTitle": "{count} verses memorized!",
+    "milestoneShareText": "I memorized {count} Bible verses!",
+    "milestonePageTitle": "{name} memorized {count} Bible verses",
+    "milestoneCta": "Take the challenge",
+    "dashboardShareText": "I have memorized {count} Bible verses so far!",
+    "milestoneShareButton": "Share this milestone"
   }
 }
