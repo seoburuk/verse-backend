@@ -14,17 +14,17 @@ const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
 
 const SITE_META: Record<Locale, { title: string; template: string; desc: string; keywords: string[]; ogLocale: string }> = {
   ko: {
-    title: "PIX BIBLE — 성경 암기 앱",
+    title: "PIX BIBLE (pixbible) — 성경 암기 앱",
     template: "%s | PIX BIBLE 성경 암기",
-    desc: "성경 암기 앱 PIX BIBLE — 킹제임스 성경(KJV)으로 영어 성경 암기를 절 단위로 하세요. 주제별·권별 성경 암송 코스 제공.",
-    keywords: ["성경 암기", "영어 성경 암기", "성경 암송", "KJV 암기", "킹제임스 성경 암기"],
+    desc: "성경 암기 앱 PIX BIBLE(픽스바이블, pixbible) — 킹제임스 성경(KJV)으로 영어 성경 암기를 절 단위로 하세요. 주제별·권별 성경 암송 코스 제공.",
+    keywords: ["pixbible", "픽스바이블", "PIX BIBLE", "성경 암기", "영어 성경 암기", "성경 암송", "KJV 암기", "킹제임스 성경 암기"],
     ogLocale: "ko_KR",
   },
   en: {
-    title: "PIX BIBLE — KJV Memory Verses · Memorize Scripture",
+    title: "PIX BIBLE (pixbible) — KJV Memory Verses · Memorize Scripture",
     template: "%s | PIX BIBLE",
-    desc: "Memorize Scripture one tile at a time with KJV memory verses. PIX BIBLE is a retro-pixel Bible memory app — memorize the King James Version verse by verse with tile-ordering and typing drills. Topic and book courses included.",
-    keywords: ["kjv memory verse", "kjv memory verses", "memorize scripture", "scripture memory", "king james memory verses", "Bible memory app"],
+    desc: "Memorize Scripture one tile at a time with KJV memory verses. PIX BIBLE (pixbible) is a retro-pixel Bible memory app — memorize the King James Version verse by verse with tile-ordering and typing drills. Topic and book courses included.",
+    keywords: ["pixbible", "PIX BIBLE", "kjv memory verse", "kjv memory verses", "memorize scripture", "scripture memory", "king james memory verses", "Bible memory app"],
     ogLocale: "en_US",
   },
 };
@@ -89,6 +89,7 @@ export default async function LocaleLayout({
         "@id": `${SITE_URL}/#website`,
         url: SITE_URL,
         name: "PIX BIBLE",
+        alternateName: ["pixbible", "PIXBIBLE", "pixbible.cloud"],
         description: meta.desc,
         inLanguage: locale,
       },
@@ -96,6 +97,7 @@ export default async function LocaleLayout({
         "@type": "WebApplication",
         "@id": `${SITE_URL}/#app`,
         name: "PIX BIBLE",
+        alternateName: ["pixbible", "pixbible.cloud"],
         url: SITE_URL,
         applicationCategory: "EducationalApplication",
         operatingSystem: "All",

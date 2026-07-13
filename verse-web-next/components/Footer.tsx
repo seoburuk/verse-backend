@@ -10,7 +10,7 @@ export async function Footer() {
         <Link href="/terms">{t("terms")}</Link>
         <Link href="/privacy">{t("privacy")}</Link>
       </nav>
-      <p className="site-footer-copy">© {new Date().getFullYear()} PIX BIBLE</p>
+      <p className="site-footer-copy">© {new Date().getFullYear()} PIX BIBLE · pixbible.cloud</p>
     </footer>
   );
 }
