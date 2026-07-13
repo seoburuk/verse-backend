@@ -13,7 +13,12 @@ import { getLives, consumeLife } from "../../lib/api/lives";
 import { getStats } from "../../lib/api/stats";
 import { pickLocalized, type CourseItem } from "../../lib/api/courses";
 import { claimMilestone } from "../../lib/milestones";
-import { buildVerseShareUrl, buildMilestoneShareUrl } from "../../lib/share";
+import {
+  buildVerseShareUrl,
+  buildMilestoneShareUrl,
+  buildVerseOgUrl,
+  buildMilestoneOgUrl,
+} from "../../lib/share";
 import { bookName } from "../../lib/bookRef";
 import { PixelIcon } from "../PixelIcon";
 import { ShareButton } from "../ShareButton";
@@ -312,6 +317,7 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
                 <p className="milestone-title">{tShare("milestoneTitle", { count: milestone })}</p>
                 <ShareButton
                   url={buildMilestoneShareUrl(locale, milestone, user?.display_name ?? "")}
+                  imageUrl={buildMilestoneOgUrl(locale, milestone, user?.display_name ?? "")}
                   title="PIX BIBLE"
                   text={tShare("milestoneShareText", { count: milestone })}
                   label={tShare("milestoneShareButton")}
@@ -326,6 +332,7 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
                   </button>
                   <ShareButton
                     url={buildVerseShareUrl(locale, item.book, item.chapter, item.verse)}
+                    imageUrl={buildVerseOgUrl(locale, item.book, item.chapter, item.verse)}
                     title="PIX BIBLE"
                     text={tShare("verseShareText", {
                       ref: `${bookName(item.book, locale)} ${item.chapter}:${item.verse}`,

@@ -193,6 +193,7 @@
   },
   "share": {
     "shareButton": "Share",
+    "sharing": "Preparing…",
     "copied": "Link copied!",
     "verseCta": "Memorize it too",
     "verseShareText": "I memorized {ref}!",

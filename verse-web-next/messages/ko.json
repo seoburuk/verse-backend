@@ -193,6 +193,7 @@
   },
   "share": {
     "shareButton": "공유하기",
+    "sharing": "공유 준비 중…",
     "copied": "링크 복사됨!",
     "verseCta": "나도 외워보기",
     "verseShareText": "{ref} 외웠어요!",
