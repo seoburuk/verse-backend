@@ -8,7 +8,14 @@ export async function generateMetadata({
   params: { locale: Locale };
 }): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: "legal" });
-  return { title: t("termsTitle") };
+  const path = "/terms";
+  return {
+    title: t("termsTitle"),
+    alternates: {
+      canonical: locale === "ko" ? path : `/en${path}`,
+      languages: { ko: path, en: `/en${path}` },
+    },
+  };
 }
 
 const COPY: Record<Locale, { title: string; sections: { h: string; p: string[] }[] }> = {

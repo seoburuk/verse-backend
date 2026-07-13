@@ -24,6 +24,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, slug } = await params;
   const t = await getTranslations({ locale, namespace: "meta" });
+  const path = `/courses/${slug}`;
+  const alternates = {
+    canonical: locale === "ko" ? path : `/en${path}`,
+    languages: { ko: path, en: `/en${path}` },
+  };
   try {
     const course = await getCourseServer(slug);
     const title = pickLocalized(course.title, course.title_en, locale);
@@ -33,13 +38,14 @@ export async function generateMetadata({
     return {
       title,
       description: t("courseDetailDesc", { title, count: totalVerses }),
+      alternates,
       openGraph: {
         title: t("courseDetailOgTitle", { title }),
         description: t("courseDetailOgDesc", { count: totalVerses }),
       },
     };
   } catch {
-    return { title: t("courseDetailFallback") };
+    return { title: t("courseDetailFallback"), alternates };
   }
 }
 

@@ -14,9 +14,14 @@ export async function generateMetadata({
   params: { locale: Locale };
 }): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: "meta" });
+  const path = "/courses";
   return {
     title: t("coursesTitle"),
     description: t("coursesDesc"),
+    alternates: {
+      canonical: locale === "ko" ? path : `/en${path}`,
+      languages: { ko: path, en: `/en${path}` },
+    },
     openGraph: {
       title: t("coursesOgTitle"),
       description: t("coursesOgDesc"),

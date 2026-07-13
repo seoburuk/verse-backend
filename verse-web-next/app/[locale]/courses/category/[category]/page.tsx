@@ -15,9 +15,14 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "meta" });
   const tc = await getTranslations({ locale, namespace: "categories" });
   const label = tc.has(category) ? tc(category) : category;
+  const path = `/courses/category/${category}`;
   return {
     title: t("categoryTitle", { label }),
     description: t("categoryDesc", { label }),
+    alternates: {
+      canonical: locale === "ko" ? path : `/en${path}`,
+      languages: { ko: path, en: `/en${path}` },
+    },
   };
 }
 
