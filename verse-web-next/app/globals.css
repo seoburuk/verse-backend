@@ -1140,6 +1140,15 @@ body {
   color: var(--green);
 }
 
+/* 상위권과 내 주변 순위 사이 생략 구분자 */
+.rank-gap {
+  text-align: center;
+  color: var(--muted);
+  font-weight: bold;
+  letter-spacing: 0.5rem;
+  margin: 0.25rem 0;
+}
+
 /* 1·2·3위 — 금/은/동 픽셀 프레임 */
 .rank-row.rank-1 { border-color: var(--yellow); box-shadow: 4px 4px 0 var(--yellow); }
 .rank-row.rank-2 { border-color: var(--silver); box-shadow: 4px 4px 0 var(--silver); }

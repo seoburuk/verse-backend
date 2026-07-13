@@ -13,4 +13,5 @@ type RankingEntryDTO struct {
 type RankingResponse struct {
 	Entries []RankingEntryDTO `json:"entries"`
 	Me      *RankingEntryDTO  `json:"me"`
+	Nearby  []RankingEntryDTO `json:"nearby,omitempty"`
 }

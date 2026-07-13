@@ -61,7 +61,12 @@ export default function RankingsPage() {
             {data.me && !meInTop && (
               <div className="section-group">
                 <h2 className="section-title">{t("myRank")}</h2>
-                <div className="rank-list">{row(data.me, true)}</div>
+                <div className="rank-gap">…</div>
+                <div className="rank-list">
+                  {(data.nearby?.length ? data.nearby : [data.me]).map((e) =>
+                    row(e, data.me?.rank === e.rank && data.me?.username === e.username)
+                  )}
+                </div>
               </div>
             )}
           </>

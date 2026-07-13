@@ -33,10 +33,14 @@ func rankScore(r domain.RankingRaw) int {
 	return r.Streak*r.ClearedVerses*RankWeight + r.DictationPts
 }
 
-// RankingResult — 상위 목록 + 요청 유저 본인 순위.
+// RankingNearbySpan — 본인 기준 위/아래로 함께 보여줄 인원 수.
+const RankingNearbySpan = 2
+
+// RankingResult — 상위 목록 + 요청 유저 본인 순위 + 본인 주변 순위(상위권 밖일 때만).
 type RankingResult struct {
 	Entries []domain.RankingEntry
 	Me      *domain.RankingEntry
+	Nearby  []domain.RankingEntry
 }
 
 // GetRankings — 전체 유저 점수를 계산·정렬해 상위 N명과 요청 유저 순위를 반환한다.
@@ -49,6 +53,7 @@ func (s *RankingService) GetRankings(ctx context.Context, userID int64) (Ranking
 	ranked := rankEntries(raw)
 
 	res := RankingResult{}
+	meIdx := -1
 	for i := range ranked {
 		if i < RankingTopN {
 			res.Entries = append(res.Entries, ranked[i])
@@ -56,9 +61,28 @@ func (s *RankingService) GetRankings(ctx context.Context, userID int64) (Ranking
 		if ranked[i].UserID == userID {
 			me := ranked[i]
 			res.Me = &me
+			meIdx = i
 		}
 	}
+	res.Nearby = nearbyEntries(ranked, meIdx)
 	return res, nil
+}
+
+// nearbyEntries — 본인이 상위 N 밖일 때 본인 ±RankingNearbySpan 구간을 반환한다.
+// 상위권 안이거나 랭킹에 없으면 nil.
+func nearbyEntries(ranked []domain.RankingEntry, meIdx int) []domain.RankingEntry {
+	if meIdx < RankingTopN {
+		return nil
+	}
+	start := meIdx - RankingNearbySpan
+	if start < RankingTopN {
+		start = RankingTopN
+	}
+	end := meIdx + RankingNearbySpan
+	if end > len(ranked)-1 {
+		end = len(ranked) - 1
+	}
+	return ranked[start : end+1]
 }
 
 // rankEntries — 순수 함수. 점수 내림차순(동점은 user_id 오름차순)으로 정렬하고 rank를 매긴다.

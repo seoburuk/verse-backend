@@ -12,6 +12,7 @@ export interface RankingEntry {
 export interface Rankings {
   entries: RankingEntry[];
   me: RankingEntry | null;
+  nearby?: RankingEntry[];
 }
 
 export function getRankings(): Promise<Rankings> {

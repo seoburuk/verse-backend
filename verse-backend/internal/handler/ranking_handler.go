@@ -28,6 +28,9 @@ func (h *Handler) GetRankings(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := dto.RankingResponse{Entries: entries}
+	for _, e := range result.Nearby {
+		resp.Nearby = append(resp.Nearby, toRankingEntryDTO(e))
+	}
 	if result.Me != nil {
 		me := toRankingEntryDTO(*result.Me)
 		resp.Me = &me
