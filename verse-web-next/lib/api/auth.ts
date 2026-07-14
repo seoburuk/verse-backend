@@ -34,6 +34,13 @@ export function googleLogin(id_token: string): Promise<AuthResponse> {
   });
 }
 
+export function appleLogin(id_token: string, name?: string): Promise<AuthResponse> {
+  return apiFetch<AuthResponse>("/auth/apple", {
+    method: "POST",
+    body: JSON.stringify({ id_token, ...(name ? { name } : {}) }),
+  });
+}
+
 export function deleteAccount(): Promise<void> {
   return apiFetch<void>("/me", { method: "DELETE" });
 }

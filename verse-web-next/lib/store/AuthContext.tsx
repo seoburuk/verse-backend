@@ -5,6 +5,7 @@ import {
   login as apiLogin,
   signup as apiSignup,
   googleLogin as apiGoogleLogin,
+  appleLogin as apiAppleLogin,
   updateProfile as apiUpdateProfile,
   getMe as apiGetMe,
   type AuthResponse,
@@ -24,6 +25,7 @@ interface AuthContextValue extends AuthState {
   login: (username: string, password: string) => Promise<AuthResponse>;
   signup: (username: string, password: string, displayName: string) => Promise<AuthResponse>;
   googleLogin: (idToken: string) => Promise<AuthResponse>;
+  appleLogin: (idToken: string, name?: string) => Promise<AuthResponse>;
   updateDisplayName: (displayName: string) => Promise<void>;
   updateProfile: (patch: UpdateProfilePatch) => Promise<void>;
   logout: () => void;
@@ -112,6 +114,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return res;
   }, []);
 
+  const appleLogin = useCallback(async (idToken: string, name?: string) => {
+    const res = await apiAppleLogin(idToken, name);
+    const user: StoredUser = {
+      user_id: res.user_id,
+      username: res.username,
+      display_name: res.display_name,
+      theme: res.theme,
+      language: res.language,
+    };
+    setToken(res.access_token);
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    setState({ token: res.access_token, user });
+    return res;
+  }, []);
+
   const updateDisplayName = useCallback(async (displayName: string) => {
     const res = await apiUpdateProfile({ display_name: displayName });
     setState((prev) => {
@@ -152,6 +169,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         signup,
         googleLogin,
+        appleLogin,
         updateDisplayName,
         updateProfile,
         logout,

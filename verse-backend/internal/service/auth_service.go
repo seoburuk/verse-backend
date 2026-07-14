@@ -34,14 +34,18 @@ type AuthService struct {
 	jwtSecret      []byte
 	accessTTL      time.Duration
 	googleClientID string
+	appleBundleID  string
+	appleServiceID string
 }
 
-func NewAuthService(users repository.UserRepo, jwtSecret string, accessTTL time.Duration, googleClientID string) *AuthService {
+func NewAuthService(users repository.UserRepo, jwtSecret string, accessTTL time.Duration, googleClientID, appleBundleID, appleServiceID string) *AuthService {
 	return &AuthService{
 		users:          users,
 		jwtSecret:      []byte(jwtSecret),
 		accessTTL:      accessTTL,
 		googleClientID: googleClientID,
+		appleBundleID:  appleBundleID,
+		appleServiceID: appleServiceID,
 	}
 }
 

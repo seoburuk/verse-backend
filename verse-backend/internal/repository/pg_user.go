@@ -56,6 +56,30 @@ func (r *pgUserRepo) CreateGoogleUser(ctx context.Context, username, displayName
 	return toDomainUser(row), nil
 }
 
+func (r *pgUserRepo) GetUserByAppleSub(ctx context.Context, appleSub string) (domain.User, error) {
+	row, err := r.q.GetUserByAppleSub(ctx, pgtype.Text{String: appleSub, Valid: true})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.User{}, domain.ErrNotFound
+		}
+		return domain.User{}, err
+	}
+	return toDomainUser(row), nil
+}
+
+func (r *pgUserRepo) CreateAppleUser(ctx context.Context, username, displayName, email, appleSub string) (domain.User, error) {
+	row, err := r.q.CreateAppleUser(ctx, db.CreateAppleUserParams{
+		Username:    username,
+		DisplayName: displayName,
+		Email:       pgtype.Text{String: email, Valid: email != ""},
+		AppleSub:    pgtype.Text{String: appleSub, Valid: true},
+	})
+	if err != nil {
+		return domain.User{}, err
+	}
+	return toDomainUser(row), nil
+}
+
 func (r *pgUserRepo) GetUserByUsername(ctx context.Context, username string) (domain.User, error) {
 	row, err := r.q.GetUserByUsername(ctx, username)
 	if err != nil {

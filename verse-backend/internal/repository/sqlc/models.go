@@ -90,6 +90,7 @@ type User struct {
 	DisplayNameUpdatedAt pgtype.Timestamptz `json:"display_name_updated_at"`
 	Email                pgtype.Text        `json:"email"`
 	GoogleSub            pgtype.Text        `json:"google_sub"`
+	AppleSub             pgtype.Text        `json:"apple_sub"`
 }
 
 type VerseSegment struct {

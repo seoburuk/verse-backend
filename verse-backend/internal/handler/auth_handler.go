@@ -81,6 +81,29 @@ func (h *Handler) GoogleLogin(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (h *Handler) AppleLogin(w http.ResponseWriter, r *http.Request) {
+	var req dto.AppleLoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid json"})
+		return
+	}
+
+	user, token, err := h.auth.AppleLogin(r.Context(), req.IDToken, req.Name)
+	if err != nil {
+		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, dto.TokenResponse{
+		AccessToken: token,
+		UserID:      user.ID,
+		Username:    user.Username,
+		DisplayName: user.DisplayName,
+		Theme:       user.Theme,
+		Language:    user.Language,
+	})
+}
+
 func (h *Handler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(mw.CtxUserID).(int64)
 	if !ok {

@@ -20,6 +20,11 @@ type GoogleLoginRequest struct {
 	IDToken string `json:"id_token"`
 }
 
+type AppleLoginRequest struct {
+	IDToken string `json:"id_token"`
+	Name    string `json:"name,omitempty"` // 애플이 최초 1회만 주는 이름(선택)
+}
+
 type TokenResponse struct {
 	AccessToken string `json:"access_token"`
 	UserID      int64  `json:"user_id"`

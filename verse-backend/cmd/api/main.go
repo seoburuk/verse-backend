@@ -68,7 +68,7 @@ func run() error {
 	attemptRepo := repository.NewAttemptRepo(pool)
 	verseRepo   := repository.NewVerseRepo(pool)
 
-	authSvc    := service.NewAuthService(userRepo, cfg.JWTSecret, cfg.JWTAccessTTL, cfg.GoogleClientID)
+	authSvc    := service.NewAuthService(userRepo, cfg.JWTSecret, cfg.JWTAccessTTL, cfg.GoogleClientID, cfg.AppleBundleID, cfg.AppleServiceID)
 	courseSvc  := service.NewCourseService(courseRepo, verseRepo)
 	attemptSvc := service.NewAttemptService(courseRepo, attemptRepo, userRepo)
 	rankingSvc := service.NewRankingService(attemptRepo)

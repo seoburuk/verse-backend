@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import { ApiError } from "@/lib/api/client";
 import type { AuthResponse } from "@/lib/api/auth";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
+import AppleSignInButton from "@/components/AppleSignInButton";
 
 const SAVED_USERNAME_KEY = "kjv_saved_username";
 
@@ -21,7 +22,7 @@ export default function LoginPage() {
 }
 
 function LoginForm() {
-  const { login, signup, googleLogin } = useAuth();
+  const { login, signup, googleLogin, appleLogin } = useAuth();
   const router = useRouter();
   const { setTheme } = useTheme();
   const t = useTranslations("login");
@@ -72,6 +73,20 @@ function LoginForm() {
     setLoading(true);
     try {
       const res = await googleLogin(idToken);
+      setTheme(res.theme);
+      router.push("/courses", { locale: res.language as "ko" | "en" });
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t("genericError"));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleApple(idToken: string, name?: string) {
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await appleLogin(idToken, name);
       setTheme(res.theme);
       router.push("/courses", { locale: res.language as "ko" | "en" });
     } catch (err) {
@@ -139,6 +154,7 @@ function LoginForm() {
         </form>
         <div className="google-signin">
           <GoogleSignInButton onCredential={handleGoogle} onError={setError} />
+          <AppleSignInButton onCredential={handleApple} onError={setError} />
         </div>
         <button
           className="btn-link"

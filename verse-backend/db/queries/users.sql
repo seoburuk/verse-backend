@@ -14,6 +14,14 @@ INSERT INTO users (username, display_name, password_hash, email, google_sub)
 VALUES ($1, $2, '', $3, $4)
 RETURNING *;
 
+-- name: GetUserByAppleSub :one
+SELECT * FROM users WHERE apple_sub = $1;
+
+-- name: CreateAppleUser :one
+INSERT INTO users (username, display_name, password_hash, email, apple_sub)
+VALUES ($1, $2, '', $3, $4)
+RETURNING *;
+
 -- name: DeleteUser :exec
 DELETE FROM users WHERE id = $1;
 

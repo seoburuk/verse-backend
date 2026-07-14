@@ -50,6 +50,7 @@ func NewRouter(pool *pgxpool.Pool, h *Handler, auth *service.AuthService, corsOr
 			r.Post("/auth/signup", h.Signup)
 			r.Post("/auth/login", h.Login)
 			r.Post("/auth/google", h.GoogleLogin)
+			r.Post("/auth/apple", h.AppleLogin)
 		})
 		r.Get("/courses", h.ListCourses)
 		r.Get("/courses/version", h.GetCoursesVersion)
