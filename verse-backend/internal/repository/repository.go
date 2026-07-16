@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/seoburuk/verse-backend/internal/domain"
 )
@@ -21,6 +22,17 @@ type UserRepo interface {
 	DeleteUser(ctx context.Context, userID int64) error
 	GetLives(ctx context.Context, userID int64) (domain.Lives, error)
 	UpdateLives(ctx context.Context, userID int64, lives domain.Lives) error
+
+	// 비밀번호 찾기 / 복구 이메일
+	GetUserByVerifiedEmail(ctx context.Context, email string) (domain.User, error)
+	SetUserEmailPending(ctx context.Context, userID int64, email string) error
+	SetUserEmailVerified(ctx context.Context, userID int64) error
+	UpdatePasswordHash(ctx context.Context, userID int64, passwordHash string) error
+	CreateAuthCode(ctx context.Context, userID int64, purpose, codeHash, email string, expiresAt time.Time) error
+	GetLatestAuthCode(ctx context.Context, userID int64, purpose string) (domain.AuthCode, error)
+	IncrementAuthCodeAttempts(ctx context.Context, id int64) error
+	DeleteAuthCodes(ctx context.Context, userID int64, purpose string) error
+	CountRecentAuthCodes(ctx context.Context, userID int64, purpose string) (int64, error)
 }
 
 // CourseRepo — 코스 저장소 인터페이스.

@@ -5,7 +5,14 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/routing";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { deleteAccount } from "@/lib/api/auth";
+import {
+  deleteAccount,
+  getMe,
+  requestEmailVerification,
+  confirmEmailVerification,
+  changePassword,
+  type MeResponse,
+} from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
 import { getCourse, pickLocalized, type CourseDetail } from "@/lib/api/courses";
 import { bookRef } from "@/lib/bookRef";
@@ -33,10 +40,69 @@ export default function SettingsPage() {
   const [savingName, setSavingName] = useState(false);
   const [nameMsg, setNameMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
+  const [me, setMe] = useState<MeResponse | null>(null);
+  const [emailInput, setEmailInput] = useState("");
+  const [emailCode, setEmailCode] = useState("");
+  const [emailStep, setEmailStep] = useState<"idle" | "editing" | "verifying">("idle");
+  const [emailMsg, setEmailMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [emailLoading, setEmailLoading] = useState(false);
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [editingPassword, setEditingPassword] = useState(false);
+  const [passwordMsg, setPasswordMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
   useEffect(() => {
     setMounted(true);
     setRecallMode(getStoredMode());
+    getMe().then(setMe).catch(() => {});
   }, []);
+
+  async function handleRequestEmail() {
+    setEmailLoading(true);
+    setEmailMsg(null);
+    try {
+      await requestEmailVerification(emailInput);
+      setEmailStep("verifying");
+    } catch (e) {
+      setEmailMsg({ ok: false, text: e instanceof ApiError ? e.message : t("securityGenericError") });
+    } finally {
+      setEmailLoading(false);
+    }
+  }
+
+  async function handleConfirmEmail() {
+    setEmailLoading(true);
+    setEmailMsg(null);
+    try {
+      await confirmEmailVerification(emailCode);
+      const updated = await getMe();
+      setMe(updated);
+      setEmailStep("idle");
+      setEmailMsg({ ok: true, text: t("emailVerified") });
+    } catch (e) {
+      setEmailMsg({ ok: false, text: e instanceof ApiError ? e.message : t("securityGenericError") });
+    } finally {
+      setEmailLoading(false);
+    }
+  }
+
+  async function handleChangePassword() {
+    setPasswordLoading(true);
+    setPasswordMsg(null);
+    try {
+      await changePassword(currentPassword, newPassword);
+      setEditingPassword(false);
+      setCurrentPassword("");
+      setNewPassword("");
+      setPasswordMsg({ ok: true, text: t("passwordChanged") });
+    } catch (e) {
+      setPasswordMsg({ ok: false, text: e instanceof ApiError ? e.message : t("securityGenericError") });
+    } finally {
+      setPasswordLoading(false);
+    }
+  }
 
   function handleThemeToggle() {
     const next = theme === "dark" ? "light" : "dark";
@@ -232,6 +298,106 @@ export default function SettingsPage() {
             </div>
           </div>
         )}
+
+        <div className="section-group">
+          <h2 className="section-title">{t("security")}</h2>
+          <div className="settings-row">
+            <span>{t("recoveryEmail")}</span>
+            <span className="muted">
+              {me?.email
+                ? me.email_verified
+                  ? `${me.email} (${t("verified")})`
+                  : `${me.email} (${t("unverified")})`
+                : t("noEmail")}
+            </span>
+          </div>
+          {emailStep === "idle" && (
+            <button className="btn-link" onClick={() => { setEmailInput(me?.email ?? ""); setEmailStep("editing"); setEmailMsg(null); }}>
+              {me?.email ? t("changeEmail") : t("addEmail")}
+            </button>
+          )}
+          {emailStep === "editing" && (
+            <div className="name-edit">
+              <input
+                className="name-input"
+                type="email"
+                value={emailInput}
+                onChange={(e) => setEmailInput(e.target.value)}
+                autoFocus
+              />
+              <button className="btn-secondary" onClick={handleRequestEmail} disabled={emailLoading}>
+                {emailLoading ? t("saving") : t("sendCode")}
+              </button>
+              <button className="btn-link" onClick={() => setEmailStep("idle")} disabled={emailLoading}>
+                {t("cancel")}
+              </button>
+            </div>
+          )}
+          {emailStep === "verifying" && (
+            <div className="name-edit">
+              <input
+                className="name-input"
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                placeholder={t("code")}
+                value={emailCode}
+                onChange={(e) => setEmailCode(e.target.value)}
+                autoFocus
+              />
+              <button className="btn-secondary" onClick={handleConfirmEmail} disabled={emailLoading}>
+                {emailLoading ? t("saving") : t("verify")}
+              </button>
+              <button className="btn-link" onClick={() => setEmailStep("idle")} disabled={emailLoading}>
+                {t("cancel")}
+              </button>
+            </div>
+          )}
+          {emailMsg && <p className={emailMsg.ok ? "success-msg" : "error-msg"}>{emailMsg.text}</p>}
+
+          {me?.has_password ? (
+            <>
+              <div className="settings-row">
+                <span>{t("password")}</span>
+                {!editingPassword && (
+                  <button className="btn-link" onClick={() => { setEditingPassword(true); setPasswordMsg(null); }}>
+                    {t("changePassword")}
+                  </button>
+                )}
+              </div>
+              {editingPassword && (
+                <div className="name-edit">
+                  <input
+                    className="name-input"
+                    type="password"
+                    autoComplete="current-password"
+                    placeholder={t("currentPassword")}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                  />
+                  <input
+                    className="name-input"
+                    type="password"
+                    autoComplete="new-password"
+                    placeholder={t("newPassword")}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    minLength={8}
+                  />
+                  <button className="btn-secondary" onClick={handleChangePassword} disabled={passwordLoading}>
+                    {passwordLoading ? t("saving") : t("save")}
+                  </button>
+                  <button className="btn-link" onClick={() => setEditingPassword(false)} disabled={passwordLoading}>
+                    {t("cancel")}
+                  </button>
+                </div>
+              )}
+              {passwordMsg && <p className={passwordMsg.ok ? "success-msg" : "error-msg"}>{passwordMsg.text}</p>}
+            </>
+          ) : (
+            <p className="muted">{t("socialAccountNoPassword")}</p>
+          )}
+        </div>
 
         <div className="section-group">
           <h2 className="section-title">{t("referenceTables")}</h2>

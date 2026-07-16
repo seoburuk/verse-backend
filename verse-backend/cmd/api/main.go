@@ -25,6 +25,7 @@ import (
 
 	"github.com/seoburuk/verse-backend/internal/config"
 	"github.com/seoburuk/verse-backend/internal/handler"
+	"github.com/seoburuk/verse-backend/internal/mailer"
 	"github.com/seoburuk/verse-backend/internal/repository"
 	"github.com/seoburuk/verse-backend/internal/service"
 )
@@ -68,7 +69,8 @@ func run() error {
 	attemptRepo := repository.NewAttemptRepo(pool)
 	verseRepo   := repository.NewVerseRepo(pool)
 
-	authSvc    := service.NewAuthService(userRepo, cfg.JWTSecret, cfg.JWTAccessTTL, cfg.GoogleClientID, cfg.AppleBundleID, cfg.AppleServiceID)
+	mailSvc    := mailer.NewMailer(cfg.ResendAPIKey, cfg.MailFrom)
+	authSvc    := service.NewAuthService(userRepo, cfg.JWTSecret, cfg.JWTAccessTTL, cfg.GoogleClientID, cfg.AppleBundleID, cfg.AppleServiceID, mailSvc)
 	courseSvc  := service.NewCourseService(courseRepo, verseRepo)
 	attemptSvc := service.NewAttemptService(courseRepo, attemptRepo, userRepo)
 	rankingSvc := service.NewRankingService(attemptRepo)

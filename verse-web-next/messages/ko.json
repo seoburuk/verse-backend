@@ -29,7 +29,9 @@
     "login": "로그인",
     "haveAccount": "이미 계정이 있어요",
     "createAccount": "계정 만들기",
-    "genericError": "오류가 발생했습니다"
+    "genericError": "오류가 발생했습니다",
+    "forgotPassword": "비밀번호를 잊으셨나요?",
+    "emailOptional": "이메일 (선택)"
   },
   "nav": {
     "bookmarks": "책갈피",
@@ -91,7 +93,24 @@
     "colTopic": "주제",
     "colVerse": "구절",
     "colProphecy": "예언 내용",
-    "colFulfilled": "성취"
+    "colFulfilled": "성취",
+    "security": "보안",
+    "recoveryEmail": "복구 이메일",
+    "noEmail": "등록된 이메일 없음",
+    "addEmail": "이메일 등록",
+    "changeEmail": "이메일 변경",
+    "verified": "인증됨",
+    "unverified": "미인증",
+    "verify": "인증하기",
+    "code": "인증 코드",
+    "emailVerified": "이메일이 인증되었습니다",
+    "password": "비밀번호",
+    "changePassword": "비밀번호 변경",
+    "currentPassword": "현재 비밀번호",
+    "newPassword": "새 비밀번호",
+    "passwordChanged": "비밀번호가 변경되었습니다",
+    "socialAccountNoPassword": "소셜 로그인 계정은 비밀번호가 없습니다",
+    "securityGenericError": "오류가 발생했습니다"
   },
   "dashboard": {
     "title": "대시보드",
@@ -204,5 +223,18 @@
     "milestoneCta": "나도 도전하기",
     "dashboardShareText": "지금까지 성경 {count}절을 외웠어요!",
     "milestoneShareButton": "이 기록 공유하기"
+  },
+  "reset": {
+    "subtitle": "비밀번호를 재설정합니다",
+    "email": "이메일",
+    "code": "인증 코드",
+    "newPassword": "새 비밀번호",
+    "sendCode": "코드 받기",
+    "resetPassword": "비밀번호 재설정",
+    "processing": "처리 중...",
+    "codeSentHint": "{email} 로 코드를 보냈습니다",
+    "doneMessage": "비밀번호가 변경되었습니다",
+    "backToLogin": "로그인으로 돌아가기",
+    "genericError": "오류가 발생했습니다"
   }
 }

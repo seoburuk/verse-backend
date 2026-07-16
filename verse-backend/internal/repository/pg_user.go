@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -169,6 +170,77 @@ func (r *pgUserRepo) UpdateLives(ctx context.Context, userID int64, lives domain
 	})
 }
 
+func (r *pgUserRepo) GetUserByVerifiedEmail(ctx context.Context, email string) (domain.User, error) {
+	row, err := r.q.GetUserByVerifiedEmail(ctx, email)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.User{}, domain.ErrNotFound
+		}
+		return domain.User{}, err
+	}
+	return toDomainUser(row), nil
+}
+
+func (r *pgUserRepo) SetUserEmailPending(ctx context.Context, userID int64, email string) error {
+	return r.q.SetUserEmailPending(ctx, db.SetUserEmailPendingParams{
+		ID:    userID,
+		Email: pgtype.Text{String: email, Valid: email != ""},
+	})
+}
+
+func (r *pgUserRepo) SetUserEmailVerified(ctx context.Context, userID int64) error {
+	return r.q.SetUserEmailVerified(ctx, userID)
+}
+
+func (r *pgUserRepo) UpdatePasswordHash(ctx context.Context, userID int64, passwordHash string) error {
+	return r.q.UpdatePasswordHash(ctx, db.UpdatePasswordHashParams{
+		ID:           userID,
+		PasswordHash: passwordHash,
+	})
+}
+
+func (r *pgUserRepo) CreateAuthCode(ctx context.Context, userID int64, purpose, codeHash, email string, expiresAt time.Time) error {
+	_, err := r.q.CreateAuthCode(ctx, db.CreateAuthCodeParams{
+		UserID:    userID,
+		Purpose:   purpose,
+		CodeHash:  codeHash,
+		Email:     email,
+		ExpiresAt: pgtype.Timestamptz{Time: expiresAt, Valid: true},
+	})
+	return err
+}
+
+func (r *pgUserRepo) GetLatestAuthCode(ctx context.Context, userID int64, purpose string) (domain.AuthCode, error) {
+	row, err := r.q.GetLatestAuthCode(ctx, db.GetLatestAuthCodeParams{UserID: userID, Purpose: purpose})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.AuthCode{}, domain.ErrNotFound
+		}
+		return domain.AuthCode{}, err
+	}
+	return domain.AuthCode{
+		ID:        row.ID,
+		UserID:    row.UserID,
+		Purpose:   row.Purpose,
+		CodeHash:  row.CodeHash,
+		Email:     row.Email,
+		Attempts:  row.Attempts,
+		ExpiresAt: row.ExpiresAt.Time,
+	}, nil
+}
+
+func (r *pgUserRepo) IncrementAuthCodeAttempts(ctx context.Context, id int64) error {
+	return r.q.IncrementAuthCodeAttempts(ctx, id)
+}
+
+func (r *pgUserRepo) DeleteAuthCodes(ctx context.Context, userID int64, purpose string) error {
+	return r.q.DeleteAuthCodes(ctx, db.DeleteAuthCodesParams{UserID: userID, Purpose: purpose})
+}
+
+func (r *pgUserRepo) CountRecentAuthCodes(ctx context.Context, userID int64, purpose string) (int64, error) {
+	return r.q.CountRecentAuthCodes(ctx, db.CountRecentAuthCodesParams{UserID: userID, Purpose: purpose})
+}
+
 func toPgText(s *string) pgtype.Text {
 	if s == nil {
 		return pgtype.Text{}
@@ -185,8 +257,9 @@ func toDomainUser(u db.User) domain.User {
 		CreatedAt:    u.CreatedAt.Time, // pgtype.Timestamptz → time.Time
 		Theme:        u.Theme,
 		Language:     u.Language,
-		Email:        u.Email.String,
-		GoogleSub:    u.GoogleSub.String,
+		Email:         u.Email.String,
+		GoogleSub:     u.GoogleSub.String,
+		EmailVerified: u.EmailVerifiedAt.Valid,
 	}
 	if u.DisplayNameUpdatedAt.Valid {
 		t := u.DisplayNameUpdatedAt.Time

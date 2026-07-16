@@ -23,7 +23,7 @@ interface AuthContextValue extends AuthState {
   isAuthed: boolean;
   ready: boolean;
   login: (username: string, password: string) => Promise<AuthResponse>;
-  signup: (username: string, password: string, displayName: string) => Promise<AuthResponse>;
+  signup: (username: string, password: string, displayName: string, email?: string) => Promise<AuthResponse>;
   googleLogin: (idToken: string) => Promise<AuthResponse>;
   appleLogin: (idToken: string, name?: string) => Promise<AuthResponse>;
   updateDisplayName: (displayName: string) => Promise<void>;
@@ -84,8 +84,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return res;
   }, []);
 
-  const signup = useCallback(async (username: string, password: string, displayName: string) => {
-    const res = await apiSignup(username, password, displayName);
+  const signup = useCallback(async (username: string, password: string, displayName: string, email?: string) => {
+    const res = await apiSignup(username, password, displayName, email);
     const user: StoredUser = {
       user_id: res.user_id,
       username: res.username,

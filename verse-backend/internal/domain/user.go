@@ -14,10 +14,22 @@ type User struct {
 	Theme                string
 	Language             string
 	DisplayNameUpdatedAt *time.Time
+	EmailVerified        bool // 복구 이메일로 등록되어 인증까지 마쳤는지
 }
 
 // Lives — 목숨 상태(코스 §Phase4). 실패 시도(비초록)마다 1 소모, 시간 경과로 자동 리필.
 type Lives struct {
 	Count     int32
 	UpdatedAt time.Time
+}
+
+// AuthCode — 이메일 인증/비밀번호 재설정용 1회용 코드.
+type AuthCode struct {
+	ID        int64
+	UserID    int64
+	Purpose   string
+	CodeHash  string
+	Email     string
+	Attempts  int32
+	ExpiresAt time.Time
 }

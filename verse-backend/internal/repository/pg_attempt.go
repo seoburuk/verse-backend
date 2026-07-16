@@ -168,15 +168,6 @@ func (r *pgAttemptRepo) GetResume(ctx context.Context, userID int64) (*domain.Re
 		return nil, err
 	}
 
-	next, err := r.q.GetNextUnclearedItem(ctx, db.GetNextUnclearedItemParams{
-		UserID:   userID,
-		CourseID: last.CourseID,
-		Ord:      last.ItemOrd,
-	})
-	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		return nil, err
-	}
-
 	target := &domain.ResumeTarget{
 		CourseID:        last.CourseID,
 		CourseSlug:      last.Slug,
@@ -186,6 +177,38 @@ func (r *pgAttemptRepo) GetResume(ctx context.Context, userID int64) (*domain.Re
 	if last.CourseTitleEn.Valid {
 		v := last.CourseTitleEn.String
 		target.CourseTitleEn = &v
+	}
+
+	// 마지막 시도 절이 아직 완료(cleared) 아니면(틀렸거나 진행 중) 그 절을
+	// 그대로 이어간다 — "이사야 40:31을 틀림 → 이어가기도 40:31". 완료된
+	// 경우에만 같은 코스의 다음 미완료 절로 진행한다.
+	if !last.Cleared {
+		target.CourseItemID = last.CourseItemID
+		target.Book = last.Book
+		target.Chapter = last.Chapter
+		target.Verse = last.Verse
+		if last.SectionID.Valid {
+			v := last.SectionID.Int64
+			target.SectionID = &v
+		}
+		if last.SectionTitle.Valid {
+			v := last.SectionTitle.String
+			target.SectionTitle = &v
+		}
+		if last.SectionTitleEn.Valid {
+			v := last.SectionTitleEn.String
+			target.SectionTitleEn = &v
+		}
+		return target, nil
+	}
+
+	next, err := r.q.GetNextUnclearedItem(ctx, db.GetNextUnclearedItemParams{
+		UserID:   userID,
+		CourseID: last.CourseID,
+		Ord:      last.ItemOrd,
+	})
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return nil, err
 	}
 
 	if errors.Is(err, pgx.ErrNoRows) {

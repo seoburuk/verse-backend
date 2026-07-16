@@ -52,6 +52,12 @@ func NewRouter(pool *pgxpool.Pool, h *Handler, auth *service.AuthService, corsOr
 			r.Post("/auth/google", h.GoogleLogin)
 			r.Post("/auth/apple", h.AppleLogin)
 		})
+		// 비밀번호 재설정 — 계정 열거/브루트포스 방지를 위해 더 빡빡한 레이트리밋(IP당 분당 5회)
+		r.Group(func(r chi.Router) {
+			r.Use(httprate.LimitByIP(5, time.Minute))
+			r.Post("/auth/password-reset/request", h.RequestPasswordReset)
+			r.Post("/auth/password-reset/confirm", h.ConfirmPasswordReset)
+		})
 		r.Get("/courses", h.ListCourses)
 		r.Get("/courses/version", h.GetCoursesVersion)
 		r.Get("/courses/{slug}", h.GetCourse)
@@ -83,6 +89,12 @@ func NewRouter(pool *pgxpool.Pool, h *Handler, auth *service.AuthService, corsOr
 			r.Patch("/me/profile", h.UpdateProfile)
 			r.Get("/me", h.GetMe)
 			r.Delete("/me", h.DeleteAccount)
+			r.Group(func(r chi.Router) {
+				r.Use(httprate.LimitByIP(5, time.Minute))
+				r.Post("/me/email/request", h.RequestEmailVerification)
+				r.Post("/me/email/confirm", h.ConfirmEmailVerification)
+				r.Post("/me/password", h.ChangePassword)
+			})
 		})
 	})
 

@@ -27,6 +27,8 @@ type Config struct {
 	GoogleClientID  string        // 구글 OAuth 웹 클라이언트 ID. ID 토큰 audience 검증에 사용.
 	AppleBundleID   string        // iOS 앱 번들 ID. 애플 ID 토큰 audience 검증에 사용(네이티브 앱 로그인).
 	AppleServiceID  string        // 웹용 Apple Services ID. "Sign in with Apple JS" audience 검증에 사용(선택).
+	ResendAPIKey    string        // Resend 메일 발송 API 키. 비어있으면 로그 출력으로 대체(dev).
+	MailFrom        string        // 발신자 주소 (예: "verse <noreply@pixbible.cloud>").
 }
 
 // Load — 환경변수에서 설정을 읽어 검증한다. 필수값 누락 시 에러.
@@ -50,6 +52,8 @@ func Load() (*Config, error) {
 		GoogleClientID:  getEnv("GOOGLE_CLIENT_ID", ""),
 		AppleBundleID:   getEnv("APPLE_BUNDLE_ID", ""),
 		AppleServiceID:  getEnv("APPLE_SERVICE_ID", ""),
+		ResendAPIKey:    getEnv("RESEND_API_KEY", ""),
+		MailFrom:        getEnv("MAIL_FROM", "verse <noreply@pixbible.cloud>"),
 	}
 
 	// fail fast: 잘못된 설정으로 조용히 뜨는 것보다

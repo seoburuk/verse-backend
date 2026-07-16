@@ -1,0 +1,20 @@
+{
+  "_comment": "채점 계약 공유 테스트 벡터. Go(grading_vectors_test.go) / Dart(verse-flutter/test/grading_test.dart)가 같은 파일을 읽는다. TS는 grade.test.ts에 동일 케이스 존재.",
+  "normalize": [
+    { "in": "In the beginning,", "want": ["in", "the", "beginning"] },
+    { "in": "thee Thou HAST", "want": ["thee", "thou", "hast"] },
+    { "in": "God's grace.", "want": ["god", "s", "grace"] },
+    { "in": "  spaces   ", "want": ["spaces"] },
+    { "in": "", "want": [] }
+  ],
+  "grade": [
+    { "name": "정답", "answer": ["in", "the", "beginning", "god", "created"], "attempt": ["in", "the", "beginning", "god", "created"], "want": "green" },
+    { "name": "한 단어 빠짐 0.80", "answer": ["in", "the", "beginning", "god", "created"], "attempt": ["in", "the", "beginning", "created"], "want": "yellow" },
+    { "name": "두 단어 빠짐 0.60", "answer": ["in", "the", "beginning", "god", "created"], "attempt": ["in", "beginning", "created"], "want": "yellow" },
+    { "name": "순서 밀림 0.80", "answer": ["in", "the", "beginning", "god", "created"], "attempt": ["in", "beginning", "the", "god", "created"], "want": "yellow" },
+    { "name": "절반 이하 0.40", "answer": ["in", "the", "beginning", "god", "created"], "attempt": ["in", "the"], "want": "red" },
+    { "name": "빈 시도", "answer": ["in", "the", "beginning", "god", "created"], "attempt": [], "want": "red" },
+    { "name": "경계값 정확히 0.50", "answer": ["a", "b", "c", "d"], "attempt": ["a", "b"], "want": "yellow" },
+    { "name": "정답 없음", "answer": [], "attempt": ["anything"], "want": "none" }
+  ]
+}

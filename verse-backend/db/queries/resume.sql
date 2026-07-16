@@ -12,12 +12,14 @@ SELECT
   bv.book,
   bv.chapter,
   bv.verse,
-  a.created_at
+  a.created_at,
+  COALESCE(p.cleared, false) AS cleared
 FROM attempts a
 JOIN course_items ci ON ci.id = a.course_item_id
 JOIN courses co ON co.id = ci.course_id AND NOT co.hidden
 LEFT JOIN course_sections cs ON cs.id = ci.section_id
 JOIN bible_verses bv ON bv.id = ci.verse_id
+LEFT JOIN progress p ON p.course_item_id = ci.id AND p.user_id = $1
 WHERE a.user_id = $1
 ORDER BY a.created_at DESC
 LIMIT 1;

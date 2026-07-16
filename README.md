@@ -22,6 +22,7 @@ make db                   # PostgreSQL 컨테이너 기동 (Docker 필요)
 make migrate              # 스키마 적용
 make load                 # KJV 31,102절 적재 (최초 1회, 약 10초)
 make seed                 # 코스 샘플 데이터 적재 (멱등)
+make run
 ```
 
 서버 실행:

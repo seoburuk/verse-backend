@@ -33,6 +33,14 @@
       "autoPort": true
     },
     {
+      "name": "verse-flutter-web",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["run", "-d", "web-server", "--web-port", "5199", "--web-hostname", "127.0.0.1", "--dart-define", "API_BASE=http://127.0.0.1:8099/v1"],
+      "cwd": "verse-flutter",
+      "port": 5199,
+      "autoPort": false
+    },
+    {
       "name": "verse-backend",
       "runtimeExecutable": "env",
       "runtimeArgs": [

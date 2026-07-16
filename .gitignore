@@ -8,6 +8,9 @@ dist/
 verse-web/.next/
 verse-web/tsconfig.tsbuildinfo
 
+# Flutter app (separate repo: seoburuk/verse-flutter)
+/verse-flutter/
+
 # secrets
 *.env
 .env

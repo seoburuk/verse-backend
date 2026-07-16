@@ -29,7 +29,9 @@
     "login": "Log in",
     "haveAccount": "I already have an account",
     "createAccount": "Create an account",
-    "genericError": "Something went wrong"
+    "genericError": "Something went wrong",
+    "forgotPassword": "Forgot password?",
+    "emailOptional": "Email (optional)"
   },
   "nav": {
     "bookmarks": "Bookmarks",
@@ -91,7 +93,24 @@
     "colTopic": "Topic",
     "colVerse": "Verse",
     "colProphecy": "Prophecy",
-    "colFulfilled": "Fulfilled"
+    "colFulfilled": "Fulfilled",
+    "security": "Security",
+    "recoveryEmail": "Recovery email",
+    "noEmail": "No email on file",
+    "addEmail": "Add email",
+    "changeEmail": "Change email",
+    "verified": "verified",
+    "unverified": "unverified",
+    "verify": "Verify",
+    "code": "Verification code",
+    "emailVerified": "Email verified",
+    "password": "Password",
+    "changePassword": "Change password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "passwordChanged": "Password changed",
+    "socialAccountNoPassword": "Social login accounts have no password",
+    "securityGenericError": "Something went wrong"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -204,5 +223,18 @@
     "milestoneCta": "Take the challenge",
     "dashboardShareText": "I have memorized {count} Bible verses so far!",
     "milestoneShareButton": "Share this milestone"
+  },
+  "reset": {
+    "subtitle": "Reset your password",
+    "email": "Email",
+    "code": "Verification code",
+    "newPassword": "New password",
+    "sendCode": "Send code",
+    "resetPassword": "Reset password",
+    "processing": "Processing...",
+    "codeSentHint": "We sent a code to {email}",
+    "doneMessage": "Your password has been changed",
+    "backToLogin": "Back to login",
+    "genericError": "Something went wrong"
   }
 }

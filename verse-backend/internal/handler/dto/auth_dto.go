@@ -9,6 +9,7 @@ type SignupRequest struct {
 	Username    string `json:"username"`
 	Password    string `json:"password"`
 	DisplayName string `json:"display_name"`
+	Email       string `json:"email,omitempty"` // 선택 — 입력하면 가입 직후 인증 코드 발송
 }
 
 type LoginRequest struct {
@@ -47,10 +48,36 @@ type ProfileResponse struct {
 }
 
 type MeResponse struct {
-	UserID      int64  `json:"user_id"`
-	Username    string `json:"username"`
-	DisplayName string `json:"display_name"`
-	Theme       string `json:"theme"`
-	Language    string `json:"language"`
-	CreatedAt   string `json:"created_at"`
+	UserID        int64  `json:"user_id"`
+	Username      string `json:"username"`
+	DisplayName   string `json:"display_name"`
+	Theme         string `json:"theme"`
+	Language      string `json:"language"`
+	CreatedAt     string `json:"created_at"`
+	Email         string `json:"email,omitempty"`
+	EmailVerified bool   `json:"email_verified"`
+	HasPassword   bool   `json:"has_password"`
+}
+
+type RequestEmailVerificationRequest struct {
+	Email string `json:"email"`
+}
+
+type ConfirmEmailVerificationRequest struct {
+	Code string `json:"code"`
+}
+
+type ChangePasswordRequest struct {
+	CurrentPassword string `json:"current_password"`
+	NewPassword     string `json:"new_password"`
+}
+
+type RequestPasswordResetRequest struct {
+	Email string `json:"email"`
+}
+
+type ConfirmPasswordResetRequest struct {
+	Email       string `json:"email"`
+	Code        string `json:"code"`
+	NewPassword string `json:"new_password"`
 }

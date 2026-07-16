@@ -6,7 +6,10 @@ package service
 import (
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
+	"crypto/subtle"
 	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"strings"
@@ -15,6 +18,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/seoburuk/verse-backend/internal/domain"
+	"github.com/seoburuk/verse-backend/internal/mailer"
 	"github.com/seoburuk/verse-backend/internal/repository"
 	"golang.org/x/crypto/argon2"
 	"google.golang.org/api/idtoken"
@@ -36,9 +40,10 @@ type AuthService struct {
 	googleClientID string
 	appleBundleID  string
 	appleServiceID string
+	mailer         mailer.Mailer
 }
 
-func NewAuthService(users repository.UserRepo, jwtSecret string, accessTTL time.Duration, googleClientID, appleBundleID, appleServiceID string) *AuthService {
+func NewAuthService(users repository.UserRepo, jwtSecret string, accessTTL time.Duration, googleClientID, appleBundleID, appleServiceID string, m mailer.Mailer) *AuthService {
 	return &AuthService{
 		users:          users,
 		jwtSecret:      []byte(jwtSecret),
@@ -46,7 +51,190 @@ func NewAuthService(users repository.UserRepo, jwtSecret string, accessTTL time.
 		googleClientID: googleClientID,
 		appleBundleID:  appleBundleID,
 		appleServiceID: appleServiceID,
+		mailer:         m,
 	}
+}
+
+// --- 인증 코드 공통 상수 ---
+const (
+	authCodeTTL          = 10 * time.Minute
+	authCodeMaxAttempts  = 5
+	authCodeMaxPerHour   = 3
+	purposeVerifyEmail   = "verify_email"
+	purposeResetPassword = "reset_password"
+	minPasswordLen       = 8
+)
+
+// SetPendingEmail — 이메일을 미인증 상태로 저장만 한다(코드 발송 없음).
+// 회원가입 시 선택 입력한 이메일을 받아둘 때 쓴다 — 인증은 나중에 설정에서
+// RequestEmailVerification으로 별도 진행한다.
+func (s *AuthService) SetPendingEmail(ctx context.Context, userID int64, email string) error {
+	email = strings.TrimSpace(strings.ToLower(email))
+	if email == "" || !strings.Contains(email, "@") {
+		return domain.ErrInvalidInput
+	}
+	return s.users.SetUserEmailPending(ctx, userID, email)
+}
+
+// RequestEmailVerification — 로그인 사용자가 복구 이메일을 등록하고 인증 코드를 받는다.
+func (s *AuthService) RequestEmailVerification(ctx context.Context, userID int64, email string) error {
+	email = strings.TrimSpace(strings.ToLower(email))
+	if email == "" || !strings.Contains(email, "@") {
+		return domain.ErrInvalidInput
+	}
+
+	if err := s.checkCodeRateLimit(ctx, userID, purposeVerifyEmail); err != nil {
+		return err
+	}
+
+	if err := s.users.SetUserEmailPending(ctx, userID, email); err != nil {
+		return err
+	}
+
+	return s.issueAndSendCode(ctx, userID, purposeVerifyEmail, email,
+		"이메일 인증", "인증 코드: %s (10분 내 입력)")
+}
+
+// ConfirmEmailVerification — 인증 코드를 검증하고 이메일을 확정한다.
+func (s *AuthService) ConfirmEmailVerification(ctx context.Context, userID int64, code string) error {
+	if err := s.verifyCode(ctx, userID, purposeVerifyEmail, code); err != nil {
+		return err
+	}
+	if err := s.users.SetUserEmailVerified(ctx, userID); err != nil {
+		return err
+	}
+	return s.users.DeleteAuthCodes(ctx, userID, purposeVerifyEmail)
+}
+
+// RequestPasswordReset — 인증된 이메일로 재설정 코드를 보낸다.
+// 계정 존재 여부를 노출하지 않기 위해 어떤 경우든 nil을 반환한다(열거 공격 방지).
+func (s *AuthService) RequestPasswordReset(ctx context.Context, email string) error {
+	email = strings.TrimSpace(strings.ToLower(email))
+	if email == "" {
+		return nil
+	}
+
+	user, err := s.users.GetUserByVerifiedEmail(ctx, email)
+	if err != nil {
+		return nil // 계정 없음 → 조용히 성공 처리
+	}
+	if user.PasswordHash == "" {
+		return nil // 소셜 전용 계정 → 비밀번호가 없으므로 조용히 성공 처리
+	}
+
+	if err := s.checkCodeRateLimit(ctx, user.ID, purposeResetPassword); err != nil {
+		return nil // 레이트리밋도 외부에 노출하지 않는다
+	}
+
+	return s.issueAndSendCode(ctx, user.ID, purposeResetPassword, email,
+		"비밀번호 재설정", "비밀번호 재설정 코드: %s (10분 내 입력)")
+}
+
+// ConfirmPasswordReset — 코드 확인 후 새 비밀번호로 교체한다.
+func (s *AuthService) ConfirmPasswordReset(ctx context.Context, email, code, newPassword string) error {
+	email = strings.TrimSpace(strings.ToLower(email))
+	if utf8.RuneCountInString(newPassword) < minPasswordLen {
+		return domain.ErrInvalidInput
+	}
+
+	user, err := s.users.GetUserByVerifiedEmail(ctx, email)
+	if err != nil {
+		return domain.ErrUnauthorized
+	}
+
+	if err := s.verifyCode(ctx, user.ID, purposeResetPassword, code); err != nil {
+		return err
+	}
+
+	hash, err := hashPassword(newPassword)
+	if err != nil {
+		return fmt.Errorf("hash password: %w", err)
+	}
+	if err := s.users.UpdatePasswordHash(ctx, user.ID, hash); err != nil {
+		return err
+	}
+	return s.users.DeleteAuthCodes(ctx, user.ID, purposeResetPassword)
+}
+
+// ChangePassword — 로그인 상태에서 현재 비밀번호 확인 후 새 비밀번호로 교체한다.
+func (s *AuthService) ChangePassword(ctx context.Context, userID int64, currentPassword, newPassword string) error {
+	if utf8.RuneCountInString(newPassword) < minPasswordLen {
+		return domain.ErrInvalidInput
+	}
+
+	user, err := s.users.GetUserByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+	if user.PasswordHash == "" {
+		return domain.ErrNoPassword
+	}
+	if !verifyPassword(currentPassword, user.PasswordHash) {
+		return domain.ErrUnauthorized
+	}
+
+	hash, err := hashPassword(newPassword)
+	if err != nil {
+		return fmt.Errorf("hash password: %w", err)
+	}
+	return s.users.UpdatePasswordHash(ctx, userID, hash)
+}
+
+// checkCodeRateLimit — 계정당 시간당 발급 횟수를 제한한다(메일 폭탄/브루트포스 방지).
+func (s *AuthService) checkCodeRateLimit(ctx context.Context, userID int64, purpose string) error {
+	count, err := s.users.CountRecentAuthCodes(ctx, userID, purpose)
+	if err != nil {
+		return err
+	}
+	if count >= authCodeMaxPerHour {
+		return domain.ErrRateLimited
+	}
+	return nil
+}
+
+// issueAndSendCode — 6자리 코드를 생성해 해시로 저장하고 이메일로 발송한다.
+func (s *AuthService) issueAndSendCode(ctx context.Context, userID int64, purpose, email, subject, bodyFormat string) error {
+	code := generateCode()
+	hash := hashCode(code)
+
+	if err := s.users.CreateAuthCode(ctx, userID, purpose, hash, email, time.Now().Add(authCodeTTL)); err != nil {
+		return err
+	}
+
+	return s.mailer.Send(ctx, email, subject, fmt.Sprintf(bodyFormat, code))
+}
+
+// verifyCode — 최신 코드를 조회해 만료/횟수/일치 여부를 확인한다.
+func (s *AuthService) verifyCode(ctx context.Context, userID int64, purpose, code string) error {
+	authCode, err := s.users.GetLatestAuthCode(ctx, userID, purpose)
+	if err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			return domain.ErrUnauthorized
+		}
+		return err
+	}
+	if authCode.Attempts >= authCodeMaxAttempts {
+		return domain.ErrRateLimited
+	}
+	if subtle.ConstantTimeCompare([]byte(hashCode(code)), []byte(authCode.CodeHash)) != 1 {
+		_ = s.users.IncrementAuthCodeAttempts(ctx, authCode.ID)
+		return domain.ErrUnauthorized
+	}
+	return nil
+}
+
+// generateCode — 6자리 숫자 인증 코드를 생성한다.
+func generateCode() string {
+	b := make([]byte, 4)
+	_, _ = rand.Read(b)
+	n := (uint32(b[0])<<24 | uint32(b[1])<<16 | uint32(b[2])<<8 | uint32(b[3])) % 1000000
+	return fmt.Sprintf("%06d", n)
+}
+
+// hashCode — 코드 원문을 저장하지 않도록 sha256 해시로 변환한다.
+func hashCode(code string) string {
+	sum := sha256.Sum256([]byte(code))
+	return hex.EncodeToString(sum[:])
 }
 
 // SignUp — 새 사용자 등록. 아이디 중복 시 ErrConflict.

@@ -44,3 +44,15 @@ SELECT lives, lives_updated_at FROM users WHERE id = $1;
 
 -- name: UpdateUserLives :exec
 UPDATE users SET lives = $2, lives_updated_at = $3 WHERE id = $1;
+
+-- name: GetUserByVerifiedEmail :one
+SELECT * FROM users WHERE lower(email) = lower($1) AND email_verified_at IS NOT NULL;
+
+-- name: SetUserEmailPending :exec
+UPDATE users SET email = $2, email_verified_at = NULL WHERE id = $1;
+
+-- name: SetUserEmailVerified :exec
+UPDATE users SET email_verified_at = now() WHERE id = $1;
+
+-- name: UpdatePasswordHash :exec
+UPDATE users SET password_hash = $2 WHERE id = $1;

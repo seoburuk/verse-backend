@@ -14,4 +14,5 @@ var (
 	ErrNoLives      = errors.New("no lives remaining")
 	ErrRateLimited  = errors.New("rate limited")
 	ErrProfanity    = errors.New("username or display name contains banned words")
+	ErrNoPassword   = errors.New("social login account has no password")
 )

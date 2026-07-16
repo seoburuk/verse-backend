@@ -14,7 +14,7 @@ import (
 const createAppleUser = `-- name: CreateAppleUser :one
 INSERT INTO users (username, display_name, password_hash, email, apple_sub)
 VALUES ($1, $2, '', $3, $4)
-RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub, apple_sub
+RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub, apple_sub, email_verified_at
 `
 
 type CreateAppleUserParams struct {
@@ -46,6 +46,7 @@ func (q *Queries) CreateAppleUser(ctx context.Context, arg CreateAppleUserParams
 		&i.Email,
 		&i.GoogleSub,
 		&i.AppleSub,
+		&i.EmailVerifiedAt,
 	)
 	return i, err
 }
@@ -53,7 +54,7 @@ func (q *Queries) CreateAppleUser(ctx context.Context, arg CreateAppleUserParams
 const createGoogleUser = `-- name: CreateGoogleUser :one
 INSERT INTO users (username, display_name, password_hash, email, google_sub)
 VALUES ($1, $2, '', $3, $4)
-RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub, apple_sub
+RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub, apple_sub, email_verified_at
 `
 
 type CreateGoogleUserParams struct {
@@ -85,6 +86,7 @@ func (q *Queries) CreateGoogleUser(ctx context.Context, arg CreateGoogleUserPara
 		&i.Email,
 		&i.GoogleSub,
 		&i.AppleSub,
+		&i.EmailVerifiedAt,
 	)
 	return i, err
 }
@@ -92,7 +94,7 @@ func (q *Queries) CreateGoogleUser(ctx context.Context, arg CreateGoogleUserPara
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (username, display_name, password_hash)
 VALUES ($1, $2, $3)
-RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub, apple_sub
+RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub, apple_sub, email_verified_at
 `
 
 type CreateUserParams struct {
@@ -118,6 +120,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Email,
 		&i.GoogleSub,
 		&i.AppleSub,
+		&i.EmailVerifiedAt,
 	)
 	return i, err
 }
@@ -132,7 +135,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 }
 
 const getUserByAppleSub = `-- name: GetUserByAppleSub :one
-SELECT id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub, apple_sub FROM users WHERE apple_sub = $1
+SELECT id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub, apple_sub, email_verified_at FROM users WHERE apple_sub = $1
 `
 
 func (q *Queries) GetUserByAppleSub(ctx context.Context, appleSub pgtype.Text) (User, error) {
@@ -152,12 +155,13 @@ func (q *Queries) GetUserByAppleSub(ctx context.Context, appleSub pgtype.Text) (
 		&i.Email,
 		&i.GoogleSub,
 		&i.AppleSub,
+		&i.EmailVerifiedAt,
 	)
 	return i, err
 }
 
 const getUserByGoogleSub = `-- name: GetUserByGoogleSub :one
-SELECT id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub, apple_sub FROM users WHERE google_sub = $1
+SELECT id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub, apple_sub, email_verified_at FROM users WHERE google_sub = $1
 `
 
 func (q *Queries) GetUserByGoogleSub(ctx context.Context, googleSub pgtype.Text) (User, error) {
@@ -177,12 +181,13 @@ func (q *Queries) GetUserByGoogleSub(ctx context.Context, googleSub pgtype.Text)
 		&i.Email,
 		&i.GoogleSub,
 		&i.AppleSub,
+		&i.EmailVerifiedAt,
 	)
 	return i, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub, apple_sub FROM users WHERE id = $1
+SELECT id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub, apple_sub, email_verified_at FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
@@ -202,12 +207,13 @@ func (q *Queries) GetUserByID(ctx context.Context, id int64) (User, error) {
 		&i.Email,
 		&i.GoogleSub,
 		&i.AppleSub,
+		&i.EmailVerifiedAt,
 	)
 	return i, err
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub, apple_sub FROM users WHERE username = $1
+SELECT id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub, apple_sub, email_verified_at FROM users WHERE username = $1
 `
 
 func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
@@ -227,6 +233,33 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 		&i.Email,
 		&i.GoogleSub,
 		&i.AppleSub,
+		&i.EmailVerifiedAt,
+	)
+	return i, err
+}
+
+const getUserByVerifiedEmail = `-- name: GetUserByVerifiedEmail :one
+SELECT id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub, apple_sub, email_verified_at FROM users WHERE lower(email) = lower($1) AND email_verified_at IS NOT NULL
+`
+
+func (q *Queries) GetUserByVerifiedEmail(ctx context.Context, lower string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByVerifiedEmail, lower)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.DisplayName,
+		&i.PasswordHash,
+		&i.CreatedAt,
+		&i.Username,
+		&i.Lives,
+		&i.LivesUpdatedAt,
+		&i.Theme,
+		&i.Language,
+		&i.DisplayNameUpdatedAt,
+		&i.Email,
+		&i.GoogleSub,
+		&i.AppleSub,
+		&i.EmailVerifiedAt,
 	)
 	return i, err
 }
@@ -247,9 +280,32 @@ func (q *Queries) GetUserLives(ctx context.Context, id int64) (GetUserLivesRow, 
 	return i, err
 }
 
+const setUserEmailPending = `-- name: SetUserEmailPending :exec
+UPDATE users SET email = $2, email_verified_at = NULL WHERE id = $1
+`
+
+type SetUserEmailPendingParams struct {
+	ID    int64       `json:"id"`
+	Email pgtype.Text `json:"email"`
+}
+
+func (q *Queries) SetUserEmailPending(ctx context.Context, arg SetUserEmailPendingParams) error {
+	_, err := q.db.Exec(ctx, setUserEmailPending, arg.ID, arg.Email)
+	return err
+}
+
+const setUserEmailVerified = `-- name: SetUserEmailVerified :exec
+UPDATE users SET email_verified_at = now() WHERE id = $1
+`
+
+func (q *Queries) SetUserEmailVerified(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, setUserEmailVerified, id)
+	return err
+}
+
 const updateDisplayName = `-- name: UpdateDisplayName :one
 UPDATE users SET display_name = $2, display_name_updated_at = now() WHERE id = $1
-RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub, apple_sub
+RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub, apple_sub, email_verified_at
 `
 
 type UpdateDisplayNameParams struct {
@@ -274,8 +330,23 @@ func (q *Queries) UpdateDisplayName(ctx context.Context, arg UpdateDisplayNamePa
 		&i.Email,
 		&i.GoogleSub,
 		&i.AppleSub,
+		&i.EmailVerifiedAt,
 	)
 	return i, err
+}
+
+const updatePasswordHash = `-- name: UpdatePasswordHash :exec
+UPDATE users SET password_hash = $2 WHERE id = $1
+`
+
+type UpdatePasswordHashParams struct {
+	ID           int64  `json:"id"`
+	PasswordHash string `json:"password_hash"`
+}
+
+func (q *Queries) UpdatePasswordHash(ctx context.Context, arg UpdatePasswordHashParams) error {
+	_, err := q.db.Exec(ctx, updatePasswordHash, arg.ID, arg.PasswordHash)
+	return err
 }
 
 const updateUserLives = `-- name: UpdateUserLives :exec
@@ -298,7 +369,7 @@ UPDATE users SET
   theme = COALESCE($2, theme),
   language = COALESCE($3, language)
 WHERE id = $1
-RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub, apple_sub
+RETURNING id, display_name, password_hash, created_at, username, lives, lives_updated_at, theme, language, display_name_updated_at, email, google_sub, apple_sub, email_verified_at
 `
 
 type UpdateUserPrefsParams struct {
@@ -324,6 +395,7 @@ func (q *Queries) UpdateUserPrefs(ctx context.Context, arg UpdateUserPrefsParams
 		&i.Email,
 		&i.GoogleSub,
 		&i.AppleSub,
+		&i.EmailVerifiedAt,
 	)
 	return i, err
 }

@@ -18,6 +18,17 @@ type Attempt struct {
 	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 }
 
+type AuthCode struct {
+	ID        int64              `json:"id"`
+	UserID    int64              `json:"user_id"`
+	Purpose   string             `json:"purpose"`
+	CodeHash  string             `json:"code_hash"`
+	Email     string             `json:"email"`
+	Attempts  int32              `json:"attempts"`
+	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
 type BibleVerse struct {
 	ID      int64  `json:"id"`
 	Book    int16  `json:"book"`
@@ -91,6 +102,7 @@ type User struct {
 	Email                pgtype.Text        `json:"email"`
 	GoogleSub            pgtype.Text        `json:"google_sub"`
 	AppleSub             pgtype.Text        `json:"apple_sub"`
+	EmailVerifiedAt      pgtype.Timestamptz `json:"email_verified_at"`
 }
 
 type VerseSegment struct {

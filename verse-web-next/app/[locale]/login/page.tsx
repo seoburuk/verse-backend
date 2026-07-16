@@ -31,6 +31,7 @@ function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [email, setEmail] = useState("");
   const [saveUsername, setSaveUsername] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -50,7 +51,7 @@ function LoginForm() {
     try {
       let res: AuthResponse;
       if (isSignup) {
-        res = await signup(username, password, displayName);
+        res = await signup(username, password, displayName, email.trim() || undefined);
       } else {
         res = await login(username, password);
       }
@@ -137,6 +138,18 @@ function LoginForm() {
               required
             />
           )}
+          {isSignup && (
+            <input
+              className="input"
+              type="email"
+              name="email"
+              id="email"
+              autoComplete="email"
+              placeholder={t("emailOptional")}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          )}
           {!isSignup && (
             <label className="checkbox-row">
               <input
@@ -146,6 +159,15 @@ function LoginForm() {
               />
               {t("saveUsername")}
             </label>
+          )}
+          {!isSignup && (
+            <button
+              type="button"
+              className="btn-link"
+              onClick={() => router.push("/forgot-password")}
+            >
+              {t("forgotPassword")}
+            </button>
           )}
           {error && <p className="error-msg">{error}</p>}
           <button className="btn-primary" type="submit" disabled={loading}>
