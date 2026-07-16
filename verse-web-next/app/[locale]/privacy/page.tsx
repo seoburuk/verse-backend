@@ -26,7 +26,7 @@ const COPY: Record<Locale, { title: string; effective: string; sections: { h: st
       {
         h: "1. 수집하는 정보",
         p: [
-          "회원가입 시 아이디, 비밀번호(암호화 저장), 이름을 수집합니다.",
+          "회원가입 시 아이디, 비밀번호(암호화 저장), 이름, 이메일 주소를 수집합니다.",
           "소셜 로그인(Google·Apple) 이용 시 해당 제공자가 전달하는 식별자 및 이메일을 수집합니다.",
           "서비스 이용 과정에서 암송 진도, 등급 기록, 책갈피, 설정(테마·언어)이 저장됩니다.",
           "광고 및 서비스 개선을 위해 광고 식별자(Android 광고 ID, Apple IDFA), 쿠키, 기기·이용 정보가 자동으로 처리될 수 있습니다.",
@@ -75,7 +75,7 @@ const COPY: Record<Locale, { title: string; effective: string; sections: { h: st
       {
         h: "1. Information We Collect",
         p: [
-          "At signup we collect a username, password (stored encrypted), and name.",
+          "At signup we collect a username, password (stored encrypted), name, and email address.",
           "If you sign in with Google or Apple, we collect the identifier and email address provided by that service.",
           "While using the Service, we store memorization progress, grades, bookmarks, and settings (theme, language).",
           "For advertising and service improvement, advertising identifiers (Android Advertising ID, Apple IDFA), cookies, and device/usage information may be processed automatically.",
