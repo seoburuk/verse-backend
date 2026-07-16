@@ -104,6 +104,7 @@
     "verify": "인증하기",
     "code": "인증 코드",
     "emailVerified": "이메일이 인증되었습니다",
+    "sendCode": "코드 받기",
     "password": "비밀번호",
     "changePassword": "비밀번호 변경",
     "currentPassword": "현재 비밀번호",
@@ -170,6 +171,7 @@
     "loading": "불러오는 중..."
   },
   "complete": {
+    "loading": "불러오는 중...",
     "backToCourse": "← 코스로",
     "sectionComplete": "섹션 완료!",
     "nextSection": "다음 섹션: {title} →",
@@ -188,7 +190,8 @@
   "footer": {
     "about": "소개",
     "terms": "이용약관",
-    "privacy": "개인정보처리방침"
+    "privacy": "개인정보처리방침",
+    "support": "고객 지원"
   },
   "legal": {
     "aboutTitle": "PIX BIBLE 소개",

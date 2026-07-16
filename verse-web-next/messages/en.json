@@ -104,6 +104,7 @@
     "verify": "Verify",
     "code": "Verification code",
     "emailVerified": "Email verified",
+    "sendCode": "Send code",
     "password": "Password",
     "changePassword": "Change password",
     "currentPassword": "Current password",
@@ -170,6 +171,7 @@
     "loading": "Loading..."
   },
   "complete": {
+    "loading": "Loading...",
     "backToCourse": "← Back to course",
     "sectionComplete": "Section complete!",
     "nextSection": "Next section: {title} →",
@@ -188,7 +190,8 @@
   "footer": {
     "about": "About",
     "terms": "Terms",
-    "privacy": "Privacy"
+    "privacy": "Privacy",
+    "support": "Support"
   },
   "legal": {
     "aboutTitle": "About PIX BIBLE",
