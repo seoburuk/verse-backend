@@ -91,8 +91,12 @@ func (s *AuthService) RequestEmailVerification(ctx context.Context, userID int64
 		return err
 	}
 
-	return s.issueAndSendCode(ctx, userID, purposeVerifyEmail, email,
-		"이메일 인증", "인증 코드: %s (10분 내 입력)")
+	user, err := s.users.GetUserByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	return s.issueAndSendCode(ctx, userID, purposeVerifyEmail, email, user.Language)
 }
 
 // ConfirmEmailVerification — 인증 코드를 검증하고 이메일을 확정한다.
@@ -126,8 +130,7 @@ func (s *AuthService) RequestPasswordReset(ctx context.Context, email string) er
 		return nil // 레이트리밋도 외부에 노출하지 않는다
 	}
 
-	return s.issueAndSendCode(ctx, user.ID, purposeResetPassword, email,
-		"비밀번호 재설정", "비밀번호 재설정 코드: %s (10분 내 입력)")
+	return s.issueAndSendCode(ctx, user.ID, purposeResetPassword, email, user.Language)
 }
 
 // ConfirmPasswordReset — 코드 확인 후 새 비밀번호로 교체한다.
@@ -193,7 +196,8 @@ func (s *AuthService) checkCodeRateLimit(ctx context.Context, userID int64, purp
 }
 
 // issueAndSendCode — 6자리 코드를 생성해 해시로 저장하고 이메일로 발송한다.
-func (s *AuthService) issueAndSendCode(ctx context.Context, userID int64, purpose, email, subject, bodyFormat string) error {
+// lang은 사용자의 language 설정("ko"가 아니면 영어로 기본 처리).
+func (s *AuthService) issueAndSendCode(ctx context.Context, userID int64, purpose, email, lang string) error {
 	code := generateCode()
 	hash := hashCode(code)
 
@@ -201,7 +205,8 @@ func (s *AuthService) issueAndSendCode(ctx context.Context, userID int64, purpos
 		return err
 	}
 
-	return s.mailer.Send(ctx, email, subject, fmt.Sprintf(bodyFormat, code))
+	subject, html := codeEmail(purpose, lang, code)
+	return s.mailer.Send(ctx, email, subject, html)
 }
 
 // verifyCode — 최신 코드를 조회해 만료/횟수/일치 여부를 확인한다.
