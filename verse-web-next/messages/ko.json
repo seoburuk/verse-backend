@@ -52,7 +52,8 @@
   "courses": {
     "verseCount": "{count}구절",
     "bookCount": "{count}권",
-    "lockedHint": "가입하고 잠금 해제"
+    "lockedHint": "가입하고 잠금 해제",
+    "commentaryToggle": "해설 보기"
   },
   "settings": {
     "title": "설정",

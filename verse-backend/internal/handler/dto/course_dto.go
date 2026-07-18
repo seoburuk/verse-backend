@@ -9,6 +9,9 @@ type CourseResponse struct {
 	Theme    string `json:"theme"`
 	Ord      int    `json:"ord"`
 	Category string `json:"category"`
+
+	Commentary   string `json:"commentary,omitempty"`
+	CommentaryEn string `json:"commentary_en,omitempty"`
 }
 
 type CourseItemResponse struct {

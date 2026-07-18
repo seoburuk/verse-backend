@@ -214,14 +214,16 @@ func (r *pgCourseRepo) ListFavoriteItems(ctx context.Context, userID int64) ([]d
 
 func toDomainCourse(c db.Course) domain.Course {
 	return domain.Course{
-		ID:       c.ID,
-		Slug:     c.Slug,
-		Title:    c.Title,
-		TitleEn:  c.TitleEn.String,
-		Theme:    c.Theme.String,
-		Ord:      int(c.Ord),
-		Hidden:   c.Hidden,
-		Category: c.Category,
+		ID:           c.ID,
+		Slug:         c.Slug,
+		Title:        c.Title,
+		TitleEn:      c.TitleEn.String,
+		Theme:        c.Theme.String,
+		Ord:          int(c.Ord),
+		Hidden:       c.Hidden,
+		Category:     c.Category,
+		Commentary:   c.Commentary.String,
+		CommentaryEn: c.CommentaryEn.String,
 	}
 }
 

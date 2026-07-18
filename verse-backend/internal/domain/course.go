@@ -10,6 +10,9 @@ type Course struct {
 	Ord      int
 	Hidden   bool
 	Category string
+
+	Commentary   string
+	CommentaryEn string
 }
 
 // CourseItem — 코스에 담긴 절 하나. 진도(progress)는 이 단위로만 추적한다.

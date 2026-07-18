@@ -52,7 +52,8 @@
   "courses": {
     "verseCount": "{count} verses",
     "bookCount": "{count} books",
-    "lockedHint": "Sign up to unlock"
+    "lockedHint": "Sign up to unlock",
+    "commentaryToggle": "View commentary"
   },
   "settings": {
     "title": "Settings",

@@ -26,11 +26,13 @@ export async function generateMetadata({
       ? `${bookRef(first.book, first.chapter, first.verse)} — ${first.text.slice(0, 140)}`
       : sectionTitle;
     const title = locale === "en" ? `${sectionTitle} — ${courseTitle} (KJV Memory Verses)` : `${sectionTitle} — ${courseTitle}`;
+    const coursePath = `/courses/${slug}`;
     return {
       title,
       description,
+      robots: { index: false, follow: true },
       alternates: {
-        canonical: locale === "ko" ? path : `/en${path}`,
+        canonical: locale === "ko" ? coursePath : `/en${coursePath}`,
         languages: { ko: path, en: `/en${path}` },
       },
       openGraph: {
@@ -39,7 +41,7 @@ export async function generateMetadata({
       },
     };
   } catch {
-    return { title: pickLocalized("구절 목록", "Verse list", locale) };
+    return { title: pickLocalized("구절 목록", "Verse list", locale), robots: { index: false, follow: true } };
   }
 }
 

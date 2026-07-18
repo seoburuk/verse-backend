@@ -6,6 +6,8 @@ import { getCourseServer, listCoursesServer } from "@/lib/api/server";
 import { pickLocalized } from "@/lib/api/courses";
 import CourseDetailPersonal from "@/components/courses/CourseDetailPersonal";
 import CourseItemList from "@/components/courses/CourseItemList";
+import { CommentaryProvider, CommentaryToggleButton, CommentaryBody } from "@/components/courses/CommentaryToggle";
+import { renderCommentaryMarkdown } from "@/lib/commentaryMarkdown";
 import { SITE_URL } from "@/lib/site";
 
 export async function generateStaticParams() {
@@ -35,9 +37,13 @@ export async function generateMetadata({
     const totalVerses =
       (course.items?.length ?? 0) +
       (course.sections?.reduce((n, s) => n + s.items.length, 0) ?? 0);
+    const commentary = pickLocalized(course.commentary ?? "", course.commentary_en, locale);
+    const firstSentence = commentary
+      ? commentary.replace(/^#+\s*/gm, "").split(/\n+/).find((l) => l.trim().length > 0)?.slice(0, 150)
+      : undefined;
     return {
       title,
-      description: t("courseDetailDesc", { title, count: totalVerses }),
+      description: firstSentence || t("courseDetailDesc", { title, count: totalVerses }),
       alternates,
       openGraph: {
         title: t("courseDetailOgTitle", { title }),
@@ -102,6 +108,17 @@ export default async function CourseDetailPage({
     ],
   };
 
+  const commentary = pickLocalized(course.commentary ?? "", course.commentary_en, locale);
+  const articleJsonLd = commentary
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline: locale === "en" ? `${courseTitle} Commentary` : `${courseTitle} 해설`,
+        articleBody: commentary.replace(/^#+\s*/gm, "").slice(0, 500),
+        url: `${SITE_URL}${prefix}/courses/${slug}`,
+      }
+    : null;
+
   return (
     <div className="page">
       <script
@@ -112,29 +129,43 @@ export default async function CourseDetailPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <header className="page-header">
-        <Link href="/courses" className="btn-link">{t("backToCourses")}</Link>
-        <h1 className="title">{courseTitle}</h1>
-        <CourseDetailPersonal />
-      </header>
-      <main className="content">
-        {course.sections ? (
-          <div className="item-list">
-            {course.sections.map((section) => (
-              <Link
-                key={section.section_id}
-                href={`/courses/${slug}/sections/${section.section_id}`}
-                className="item-card"
-              >
-                <span className="item-topic">{pickLocalized(section.title, section.title_en, locale)}</span>
-                <span className="item-ref">{tCourses("verseCount", { count: section.items.length })}</span>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <CourseItemList slug={slug} items={course.items ?? []} />
-        )}
-      </main>
+      {articleJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+        />
+      )}
+      <CommentaryProvider>
+        <header className="page-header">
+          <Link href="/courses" className="btn-link">{t("backToCourses")}</Link>
+          <h1 className="title">{courseTitle}</h1>
+          <CourseDetailPersonal />
+          {commentary && <CommentaryToggleButton label={tCourses("commentaryToggle")} />}
+        </header>
+        <main className="content">
+          {course.sections ? (
+            <div className="item-list">
+              {course.sections.map((section) => (
+                <Link
+                  key={section.section_id}
+                  href={`/courses/${slug}/sections/${section.section_id}`}
+                  className="item-card"
+                >
+                  <span className="item-topic">{pickLocalized(section.title, section.title_en, locale)}</span>
+                  <span className="item-ref">{tCourses("verseCount", { count: section.items.length })}</span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <CourseItemList slug={slug} items={course.items ?? []} />
+          )}
+          {commentary && (
+            <section className="commentary-section">
+              <CommentaryBody>{renderCommentaryMarkdown(commentary)}</CommentaryBody>
+            </section>
+          )}
+        </main>
+      </CommentaryProvider>
     </div>
   );
 }

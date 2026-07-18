@@ -1559,4 +1559,71 @@ body {
   width: 100%;
 }
 
+/* ── Commentary ─────────────────────────────────── */
+.commentary-section {
+  margin-top: 1.5rem;
+  border-top: 2px solid var(--border);
+  padding-top: 1rem;
+}
+
+.commentary-toggle-btn {
+  font-family: var(--font-pixel);
+  font-size: 0.95rem;
+}
+
+.commentary-body {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  line-height: 1.7;
+}
+
+.commentary-body h2,
+.commentary-body h3 {
+  font-size: 1rem;
+  color: var(--green);
+}
+
+.commentary-body p {
+  font-size: 0.92rem;
+}
+
+.commentary-quote {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  box-shadow: 3px 3px 0 var(--border);
+  padding: 0.65rem 0.85rem;
+  font-size: 0.88rem;
+  color: var(--text);
+}
+
+.commentary-table-wrap {
+  overflow-x: auto;
+  border: 2px solid var(--border);
+  box-shadow: 3px 3px 0 var(--border);
+}
+
+.commentary-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.82rem;
+}
+
+.commentary-table th,
+.commentary-table td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+  white-space: normal;
+}
+
+.commentary-table th {
+  background: var(--surface);
+  color: var(--green);
+  font-family: var(--font-pixel);
+  white-space: nowrap;
+}
+
 .share-actions .btn-primary { width: 100%; max-width: 20rem; text-align: center; }

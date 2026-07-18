@@ -38,14 +38,16 @@ type BibleVerse struct {
 }
 
 type Course struct {
-	ID       int64       `json:"id"`
-	Slug     string      `json:"slug"`
-	Title    string      `json:"title"`
-	Theme    pgtype.Text `json:"theme"`
-	Ord      int32       `json:"ord"`
-	Hidden   bool        `json:"hidden"`
-	Category string      `json:"category"`
-	TitleEn  pgtype.Text `json:"title_en"`
+	ID           int64       `json:"id"`
+	Slug         string      `json:"slug"`
+	Title        string      `json:"title"`
+	Theme        pgtype.Text `json:"theme"`
+	Ord          int32       `json:"ord"`
+	Hidden       bool        `json:"hidden"`
+	Category     string      `json:"category"`
+	TitleEn      pgtype.Text `json:"title_en"`
+	Commentary   pgtype.Text `json:"commentary"`
+	CommentaryEn pgtype.Text `json:"commentary_en"`
 }
 
 type CourseItem struct {

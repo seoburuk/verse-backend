@@ -117,6 +117,9 @@ func (h *Handler) GetCourse(w http.ResponseWriter, r *http.Request) {
 		Theme:    detail.Course.Theme,
 		Ord:      detail.Course.Ord,
 		Category: detail.Course.Category,
+
+		Commentary:   detail.Course.Commentary,
+		CommentaryEn: detail.Course.CommentaryEn,
 	}
 
 	if len(detail.Sections) > 0 {

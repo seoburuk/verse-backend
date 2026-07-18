@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getCourseServer, listCoursesServer } from "../lib/api/server";
+import { listCoursesServer } from "../lib/api/server";
 import { CATEGORY_ORDER } from "../lib/categories";
 import { SITE_URL } from "../lib/site";
 
@@ -47,21 +47,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entries(`/courses/${c.slug}`, { changeFrequency: "monthly", priority: 0.8 }),
   );
 
-  // 섹션(구절 목록) 페이지 — 실제 구절 텍스트가 담긴 SEO 핵심 페이지.
-  // 코스별 조회 실패는 건너뛰고 나머지는 계속 수집한다.
-  const sectionEntries: MetadataRoute.Sitemap = [];
-  for (const c of courses) {
-    try {
-      const detail = await getCourseServer(c.slug);
-      for (const s of detail.sections ?? []) {
-        sectionEntries.push(
-          ...entries(`/courses/${c.slug}/sections/${s.section_id}`, { changeFrequency: "monthly", priority: 0.6 }),
-        );
-      }
-    } catch {
-      // skip
-    }
-  }
-
-  return [...base, ...categoryEntries, ...courseEntries, ...sectionEntries];
+  return [...base, ...categoryEntries, ...courseEntries];
 }

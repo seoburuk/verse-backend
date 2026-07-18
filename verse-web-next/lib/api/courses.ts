@@ -8,6 +8,8 @@ export interface Course {
   theme: string;
   ord: number;
   category: string;
+  commentary?: string;
+  commentary_en?: string;
 }
 
 export interface CourseItem {

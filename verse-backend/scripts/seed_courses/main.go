@@ -199,6 +199,10 @@ func main() {
 	if err := seedMessiahProphecy(ctx, pool); err != nil {
 		log.Fatalf("seed messiah-prophecy: %v", err)
 	}
+
+	if err := seedCommentary(ctx, pool); err != nil {
+		log.Fatalf("seed commentary: %v", err)
+	}
 }
 
 func insertCourse(ctx context.Context, pool *pgxpool.Pool, co seedCourse) error {
