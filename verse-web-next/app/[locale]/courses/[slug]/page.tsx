@@ -140,7 +140,6 @@ export default async function CourseDetailPage({
           <Link href="/courses" className="btn-link">{t("backToCourses")}</Link>
           <h1 className="title">{courseTitle}</h1>
           <CourseDetailPersonal />
-          {commentary && <CommentaryToggleButton label={tCourses("commentaryToggle")} />}
         </header>
         <main className="content">
           {course.sections ? (
@@ -161,6 +160,7 @@ export default async function CourseDetailPage({
           )}
           {commentary && (
             <section className="commentary-section">
+              <CommentaryToggleButton label={tCourses("commentaryToggle")} />
               <CommentaryBody>{renderCommentaryMarkdown(commentary)}</CommentaryBody>
             </section>
           )}
