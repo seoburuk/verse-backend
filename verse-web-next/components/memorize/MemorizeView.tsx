@@ -9,7 +9,7 @@ import { DragTiles } from "./DragTiles";
 import { TypeScaffold } from "./TypeScaffold";
 import { recordGrade, clearGrades } from "../../lib/sessionGrades";
 import { getFavorites, addFavorite, removeFavorite } from "../../lib/api/favorites";
-import { getLives } from "../../lib/api/lives";
+import { getLives, consumeLife } from "../../lib/api/lives";
 import { getStats } from "../../lib/api/stats";
 import { pickLocalized, type CourseItem } from "../../lib/api/courses";
 import { claimMilestone } from "../../lib/milestones";
@@ -133,12 +133,11 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
       .catch(() => {});
   }, [phase, serverGrade, isAuthed, mode]);
 
-  // 뒤로가기 — 암송(recall) 중이면 화면을 나가지 않고 모드 선택(study) 단계로
-  // 돌아간다. study/result 단계에서만 실제로 코스로 이탈한다. (목숨 페널티 없음)
+  // 뒤로가기 — 암송(recall) 진행 중 이탈은 목숨 1을 소모한다(포기 페널티). 게스트는 페널티 없음.
   function handleBack() {
-    if (phase === "recall") {
-      reset();
-      return;
+    if (phase === "recall" && isAuthed) {
+      setLives((prev) => (prev !== null ? Math.max(0, prev - 1) : prev));
+      consumeLife().catch(() => {});
     }
     router.push(backHref);
   }

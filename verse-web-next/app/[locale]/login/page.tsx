@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense, type FormEvent } from "react";
+import { useState, useEffect, useCallback, Suspense, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
@@ -69,7 +69,7 @@ function LoginForm() {
     }
   }
 
-  async function handleGoogle(idToken: string) {
+  const handleGoogle = useCallback(async (idToken: string) => {
     setError(null);
     setLoading(true);
     try {
@@ -81,9 +81,9 @@ function LoginForm() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [googleLogin, router, setTheme, t]);
 
-  async function handleApple(idToken: string, name?: string) {
+  const handleApple = useCallback(async (idToken: string, name?: string) => {
     setError(null);
     setLoading(true);
     try {
@@ -95,7 +95,7 @@ function LoginForm() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [appleLogin, router, setTheme, t]);
 
   return (
     <div className="page-center login-center">
