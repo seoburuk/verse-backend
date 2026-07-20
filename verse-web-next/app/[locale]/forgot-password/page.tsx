@@ -49,7 +49,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="page-center login-center">
       <div className="card">
-        <h1 className="title">PIX BIBLE</h1>
+        <h1 className="title">PIXBIBLE</h1>
         <p className="subtitle">{t("subtitle")}</p>
 
         {step === "email" && (

@@ -100,7 +100,7 @@ function LoginForm() {
   return (
     <div className="page-center login-center">
       <div className="card">
-        <h1 className="title">PIX BIBLE</h1>
+        <h1 className="title">PIXBIBLE</h1>
         <p className="subtitle">{t("subtitle")}</p>
         <form onSubmit={handleSubmit} className="form">
           <input

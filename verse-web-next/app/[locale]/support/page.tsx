@@ -33,9 +33,9 @@ const COPY: Record<
   }
 > = {
   ko: {
-    title: "고객 지원 — PIX BIBLE",
+    title: "고객 지원 — PIXBIBLE",
     intro:
-      "PIX BIBLE 사용 중 궁금한 점이나 문제가 있으신가요? 아래 자주 묻는 질문을 먼저 확인하시고, 해결되지 않으면 이메일로 문의해 주세요.",
+      "PIXBIBLE 사용 중 궁금한 점이나 문제가 있으신가요? 아래 자주 묻는 질문을 먼저 확인하시고, 해결되지 않으면 이메일로 문의해 주세요.",
     contactH: "문의하기",
     contactP: [
       `문의는 ${EMAIL} 으로 보내주세요. 영업일 기준 2~3일 이내에 답변드립니다.`,
@@ -84,9 +84,9 @@ const COPY: Record<
     ],
   },
   en: {
-    title: "Support — PIX BIBLE",
+    title: "Support — PIXBIBLE",
     intro:
-      "Have a question or running into a problem with PIX BIBLE? Check the frequently asked questions below first, and if that doesn't help, reach out by email.",
+      "Have a question or running into a problem with PIXBIBLE? Check the frequently asked questions below first, and if that doesn't help, reach out by email.",
     contactH: "Contact us",
     contactP: [
       `Email us at ${EMAIL}. We usually reply within 2–3 business days.`,

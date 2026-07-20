@@ -24,7 +24,7 @@ const COPY: Record<Locale, { title: string; sections: { h: string; p: string[] }
     sections: [
       {
         h: "1. 서비스 소개",
-        p: ["PIX BIBLE(이하 '서비스')은 킹제임스 성경(KJV)을 절 단위로 암송할 수 있도록 돕는 학습용 웹앱입니다."],
+        p: ["PIXBIBLE(이하 '서비스')은 킹제임스 성경(KJV)을 절 단위로 암송할 수 있도록 돕는 학습용 웹앱입니다."],
       },
       {
         h: "2. 이용 계약",
@@ -53,7 +53,7 @@ const COPY: Record<Locale, { title: string; sections: { h: string; p: string[] }
     sections: [
       {
         h: "1. About the Service",
-        p: ["PIX BIBLE (the \"Service\") is a learning web app that helps you memorize the King James Version (KJV) Bible verse by verse."],
+        p: ["PIXBIBLE (the \"Service\") is a learning web app that helps you memorize the King James Version (KJV) Bible verse by verse."],
       },
       {
         h: "2. Account",

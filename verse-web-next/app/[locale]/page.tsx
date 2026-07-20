@@ -33,7 +33,7 @@ export default async function LandingPage({
       <AuthRedirect />
       <main className="landing-main">
         <section className="landing-hero">
-          <h1 className="landing-title">PIX BIBLE</h1>
+          <h1 className="landing-title">PIXBIBLE</h1>
           <p className="landing-tagline">{t("tagline")}</p>
           <div className="landing-cta">
             <Link href={`/courses/${TRIAL_COURSE_SLUG}`} className="btn-primary landing-cta-link">

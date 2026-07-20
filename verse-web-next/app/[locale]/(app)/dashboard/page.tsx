@@ -73,7 +73,7 @@ export default function DashboardPage() {
               <ShareButton
                 url={buildMilestoneShareUrl(locale, stats.total_cleared, user?.display_name ?? "")}
                 imageUrl={buildMilestoneOgUrl(locale, stats.total_cleared, user?.display_name ?? "")}
-                title="PIX BIBLE"
+                title="PIXBIBLE"
                 text={tShare("dashboardShareText", { count: stats.total_cleared })}
                 label={tShare("milestoneShareButton")}
               />

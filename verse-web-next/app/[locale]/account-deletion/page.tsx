@@ -22,13 +22,13 @@ const COPY: Record<
   { title: string; effective: string; sections: { h: string; p: string[] }[] }
 > = {
   ko: {
-    title: "계정 삭제 안내 — PIX BIBLE",
+    title: "계정 삭제 안내 — PIXBIBLE",
     effective: "시행일자: 2026년 7월 16일",
     sections: [
       {
         h: "1. 앱 내에서 직접 삭제하기",
         p: [
-          "PIX BIBLE 앱을 실행한 뒤 [설정] → [계정 삭제]로 이동하세요.",
+          "PIXBIBLE 앱을 실행한 뒤 [설정] → [계정 삭제]로 이동하세요.",
           "본인 계정임을 확인하기 위해 사용자 이름(아이디)을 입력하는 화면이 표시됩니다. 사용자 이름을 정확히 입력하고 [영구 삭제]를 누르면 계정이 즉시 삭제됩니다.",
           "이 절차는 로그인 방식(아이디/비밀번호, Google 로그인, Apple 로그인)에 관계없이 동일하게 적용됩니다.",
         ],
@@ -62,13 +62,13 @@ const COPY: Record<
     ],
   },
   en: {
-    title: "Account Deletion — PIX BIBLE",
+    title: "Account Deletion — PIXBIBLE",
     effective: "Effective date: July 16, 2026",
     sections: [
       {
         h: "1. Delete your account in the app",
         p: [
-          "Open the PIX BIBLE app and go to Settings → Delete account.",
+          "Open the PIXBIBLE app and go to Settings → Delete account.",
           "You'll be asked to type your username to confirm it's your account. Once you type it correctly and tap \"Delete permanently,\" your account is deleted immediately.",
           "This process is the same regardless of how you signed in (username/password, Google Sign-In, or Apple Sign-In).",
         ],

@@ -318,7 +318,7 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
                 <ShareButton
                   url={buildMilestoneShareUrl(locale, milestone, user?.display_name ?? "")}
                   imageUrl={buildMilestoneOgUrl(locale, milestone, user?.display_name ?? "")}
-                  title="PIX BIBLE"
+                  title="PIXBIBLE"
                   text={tShare("milestoneShareText", { count: milestone })}
                   label={tShare("milestoneShareButton")}
                 />
@@ -333,7 +333,7 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
                   <ShareButton
                     url={buildVerseShareUrl(locale, item.book, item.chapter, item.verse)}
                     imageUrl={buildVerseOgUrl(locale, item.book, item.chapter, item.verse)}
-                    title="PIX BIBLE"
+                    title="PIXBIBLE"
                     text={tShare("verseShareText", {
                       ref: `${bookName(item.book, locale)} ${item.chapter}:${item.verse}`,
                     })}

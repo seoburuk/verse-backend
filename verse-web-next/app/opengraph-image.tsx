@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "PIX BIBLE — KJV 성경 암송 앱";
+export const alt = "PIXBIBLE — KJV 성경 암송 앱";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -21,7 +21,7 @@ export default function OGImage() {
         }}
       >
         <div style={{ fontSize: 72, color: "#f5f5f5", letterSpacing: 8, marginBottom: 24 }}>
-          PIX BIBLE
+          PIXBIBLE
         </div>
         <div style={{ fontSize: 28, color: "#aaaaaa", letterSpacing: 2 }}>
           KJV 성경 66권 · 절별 암송

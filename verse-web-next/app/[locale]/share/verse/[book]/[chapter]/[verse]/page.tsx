@@ -85,7 +85,7 @@ export default async function ShareVersePage({
             {t("verseCta")}
           </Link>
           <Link href="/" className="btn-link">
-            PIX BIBLE
+            PIXBIBLE
           </Link>
         </div>
       </main>

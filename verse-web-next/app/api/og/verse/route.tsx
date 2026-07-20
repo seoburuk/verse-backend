@@ -80,7 +80,7 @@ export async function GET(request: Request) {
             marginTop: 40,
           }}
         >
-          PIX BIBLE
+          PIXBIBLE
         </div>
       </div>
     ),

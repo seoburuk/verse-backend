@@ -77,7 +77,7 @@ export default async function ShareMilestonePage({
             {t("milestoneCta")}
           </Link>
           <Link href="/" className="btn-link">
-            PIX BIBLE
+            PIXBIBLE
           </Link>
         </div>
       </main>

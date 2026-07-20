@@ -70,7 +70,7 @@ export default async function SectionDetailPage({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "PIX BIBLE", item: `${SITE_URL}${prefix || "/"}` },
+      { "@type": "ListItem", position: 1, name: "PIXBIBLE", item: `${SITE_URL}${prefix || "/"}` },
       { "@type": "ListItem", position: 2, name: tMeta("coursesTitle"), item: `${SITE_URL}${prefix}/courses` },
       { "@type": "ListItem", position: 3, name: courseTitle, item: `${SITE_URL}${prefix}/courses/${slug}` },
       { "@type": "ListItem", position: 4, name: sectionTitle },
