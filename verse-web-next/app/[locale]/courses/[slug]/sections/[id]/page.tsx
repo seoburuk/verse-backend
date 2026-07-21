@@ -7,6 +7,7 @@ import { pickLocalized } from "@/lib/api/courses";
 import { bookRef } from "@/lib/bookRef";
 import { SITE_URL } from "@/lib/site";
 import SectionItemList from "@/components/courses/SectionItemList";
+import SectionHeaderPersonal from "@/components/courses/SectionHeaderPersonal";
 
 // 구절 텍스트가 초기 HTML에 담기도록 서버에서 fetch해 렌더링한다 (SEO 핵심 페이지).
 
@@ -88,6 +89,7 @@ export default async function SectionDetailPage({
           {t("backToCourse", { title: courseTitle })}
         </Link>
         <h1 className="title">{sectionTitle}</h1>
+        <SectionHeaderPersonal />
       </header>
       <main className="content">
         <SectionItemList slug={slug} sectionId={section.section_id} items={section.items} />

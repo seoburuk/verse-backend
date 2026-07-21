@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges">
+  <rect x="4" y="10" width="14" height="9" fill="#241f16"/>
+  <rect x="14" y="4" width="7" height="7" fill="#241f16"/>
+  <rect x="1" y="14" width="5" height="4" fill="#241f16"/>
+  <!-- 볏(축 처짐) -->
+  <rect x="16" y="2" width="2" height="2" fill="#241f16"/>
+
+  <!-- 몸통 채움 — 빛바랜 갈색(시무룩) -->
+  <rect x="5" y="11" width="12" height="7" fill="#9c8163"/>
+  <rect x="15" y="5" width="5" height="5" fill="#9c8163"/>
+  <rect x="2" y="15" width="3" height="2" fill="#9c8163"/>
+  <rect x="16" y="3" width="2" height="2" fill="#c98299"/>
+  <!-- 축 처진 날개 -->
+  <rect x="6" y="14" width="7" height="4" fill="#6b5540"/>
+  <rect x="6" y="16" width="5" height="2" fill="#f5f0e0"/>
+  <rect x="20" y="7" width="2" height="2" fill="#c99a3a"/>
+  <!-- 눈(처짐) -->
+  <rect x="17" y="7" width="2" height="2" fill="#241f16"/>
+  <!-- 눈물 -->
+  <rect x="17" y="9" width="1" height="2" fill="#6fa8dc"/>
+</svg>

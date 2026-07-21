@@ -4,12 +4,11 @@ import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { pickLocalized } from "../../lib/api/courses";
-import { getProgress, type Streak } from "../../lib/api/progress";
-import { getLives, type Lives } from "../../lib/api/lives";
 import { getResume, type ResumeTarget } from "../../lib/api/resume";
 import { useAuth } from "../../lib/hooks/useAuth";
 import { bookRef } from "../../lib/bookRef";
 import { PixelIcon } from "../PixelIcon";
+import { LivesStreakBadges } from "../LivesStreakBadges";
 
 function resumeUrl(r: ResumeTarget): string {
   if (r.section_id != null) {
@@ -22,31 +21,10 @@ export function CourseHeaderPersonal() {
   const { user, isAuthed, logout } = useAuth();
   const router = useRouter();
   const t = useTranslations("nav");
-  const [streak, setStreak] = useState<Streak | null>(null);
-  const [lives, setLives] = useState<Lives | null>(null);
-
-  useEffect(() => {
-    if (!isAuthed) return;
-    Promise.all([getProgress(), getLives()])
-      .then(([p, l]) => {
-        setStreak(p.streak);
-        setLives(l);
-      })
-      .catch(() => {});
-  }, [isAuthed]);
 
   return (
     <div className="header-right">
-      {lives && (
-        <span className="lives-badge">
-          <PixelIcon name="heart" /> {lives.lives}
-        </span>
-      )}
-      {streak && (
-        <span className="streak-badge">
-          <PixelIcon name="flame" /> {streak.current}
-        </span>
-      )}
+      <LivesStreakBadges />
       {isAuthed ? (
         <>
           <span className="user-name">{user?.display_name}</span>

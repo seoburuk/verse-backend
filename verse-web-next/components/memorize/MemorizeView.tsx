@@ -158,6 +158,7 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
         </header>
         <main className="page-center">
           <div className="card out-of-lives">
+            <img src="/mascot/dove-sad.svg" alt="" width={64} height={64} className="out-of-lives-mascot" />
             <div className="out-of-lives-icon">
               <PixelIcon name="heart" size={40} />
             </div>
@@ -291,6 +292,7 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
                     }}
                   />
                 ))}
+                <img src="/mascot/dove-happy.svg" alt="" width={72} height={72} className="complete-mascot" />
                 <div className="complete-icon">
                   <PixelIcon name="star" size={48} />
                 </div>

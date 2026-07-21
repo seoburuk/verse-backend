@@ -1126,6 +1126,12 @@ body {
 
 .out-of-lives-icon { font-size: 2.5rem; }
 
+.out-of-lives-mascot,
+.complete-mascot {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
 /* ── Dashboard ───────────────────────────────────── */
 .rank-list {
   display: flex;
@@ -1390,6 +1396,17 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 2rem;
+}
+
+.landing-mascot {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  margin-bottom: -1rem;
+}
+
+.streak-mascot {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 .landing-title {
