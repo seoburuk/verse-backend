@@ -34,7 +34,6 @@ export function LivesStreakBadges() {
       )}
       {streak && (
         <span className="streak-badge">
-          <img src="/mascot/dove-idle.svg" alt="" width={18} height={18} className="streak-mascot" />
           <PixelIcon name="flame" /> {streak.current}
         </span>
       )}

@@ -33,7 +33,6 @@ export default async function LandingPage({
       <AuthRedirect />
       <main className="landing-main">
         <section className="landing-hero">
-          <img src="/mascot/dove-idle.svg" alt="" width={96} height={96} className="landing-mascot" />
           <h1 className="landing-title">PIXBIBLE</h1>
           <p className="landing-tagline">{t("tagline")}</p>
           <div className="landing-cta">
