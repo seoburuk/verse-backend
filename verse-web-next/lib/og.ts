@@ -18,7 +18,8 @@ export async function loadGalmuri(): Promise<Buffer> {
 export const OG_SIZE = { width: 1200, height: 630 };
 
 // 메신저로 이미지 파일을 직접 공유할 때 쓰는 세로형 카드 — 링크 미리보기(OG_SIZE)와는 별개.
-export const OG_STORY_SIZE = { width: 1080, height: 1920 };
+// 4:5 — 채팅 썸네일 박스 안에서 9:16보다 크고 읽기 편하게 뜬다(스토리 업로드용이 아니라 채팅 전송용).
+export const OG_STORY_SIZE = { width: 1080, height: 1350 };
 
 export const OG_COLORS = {
   bg: "#0d0d0d",

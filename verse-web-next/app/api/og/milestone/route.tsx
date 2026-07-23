@@ -38,7 +38,7 @@ export async function GET(request: Request) {
         justifyContent: "space-between",
         background: OG_COLORS.bg,
         fontFamily: "Galmuri11",
-        padding: "96px 72px",
+        padding: "64px 64px",
       }}
     >
       <div style={{ display: "flex", fontSize: 32, color: OG_COLORS.green, letterSpacing: 8 }}>
