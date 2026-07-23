@@ -16,8 +16,8 @@ import { claimMilestone } from "../../lib/milestones";
 import {
   buildVerseShareUrl,
   buildMilestoneShareUrl,
-  buildVerseOgUrl,
-  buildMilestoneOgUrl,
+  buildVerseStoryUrl,
+  buildMilestoneStoryUrl,
 } from "../../lib/share";
 import { bookName } from "../../lib/bookRef";
 import { PixelIcon } from "../PixelIcon";
@@ -133,11 +133,16 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
       .catch(() => {});
   }, [phase, serverGrade, isAuthed, mode]);
 
-  // 뒤로가기 — 암송(recall) 진행 중 이탈은 목숨 1을 소모한다(포기 페널티). 게스트는 페널티 없음.
+  // 뒤로가기 — 암송(recall) 진행 중이면 목숨 1을 소모하고(포기 페널티, 게스트 제외)
+  // 섹션으로 나가지 않고 같은 구절의 study 단계로 되돌린다. study/result 단계에서는 섹션 목록으로 나간다.
   function handleBack() {
-    if (phase === "recall" && isAuthed) {
-      setLives((prev) => (prev !== null ? Math.max(0, prev - 1) : prev));
-      consumeLife().catch(() => {});
+    if (phase === "recall") {
+      if (isAuthed) {
+        setLives((prev) => (prev !== null ? Math.max(0, prev - 1) : prev));
+        consumeLife().catch(() => {});
+      }
+      reset();
+      return;
     }
     router.push(backHref);
   }
@@ -317,7 +322,7 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
                 <p className="milestone-title">{tShare("milestoneTitle", { count: milestone })}</p>
                 <ShareButton
                   url={buildMilestoneShareUrl(locale, milestone, user?.display_name ?? "")}
-                  imageUrl={buildMilestoneOgUrl(locale, milestone, user?.display_name ?? "")}
+                  imageUrl={buildMilestoneStoryUrl(locale, milestone, user?.display_name ?? "")}
                   title="PIXBIBLE"
                   text={tShare("milestoneShareText", { count: milestone })}
                   label={tShare("milestoneShareButton")}
@@ -332,7 +337,7 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
                   </button>
                   <ShareButton
                     url={buildVerseShareUrl(locale, item.book, item.chapter, item.verse)}
-                    imageUrl={buildVerseOgUrl(locale, item.book, item.chapter, item.verse)}
+                    imageUrl={buildVerseStoryUrl(locale, item.book, item.chapter, item.verse)}
                     title="PIXBIBLE"
                     text={tShare("verseShareText", {
                       ref: `${bookName(item.book, locale)} ${item.chapter}:${item.verse}`,

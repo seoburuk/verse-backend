@@ -33,21 +33,17 @@ export function ShareButton({ url, title, text, imageUrl, className, label }: Sh
       // 오프라인 등 fetch 실패 — 텍스트 공유로 폴백
       return false;
     }
-    // 일부 플랫폼은 files와 url 동시 공유를 지원하지 않으므로 순서대로 시도
-    const candidates = [
-      { files: [file], title, text, url },
-      { files: [file], title, text: `${text}\n${url}` },
-    ];
-    for (const data of candidates) {
-      if (!navigator.canShare(data)) continue;
-      try {
-        await navigator.share(data);
-      } catch {
-        // 사용자가 공유시트를 닫은 경우 등 — 폴백하지 않고 종료
-      }
-      return true;
+    // files와 url은 스펙상 동시 공유가 불가하다. 캡션에 url을 끼워 넣으면 카카오톡 등이
+    // 첨부 이미지 대신 그 url을 감지해 자체 og:image(가로) 링크 카드로 덮어써버리므로,
+    // 이미지 공유 시에는 url을 아예 빼고 캡션 텍스트만 붙인다.
+    const data = { files: [file], title, text };
+    if (!navigator.canShare(data)) return false;
+    try {
+      await navigator.share(data);
+    } catch {
+      // 사용자가 공유시트를 닫은 경우 등 — 폴백하지 않고 종료
     }
-    return false;
+    return true;
   }
 
   async function handleShare() {

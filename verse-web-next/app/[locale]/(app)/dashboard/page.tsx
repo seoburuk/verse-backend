@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import { getStats, type Stats } from "@/lib/api/stats";
 import { CATEGORY_ORDER } from "@/lib/categories";
 import { bookName } from "@/lib/bookRef";
-import { buildMilestoneShareUrl, buildMilestoneOgUrl } from "@/lib/share";
+import { buildMilestoneShareUrl, buildMilestoneStoryUrl } from "@/lib/share";
 import { PixelIcon } from "@/components/PixelIcon";
 import { ShareButton } from "@/components/ShareButton";
 
@@ -72,7 +72,7 @@ export default function DashboardPage() {
             {stats.total_cleared > 0 && (
               <ShareButton
                 url={buildMilestoneShareUrl(locale, stats.total_cleared, user?.display_name ?? "")}
-                imageUrl={buildMilestoneOgUrl(locale, stats.total_cleared, user?.display_name ?? "")}
+                imageUrl={buildMilestoneStoryUrl(locale, stats.total_cleared, user?.display_name ?? "")}
                 title="PIXBIBLE"
                 text={tShare("dashboardShareText", { count: stats.total_cleared })}
                 label={tShare("milestoneShareButton")}
