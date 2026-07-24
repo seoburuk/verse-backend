@@ -466,7 +466,7 @@ void main() {
   });
 
   test('관련 절이 적으면 중간 등급이 건너뛰어진다(알려진 절충)', () {
-    expect(tier(1, 2), CardTier.gold); // 0.50 → 실버를 건너뛴다
+    expect(tier(1, 2), CardTier.silver); // 0.50 → 브론즈를 건너뛰고 바로 실버
     expect(tier(2, 2), CardTier.legend);
   });
 
