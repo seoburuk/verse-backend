@@ -2,6 +2,12 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+## 구현 상태: 완료 (2026-07-23)
+
+3개 태스크 전부 구현·테스트 통과. `verse-flutter` 커밋: `1b013f3` 카드 탭 플레이스홀더 →
+`ed70de9` StatefulShellRoute 5탭 셸 → `3b4386a` 흩어진 내비 정리.
+카드 탭은 이후 `2026-07-23-card-collection.md`에서 실제 도감으로 교체됨.
+
 **Goal:** 흩어진 AppBar 이동 아이콘을 없애고, 5탭(오늘·코스·랭킹·카드·설정) 지속 하단 바를 `StatefulShellRoute.indexedStack`로 도입해 탭별 내비 스택이 보존되게 한다.
 
 **Architecture:** `lib/app/router.dart`를 `StatefulShellRoute.indexedStack` 5브랜치로 재구성한다. 셸을 감싸는 `AppShell` 위젯이 Material `NavigationBar`를 그린다. 암송·플랜생성·로그인/회원가입·섹션완료는 루트 Navigator(`parentNavigatorKey`)에 올려 바를 숨긴다. 카드 탭은 "준비 중" 플레이스홀더 화면으로 둔다(실제 컬렉션은 별개 스펙).

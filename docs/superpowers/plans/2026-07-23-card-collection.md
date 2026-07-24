@@ -2,6 +2,19 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+## 구현 상태: 완료 (2026-07-23)
+
+4개 태스크 전부 구현·테스트 통과(`flutter test` 122/122, `flutter analyze` 신규 코드 무경고).
+`verse-flutter` 커밋: `6aa7130` 카탈로그+모델 → `a651600` 해금 판정 → `2f7c7e5` 도감 갤러리 →
+`60961d3` 섹션 완료 뒤집기 공개.
+
+**후속 수정**: 플랜 생성 화면이 로케일과 무관하게 항상 한글 코스 제목을 쓰던 버그를 발견해
+`aaea931`에서 별도로 고쳤다(이 계획 범위 밖, `titleEn` 폴백 패턴 적용).
+
+**시뮬레이터 육안 검증**: 한국어 로케일 흐름(하단 바·오늘 홈·카드 도감 빈 상태·플랜 생성)은
+iOS 시뮬레이터에서 확인 완료. 영어 로케일 재확인은 시뮬레이터의 알림 권한 팝업이 터치에
+응답하지 않는 툴링 문제로 중단 — 실기기 확인 필요.
+
 **Goal:** 성경 동물·인물(장비로 표현) 카드를 번들 JSON 카탈로그로 정의하고, 섹션을 완주하면 해금해, 섹션 완료 화면에서 뒤집어 공개하고 `카드` 탭 도감에서 모아 본다.
 
 **Architecture:** 카드 목록은 `assets/cards/cards.json`(코드 수정 없이 갱신 가능)에 두고 `CardCatalog`이 로드한다. 해금 여부는 새 테이블 없이 기존 `CourseItems`+`Progress` 조인으로 "완주한 섹션 집합"을 파생해 판정한다. 뒤집기 1회 기록만 기존 `SyncMeta`에 남긴다. 아트가 없으면 이름 첫 글자 타일로 대체 렌더한다.

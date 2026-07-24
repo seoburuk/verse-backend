@@ -2,6 +2,12 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+## 구현 상태: 완료 (2026-07-23)
+
+4개 태스크 전부 구현·테스트 통과(`flutter test` 전체 그린, `flutter analyze` 신규 코드 무경고).
+`verse-flutter` 커밋: `dacdbf1` 무드 파생 함수 → `c53cef4` 오늘 홈 반영 → `e0e5ce9` 축하 연출 →
+`c6c789a` 배고픔 알림 문구까지.
+
 **Goal:** 마스코트(Shaun) 무드를 오늘치 달성 여부에서 파생해 오늘 홈에 살아있게 띄우고, 목표 달성 시 하루 1회 축하 연출을 재생하며, 저녁 스트릭 위험 알림 문구를 "Shaun이 배고파해요"로 교체한다.
 
 **Architecture:** 새 테이블 없이 기존 `StreakState.lastDay` + `PlanView.todayDone`에서 무드를 계산하는 순수 함수(`lib/shared/mascot_mood.dart`)를 만들고, `TodayScreen`이 이를 그려 마스코트와 오늘 목표를 한 블록으로 묶는다. 축하 1회 가드는 기존 `SyncMeta`(via `AppSettingsRepository`)에 마지막 축하일을 저장해 처리한다. 알림은 스케줄링 로직을 건드리지 않고 문구 생성 함수만 교체한다.
