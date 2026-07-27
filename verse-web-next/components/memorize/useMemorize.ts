@@ -45,9 +45,10 @@ interface UseMemorizeReturn extends MemorizeState {
   setMode: (mode: RecallMode) => void;
   tapTile: (tile: string, fromPool: boolean) => void;
   setTyped: (text: string) => void;
-  startRecall: () => void;
+  startRecall: (currentLives: number | null) => void;
   submit: () => Promise<void>;
   reset: () => void;
+  clearOutOfLives: () => void;
 }
 
 function shuffle<T>(arr: T[]): T[] {
@@ -179,7 +180,13 @@ export function useMemorize(
     }
   }, [phase, placed, answerTokens, fireFx]);
 
-  const startRecall = useCallback(() => {
+  // 목숨이 0이면 recall을 막는다(서버 attempt_service.go의 목숨 확인을 사전에 미러).
+  // currentLives가 null이면(게스트, 또는 로딩 전) 체크를 건너뛴다.
+  const startRecall = useCallback((currentLives: number | null) => {
+    if (currentLives !== null && currentLives <= 0) {
+      setOutOfLives(true);
+      return;
+    }
     setPhase("recall");
   }, []);
 
@@ -213,6 +220,11 @@ export function useMemorize(
     }
   }, [courseItemId, mode, liveGrade, attemptTokens, isAuthed]);
 
+  // 목숨 없음 화면에서 재조회로 회복했을 때 호출 — 카드에 갇히지 않게 한다.
+  const clearOutOfLives = useCallback(() => {
+    setOutOfLives(false);
+  }, []);
+
   const reset = useCallback(() => {
     setPhase("study");
     setTiles(buildTilePool(answerDisplay));
@@ -225,5 +237,5 @@ export function useMemorize(
     prevFilledRef.current = 0;
   }, [answerDisplay]);
 
-  return { phase, mode, tiles, placed, typed, typeReveal, liveGrade, submitting, serverGrade, mismatch, outOfLives, combo, fx, setMode, tapTile, setTyped, startRecall, submit, reset };
+  return { phase, mode, tiles, placed, typed, typeReveal, liveGrade, submitting, serverGrade, mismatch, outOfLives, combo, fx, setMode, tapTile, setTyped, startRecall, submit, reset, clearOutOfLives };
 }

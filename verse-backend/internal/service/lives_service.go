@@ -23,8 +23,12 @@ const (
 // SettleLives — 저장된 목숨 상태에 경과 시간만큼의 리필을 반영한 새 상태를 계산한다.
 // 순수 함수라 시간 주입만으로 단위 테스트가 가능하다.
 func SettleLives(stored domain.Lives, now time.Time) domain.Lives {
+	// 만렙 상태의 UpdatedAt은 시각이 지나도 갱신되지 않으므로, 옛 시각을
+	// 그대로 둔 채 소모하면 다음 리필까지 걸리는 시간이 실제보다 훨씬
+	// 짧게 계산된다(이미 지난 시간이 잔여 리필분으로 잘못 카운트됨).
+	// 만렙에서는 "지금부터" 다시 채워진다고 보고 시계를 now로 리셋한다.
 	if stored.Count >= MaxLives {
-		return domain.Lives{Count: MaxLives, UpdatedAt: stored.UpdatedAt}
+		return domain.Lives{Count: MaxLives, UpdatedAt: now}
 	}
 
 	elapsed := now.Sub(stored.UpdatedAt)

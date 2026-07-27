@@ -61,7 +61,7 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
   const isLast = index >= items.length - 1;
   const {
     phase, mode, tiles, placed, typed, typeReveal, liveGrade, submitting, serverGrade, mismatch, outOfLives, combo, fx,
-    setMode, tapTile, setTyped, startRecall, submit, reset,
+    setMode, tapTile, setTyped, startRecall, submit, reset, clearOutOfLives,
   } = useMemorize(item.course_item_id, item.text);
 
   // 진행 게이지 — recall 단계에서 채운 단어 비율 (드래그: 배치 수, 타자: 정확히 채운 수)
@@ -138,8 +138,9 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
   function handleBack() {
     if (phase === "recall") {
       if (isAuthed) {
-        setLives((prev) => (prev !== null ? Math.max(0, prev - 1) : prev));
-        consumeLife().catch(() => {});
+        // 서버 응답값을 그대로 반영한다 — 낙관적으로 먼저 깎고 실패를 삼키면
+        // 실제 소모 여부와 화면 표시가 어긋난다.
+        consumeLife().then((l) => setLives(l.lives)).catch(() => {});
       }
       reset();
       return;
@@ -151,6 +152,19 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
       getLives().then((l) => setLives(l.lives)).catch(() => {});
     }
   }, [phase, isAuthed]);
+
+  // 목숨 없음 화면에서 재조회 — 그 사이 리필됐으면 study 단계로 복귀시킨다.
+  function handleRetryLives() {
+    getLives()
+      .then((l) => {
+        setLives(l.lives);
+        if (l.lives > 0) {
+          clearOutOfLives();
+          reset();
+        }
+      })
+      .catch(() => {});
+  }
 
   if (outOfLives) {
     return (
@@ -168,6 +182,9 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
             </div>
             <h2 className="title">{t("outOfLivesTitle")}</h2>
             <p className="muted">{t("outOfLivesDesc")}</p>
+            <button className="btn-secondary" onClick={handleRetryLives}>
+              {t("retryLives")}
+            </button>
             <button className="btn-primary" onClick={() => router.push(backHref)}>
               {t("goBack")}
             </button>
@@ -230,7 +247,7 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
                 {t("modeDictation")}
               </button>
             </div>
-            <button className="btn-primary" onClick={startRecall}>
+            <button className="btn-primary" onClick={() => startRecall(isAuthed ? lives : null)}>
               {t("startRecall")}
             </button>
           </div>

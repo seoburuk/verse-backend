@@ -60,11 +60,11 @@ func TestSettleLives(t *testing.T) {
 			wantAt:    base.Add(3 * time.Hour),
 		},
 		{
-			name:      "already at max: unchanged even with elapsed time",
+			name:      "already at max: clock resets to now",
 			stored:    domain.Lives{Count: MaxLives, UpdatedAt: base},
 			now:       base.Add(3 * time.Hour),
 			wantCount: MaxLives,
-			wantAt:    base,
+			wantAt:    base.Add(3 * time.Hour),
 		},
 	}
 
