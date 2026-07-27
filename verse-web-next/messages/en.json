@@ -36,18 +36,10 @@
   "nav": {
     "bookmarks": "Bookmarks",
     "dashboard": "Dashboard",
-    "rankings": "Rankings",
     "settings": "Settings",
     "logout": "Log out",
     "login": "Log in",
     "resume": "▶ Resume"
-  },
-  "rankings": {
-    "title": "Rankings",
-    "back": "← Back",
-    "loading": "Loading...",
-    "empty": "No one is on the leaderboard yet",
-    "myRank": "My rank"
   },
   "courses": {
     "verseCount": "{count} verses",
@@ -164,7 +156,7 @@
     "retryAgain": "Retry",
     "bookmark": "Bookmark",
     "removeBookmark": "Remove bookmark",
-    "guestCta": "Sign up to save your progress, lives, and rankings!",
+    "guestCta": "Sign up to save your progress and lives!",
     "guestCtaButton": "Sign up"
   },
   "section": {

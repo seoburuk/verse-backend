@@ -36,18 +36,10 @@
   "nav": {
     "bookmarks": "책갈피",
     "dashboard": "대시보드",
-    "rankings": "랭킹",
     "settings": "설정",
     "logout": "로그아웃",
     "login": "로그인",
     "resume": "▶ 이어가기"
-  },
-  "rankings": {
-    "title": "랭킹",
-    "back": "← 뒤로",
-    "loading": "불러오는 중...",
-    "empty": "아직 랭킹에 오른 사람이 없어요",
-    "myRank": "내 순위"
   },
   "courses": {
     "verseCount": "{count}구절",
@@ -164,7 +156,7 @@
     "retryAgain": "다시하기",
     "bookmark": "책갈피",
     "removeBookmark": "책갈피 해제",
-    "guestCta": "가입하면 진행도 저장 · 목숨 · 랭킹까지!",
+    "guestCta": "가입하면 진행도 저장 · 목숨까지!",
     "guestCtaButton": "가입하기"
   },
   "section": {

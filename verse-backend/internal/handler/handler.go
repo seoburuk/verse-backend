@@ -15,16 +15,14 @@ type Handler struct {
 	auth    *service.AuthService
 	courses *service.CourseService
 	attempt *service.AttemptService
-	ranking *service.RankingService
 }
 
 func NewHandler(
 	auth *service.AuthService,
 	courses *service.CourseService,
 	attempt *service.AttemptService,
-	ranking *service.RankingService,
 ) *Handler {
-	return &Handler{auth: auth, courses: courses, attempt: attempt, ranking: ranking}
+	return &Handler{auth: auth, courses: courses, attempt: attempt}
 }
 
 // errStatus — domain 에러를 HTTP 상태코드로 변환한다.

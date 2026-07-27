@@ -73,9 +73,7 @@ func run() error {
 	authSvc    := service.NewAuthService(userRepo, cfg.JWTSecret, cfg.JWTAccessTTL, cfg.GoogleClientID, cfg.AppleBundleID, cfg.AppleServiceID, mailSvc)
 	courseSvc  := service.NewCourseService(courseRepo, verseRepo)
 	attemptSvc := service.NewAttemptService(courseRepo, attemptRepo, userRepo)
-	rankingSvc := service.NewRankingService(attemptRepo)
-
-	h := handler.NewHandler(authSvc, courseSvc, attemptSvc, rankingSvc)
+	h := handler.NewHandler(authSvc, courseSvc, attemptSvc)
 
 	// 4) HTTP 서버 조립
 	srv := &http.Server{
