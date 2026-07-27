@@ -18,3 +18,4 @@ verse-web/tsconfig.tsbuildinfo
 
 # os
 .DS_Store
+.worktrees/
