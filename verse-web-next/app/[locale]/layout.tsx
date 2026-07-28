@@ -8,6 +8,7 @@ import { AuthProvider } from "@/lib/store/AuthContext";
 import { Footer } from "@/components/Footer";
 import { routing, type Locale } from "@/i18n/routing";
 import { SITE_URL } from "@/lib/site";
+import { APP_STORE_URL } from "@/lib/app";
 import "../globals.css";
 
 const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
@@ -101,6 +102,17 @@ export default async function LocaleLayout({
         url: SITE_URL,
         applicationCategory: "EducationalApplication",
         operatingSystem: "All",
+        inLanguage: locale,
+        description: meta.desc,
+      },
+      {
+        "@type": "MobileApplication",
+        "@id": `${SITE_URL}/#ios-app`,
+        name: "PixBible: Bible Verse Memory",
+        url: APP_STORE_URL,
+        installUrl: APP_STORE_URL,
+        applicationCategory: "EducationalApplication",
+        operatingSystem: "iOS",
         inLanguage: locale,
         description: meta.desc,
       },

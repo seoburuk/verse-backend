@@ -50,7 +50,7 @@ App Store: <https://apps.apple.com/kr/app/pixbible-bible-verse-memory/id67916222
 | 5 | Features 섹션 | 기존 기능 카드 4개 재활용 + 스크린샷 곁들이기 |
 | 6 | Why Choose Us | 5번과 내용이 겹침 → **통합**, 별도 섹션 만들지 않음 |
 | 7 | 리뷰 섹션 | **보류.** 출시 직후라 실제 후기 없음. 리뷰가 쌓이면 추가 |
-| 8 | FAQ 섹션 | 신규 작성 (무료 여부, 오프라인 동작, 안드로이드 출시 계획 등) |
+| 8 | FAQ 섹션 | **보류.** 1차 구현 범위에서 제외 |
 | 9 | 마지막 CTA | 신규 — App Store 배지 재배치 |
 | 10 | CTA 옆 비주얼 | 스크린샷 재사용 |
 | 11 | 푸터 | 이미 있음([Footer.tsx](../verse-web-next/components/Footer.tsx)) — 변경 없음 |
