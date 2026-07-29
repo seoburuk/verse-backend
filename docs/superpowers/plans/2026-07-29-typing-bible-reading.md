@@ -16,6 +16,9 @@
 - **입력 판정은 영숫자만.** 대소문자 무시, 구두점·공백은 커서가 자동 통과. 기준은 기존 `grading.normalize()`(소문자화 + 구두점 제거)와 일치한다.
 - **drift 스키마 버전은 3 → 4로 한 번만 올린다.** Task 1에서 올리고 이후 태스크는 건드리지 않는다.
 - l10n 문자열 추가 시 `lib/l10n/app_ko.arb`(템플릿)와 `lib/l10n/app_en.arb`를 **둘 다** 수정하고 `flutter gen-l10n`을 돌린다. 생성 파일(`app_localizations*.dart`)은 저장소에 커밋된다.
+- **`*.g.dart`는 `.gitignore` 대상이다** — drift 생성 파일은 커밋하지 않는다. `dart run build_runner build`는 각자 로컬에서 돌린다. (`build_runner`에서 `--delete-conflicting-outputs` 플래그는 이 프로젝트 버전에서 제거되었다 — 붙이면 경고만 뜬다.)
+- drift가 단일 정수 PK 컬럼을 생성할 때 Companion 필드는 **필수가 아니라 `Value<int>`**다(기존 `Bookmarks.courseItemId`와 동일). `ReadingProgressCompanion.insert(courseItemId: const Value(42), ...)` 형태로 쓴다.
+- **drift `DateTime` 컬럼은 로컬 시간대로 복원된다.** 테스트에서 UTC와 비교할 때는 `row.typedAt.toUtc()`를 쓴다(기존 `test/favorites_sync_service_test.dart:138` 패턴).
 - 각 태스크는 테스트가 통과한 상태로 끝난다. Flutter는 `flutter test`, Go는 `go test ./...`.
 
 ---
@@ -393,7 +396,7 @@ Expected: PASS (6개)
 
 ```dart
 final readingProgressRepositoryProvider = Provider<ReadingProgressRepository>(
-  (ref) => ReadingProgressRepository(ref.watch(appDatabaseProvider)),
+  (ref) => ReadingProgressRepository(ref.watch(databaseProvider)),
 );
 ```
 
@@ -968,7 +971,7 @@ Future<AppDatabase> _seededDb() async {
 }
 
 Widget _app(AppDatabase db) => ProviderScope(
-      overrides: [appDatabaseProvider.overrideWithValue(db)],
+      overrides: [databaseProvider.overrideWithValue(db)],
       child: const MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
@@ -1200,7 +1203,7 @@ Future<AppDatabase> _seededDb() async {
 }
 
 Widget _app(AppDatabase db) => ProviderScope(
-      overrides: [appDatabaseProvider.overrideWithValue(db)],
+      overrides: [databaseProvider.overrideWithValue(db)],
       child: const MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
@@ -1488,7 +1491,7 @@ void main() {
 
   setUp(() async {
     db = await _seededDb();
-    container = ProviderContainer(overrides: [appDatabaseProvider.overrideWithValue(db)]);
+    container = ProviderContainer(overrides: [databaseProvider.overrideWithValue(db)]);
   });
   tearDown(() {
     container.dispose();
@@ -1729,7 +1732,7 @@ final readingSessionProvider = FutureProvider<ReadingSession?>((ref) async {
   final view = await ref.watch(readingPlanViewProvider.future);
   if (view == null) return null;
 
-  final db = ref.watch(appDatabaseProvider);
+  final db = ref.watch(databaseProvider);
   final reading = ref.watch(readingProgressRepositoryProvider);
   final sectionIds = view.sectionIds;
 
@@ -2028,7 +2031,7 @@ void main() {
     addTearDown(db.close);
 
     await tester.pumpWidget(ProviderScope(
-      overrides: [appDatabaseProvider.overrideWithValue(db)],
+      overrides: [databaseProvider.overrideWithValue(db)],
       child: const MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
@@ -2560,7 +2563,7 @@ void main() {
   test('책장은 성경 코스만 담는다 (워밍업 제외)', () async {
     final db = await _seededDb();
     addTearDown(db.close);
-    final container = ProviderContainer(overrides: [appDatabaseProvider.overrideWithValue(db)]);
+    final container = ProviderContainer(overrides: [databaseProvider.overrideWithValue(db)]);
     addTearDown(container.dispose);
 
     final shelf = await container.read(bookshelfProvider.future);
@@ -2570,7 +2573,7 @@ void main() {
   test('채움 비율은 통독한 절 / 전체 절이다', () async {
     final db = await _seededDb();
     addTearDown(db.close);
-    final container = ProviderContainer(overrides: [appDatabaseProvider.overrideWithValue(db)]);
+    final container = ProviderContainer(overrides: [databaseProvider.overrideWithValue(db)]);
     addTearDown(container.dispose);
 
     final reading = ReadingProgressRepository(db);
@@ -2588,7 +2591,7 @@ void main() {
   test('전부 통독하면 complete다', () async {
     final db = await _seededDb();
     addTearDown(db.close);
-    final container = ProviderContainer(overrides: [appDatabaseProvider.overrideWithValue(db)]);
+    final container = ProviderContainer(overrides: [databaseProvider.overrideWithValue(db)]);
     addTearDown(container.dispose);
 
     final reading = ReadingProgressRepository(db);
@@ -2603,7 +2606,7 @@ void main() {
   test('암송으로 외운 절은 책장을 채우지 않는다', () async {
     final db = await _seededDb();
     addTearDown(db.close);
-    final container = ProviderContainer(overrides: [appDatabaseProvider.overrideWithValue(db)]);
+    final container = ProviderContainer(overrides: [databaseProvider.overrideWithValue(db)]);
     addTearDown(container.dispose);
 
     await db.into(db.progress).insert(ProgressCompanion.insert(
@@ -2640,7 +2643,7 @@ class BookProgress {
 /// 66권 책장. 통독(reading_progress)만 센다 — 암송으로 외운 절은
 /// 책장을 채우지 않는다(성취 자산 분리 원칙, 스펙 §5).
 final bookshelfProvider = FutureProvider<List<BookProgress>>((ref) async {
-  final db = ref.watch(appDatabaseProvider);
+  final db = ref.watch(databaseProvider);
   final reading = ref.watch(readingProgressRepositoryProvider);
 
   final courses = await (db.select(db.courses)
@@ -3006,7 +3009,7 @@ void main() {
 
   setUp(() async {
     db = await _seededDb();
-    container = ProviderContainer(overrides: [appDatabaseProvider.overrideWithValue(db)]);
+    container = ProviderContainer(overrides: [databaseProvider.overrideWithValue(db)]);
   });
   tearDown(() {
     container.dispose();
@@ -3278,7 +3281,7 @@ void main() {
   test('장별 진행을 섹션 순서대로 준다', () async {
     final db = await _seededDb();
     addTearDown(db.close);
-    final container = ProviderContainer(overrides: [appDatabaseProvider.overrideWithValue(db)]);
+    final container = ProviderContainer(overrides: [databaseProvider.overrideWithValue(db)]);
     addTearDown(container.dispose);
 
     final chapters = await container.read(bookChaptersProvider(1).future);
@@ -3290,7 +3293,7 @@ void main() {
   test('한 장을 다 통독하면 그 장만 complete다', () async {
     final db = await _seededDb();
     addTearDown(db.close);
-    final container = ProviderContainer(overrides: [appDatabaseProvider.overrideWithValue(db)]);
+    final container = ProviderContainer(overrides: [databaseProvider.overrideWithValue(db)]);
     addTearDown(container.dispose);
 
     final reading = ReadingProgressRepository(db);
@@ -3305,7 +3308,7 @@ void main() {
   test('부분 통독은 typed에 반영되지만 complete는 아니다', () async {
     final db = await _seededDb();
     addTearDown(db.close);
-    final container = ProviderContainer(overrides: [appDatabaseProvider.overrideWithValue(db)]);
+    final container = ProviderContainer(overrides: [databaseProvider.overrideWithValue(db)]);
     addTearDown(container.dispose);
 
     await ReadingProgressRepository(db).markTyped(102);
@@ -3340,7 +3343,7 @@ class ChapterProgress {
 /// 한 권의 장별 통독 진행. 책장에서 책을 탭하면 연다(스펙 §5).
 final bookChaptersProvider =
     FutureProvider.family<List<ChapterProgress>, int>((ref, courseId) async {
-  final db = ref.watch(appDatabaseProvider);
+  final db = ref.watch(databaseProvider);
   final reading = ref.watch(readingProgressRepositoryProvider);
 
   final sections = await (db.select(db.sections)
