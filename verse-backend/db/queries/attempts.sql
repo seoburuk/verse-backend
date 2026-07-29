@@ -33,3 +33,10 @@ FROM course_items ci
 LEFT JOIN progress p
   ON p.course_item_id = ci.id AND p.user_id = $1
 GROUP BY ci.course_id;
+
+-- name: ListReadingProgress :many
+SELECT course_item_id, MIN(created_at)::timestamptz AS typed_at
+FROM attempts
+WHERE user_id = $1 AND mode = 'reading'
+GROUP BY course_item_id
+ORDER BY course_item_id;

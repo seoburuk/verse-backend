@@ -98,6 +98,39 @@ func (q *Queries) ListCourseProgress(ctx context.Context, userID int64) ([]ListC
 	return items, nil
 }
 
+const listReadingProgress = `-- name: ListReadingProgress :many
+SELECT course_item_id, MIN(created_at)::timestamptz AS typed_at
+FROM attempts
+WHERE user_id = $1 AND mode = 'reading'
+GROUP BY course_item_id
+ORDER BY course_item_id
+`
+
+type ListReadingProgressRow struct {
+	CourseItemID int64              `json:"course_item_id"`
+	TypedAt      pgtype.Timestamptz `json:"typed_at"`
+}
+
+func (q *Queries) ListReadingProgress(ctx context.Context, userID int64) ([]ListReadingProgressRow, error) {
+	rows, err := q.db.Query(ctx, listReadingProgress, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListReadingProgressRow
+	for rows.Next() {
+		var i ListReadingProgressRow
+		if err := rows.Scan(&i.CourseItemID, &i.TypedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listUserProgress = `-- name: ListUserProgress :many
 SELECT p.course_item_id, p.grade, p.cleared, bv.book, bv.chapter, bv.verse
 FROM progress p

@@ -256,3 +256,8 @@ func (s *AttemptService) GetProgress(ctx context.Context, userID int64) (Progres
 	}
 	return ProgressSummary{Streak: streak, Courses: courses, Items: items}, nil
 }
+
+// GetReadingProgress — 사용자의 통독 진행 목록. 재설치/기기 변경 시 복원용.
+func (s *AttemptService) GetReadingProgress(ctx context.Context, userID int64) ([]domain.ReadingProgress, error) {
+	return s.attempts.ListReadingProgress(ctx, userID)
+}

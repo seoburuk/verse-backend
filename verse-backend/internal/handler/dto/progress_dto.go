@@ -26,3 +26,13 @@ type ProgressResponse struct {
 	Courses []CourseProgressDTO `json:"courses"`
 	Items   []ItemProgressDTO   `json:"items"`
 }
+
+// ReadingItemDTO — 통독한 절 하나.
+type ReadingItemDTO struct {
+	CourseItemID int64  `json:"course_item_id"`
+	TypedAt      string `json:"typed_at"`
+}
+
+type ReadingProgressResponse struct {
+	Items []ReadingItemDTO `json:"items"`
+}

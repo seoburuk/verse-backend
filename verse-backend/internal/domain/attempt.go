@@ -44,6 +44,12 @@ type Attempt struct {
 	CreatedAt    time.Time
 }
 
+// ReadingProgress — 통독으로 타이핑을 마친 절 하나. 재설치 복원용.
+type ReadingProgress struct {
+	CourseItemID int64
+	TypedAt      time.Time
+}
+
 // Streak — 연속 학습일 기록. 기획서 §8.
 type Streak struct {
 	UserID     int64

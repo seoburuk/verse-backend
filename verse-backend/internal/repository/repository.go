@@ -71,6 +71,7 @@ type AttemptRepo interface {
 	GetGradeDistribution(ctx context.Context, userID int64) (domain.GradeDistribution, error)
 	GetTotalCleared(ctx context.Context, userID int64) (int, error)
 	GetResume(ctx context.Context, userID int64) (*domain.ResumeTarget, error)
+	ListReadingProgress(ctx context.Context, userID int64) ([]domain.ReadingProgress, error)
 }
 
 // --- 파라미터 타입 ---

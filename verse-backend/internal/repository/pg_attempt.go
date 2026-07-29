@@ -251,6 +251,21 @@ func (r *pgAttemptRepo) GetResume(ctx context.Context, userID int64) (*domain.Re
 	return target, nil
 }
 
+func (r *pgAttemptRepo) ListReadingProgress(ctx context.Context, userID int64) ([]domain.ReadingProgress, error) {
+	rows, err := r.q.ListReadingProgress(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]domain.ReadingProgress, len(rows))
+	for i, row := range rows {
+		out[i] = domain.ReadingProgress{
+			CourseItemID: row.CourseItemID,
+			TypedAt:      row.TypedAt.Time,
+		}
+	}
+	return out, nil
+}
+
 func (r *pgAttemptRepo) UpsertStreak(ctx context.Context, params UpsertStreakParams) error {
 	var pgDate pgtype.Date
 	if params.LastDay != nil {
