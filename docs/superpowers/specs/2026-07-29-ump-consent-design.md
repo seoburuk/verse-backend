@@ -57,10 +57,12 @@ ATT 요청 → MobileAds.initialize() → 광고 프리로드
 
 ```dart
 ConsentDebugSettings(
-  debugGeography: kDebugMode ? DebugGeography.debugGeographyEEA : DebugGeography.debugGeographyDisabled,
-  testIdentifiers: kDebugMode ? [<테스트 기기 광고 ID>] : [],
+  debugGeography: kDebugMode ? DebugGeography.debugGeographyEea : DebugGeography.debugGeographyDisabled,
 )
 ```
+
+(`DebugGeography`의 EEA 값은 `debugGeographyEea`다 — 대소문자에 주의한다.
+`testIdentifiers`는 실기기 테스트가 필요해지면 그때 추가한다.)
 
 `kDebugMode`는 release 빌드에서 자동으로 `false`이므로 릴리스에 EEA 강제
 설정이 들어갈 수 없다. 테스트 기기 ID는 실기기 테스트 시 콘솔 로그에 찍히는
@@ -92,11 +94,22 @@ ConsentDebugSettings(
 
 탭하면:
 
-1. `ConsentInformation.instance.reset()` — 저장된 동의 상태 초기화
-2. `requestConsentInfoUpdate()` 재호출
-3. 조건을 충족하면(EEA/UK 등) 동의폼 재표시
-4. 동의폼이 필요 없는 지역이면 짧은 안내 스낵바 표시 — "이 지역에서는 동의가
+1. `ensureConsent()`(§1의 게이트)로 동의 정보를 재확인 — `canRequestAds()`가
+   이미 true면 폼을 다시 띄우지 않고 그대로 통과한다. 앱이 오프라인으로
+   시작해 시작 시점 갱신이 실패했던 경우에도 여기서 다시 시도된다.
+2. `getPrivacyOptionsRequirementStatus()`로 이 지역에서 재설정 진입점이
+   필요한지 확인
+3. 필요하면 `ConsentForm.showPrivacyOptionsForm()`으로 개인정보 옵션 폼 표시
+4. 필요 없는 지역이면 짧은 안내 스낵바 표시 — "이 지역에서는 동의가
    필요하지 않습니다"
+
+**구현 시 정정:** 최초 설계는 `ConsentInformation.instance.reset()` →
+`requestConsentInfoUpdate()` 재호출 방식을 가정했으나, 실제로는 Google이
+권장하는 `getPrivacyOptionsRequirementStatus()` +
+`ConsentForm.showPrivacyOptionsForm()` 조합으로 구현했다. `reset()`은 매번
+동의를 처음부터 다시 받게 하므로 "이미 준 동의를 확인·변경"하려는 사용자
+의도와 맞지 않고, 위 조합이 재동의 없이 옵션만 다시 보여주는 Google의
+공식 패턴이다. 앱 코드에서 `ConsentInformation.reset()`은 호출하지 않는다.
 
 ## 6. 엣지 케이스
 
