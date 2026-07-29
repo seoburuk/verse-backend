@@ -47,12 +47,17 @@ func (s *AttemptService) SubmitAttempt(
 	tokens []string,
 ) (AttemptResult, error) {
 	// 0. 목숨 확인 — 0이면 채점 없이 즉시 거부
-	lives, err := GetLives(ctx, s.users, userID)
-	if err != nil {
-		return AttemptResult{}, err
-	}
-	if lives.Count <= 0 {
-		return AttemptResult{}, domain.ErrNoLives
+	// 연습 모드(받아쓰기·통독)는 목숨과 무관하다 — 목숨이 0이어도 시도를 받는다.
+	// 이 분기가 없으면 목숨 소진 시 통독 기록이 전부 거부되어 영영 동기화되지
+	// 않고, 클라이언트의 책장과 재설치 복원이 깨진다.
+	if !domain.IsPracticeMode(mode) {
+		lives, err := GetLives(ctx, s.users, userID)
+		if err != nil {
+			return AttemptResult{}, err
+		}
+		if lives.Count <= 0 {
+			return AttemptResult{}, domain.ErrNoLives
+		}
 	}
 
 	// 1. 정답 절 텍스트 조회 → 정규화
@@ -81,10 +86,10 @@ func (s *AttemptService) SubmitAttempt(
 	// 4. 진도 업데이트(cleared = 서버 기준 green)
 	// 같은 절(verse_id)을 공유하는 모든 course_item(다른 코스/섹터에 속한 사본 포함)에
 	// 진도를 함께 반영해, 한 곳에서 외운 절이 다른 코스에서도 완료로 집계되게 한다.
-	// 단, 받아쓰기(ModeDictation)는 본문을 보고 따라 적는 연습 모드라 진도를 갱신하지 않는다
-	// (완료 체크가 생기지 않음). 시도 기록·연속일·목숨은 다른 모드와 동일하게 처리한다.
+	// 단, 연습 모드(받아쓰기·통독)는 본문을 보고 따라 적는 저강도 루프라 진도를 갱신하지 않는다
+	// (완료 체크가 생기지 않음). 시도 기록·연속일은 다른 모드와 동일하게 처리한다.
 	cleared := serverGrade == domain.GradeGreen
-	if mode != domain.ModeDictation {
+	if !domain.IsPracticeMode(mode) {
 		siblingIDs, err := s.courses.ListSiblingCourseItemIDs(ctx, courseItemID)
 		if err != nil {
 			return AttemptResult{}, err
@@ -109,9 +114,9 @@ func (s *AttemptService) SubmitAttempt(
 		return AttemptResult{}, err
 	}
 
-	// 6. 비초록 결과는 목숨 1 소모. 이미 시도는 기록됐으므로 동시성 경합으로 목숨이
-	// 먼저 소진된 예외적인 경우(ErrNoLives)는 무시하고 결과를 그대로 반환한다.
-	if !cleared {
+	// 6. 비초록 결과는 목숨 1 소모. 연습 모드는 소모하지 않는다. 이미 시도는 기록됐으므로
+	// 동시성 경합으로 목숨이 먼저 소진된 예외적인 경우(ErrNoLives)는 무시하고 결과를 그대로 반환한다.
+	if !cleared && !domain.IsPracticeMode(mode) {
 		if _, err := ConsumeLife(ctx, s.users, userID); err != nil && !errors.Is(err, domain.ErrNoLives) {
 			return AttemptResult{}, err
 		}
