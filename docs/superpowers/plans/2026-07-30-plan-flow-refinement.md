@@ -1,5 +1,12 @@
 # 플랜 생성 흐름 개선 Implementation Plan
 
+> **완료 (2026-07-30).** 7태스크 전부 구현·리뷰·승인, 최종 브랜치 리뷰에서 나온
+> Important 3건(예언 플랜 "다음 장" 버튼이 미스코프 플랜을 재생성하던 버그,
+> v4→v5 마이그레이션 미검증, UI→저장 종단 테스트 부재)까지 수정 완료.
+> `verse-flutter` main에 커밋 `32ece23`..`39dc8bd`(10개)로 반영, 테스트
+> 26개 → 337개, 전체 통과. 실행 로그는 `.superpowers/sdd/`(두 저장소 모두,
+> git-ignored)에 남아 있다.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 예언 성취 코스를 주제 단위로 쪼개 플랜을 만들 수 있게 하고, 플랜 생성 흐름의 뒤로가기·단일선택·통독 롤오버를 고친다.
