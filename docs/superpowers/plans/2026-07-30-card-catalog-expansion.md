@@ -116,12 +116,69 @@ CardTier? tierOf({
 Run: `flutter test test/card_tier_test.dart`
 Expected: PASS. 기존 8개 + 신규 6개, 모두 14개가 통과한다.
 
-- [ ] **Step 5: 회귀가 없는지 확인한다**
+- [ ] **Step 5: 리포지토리 레벨에서도 클램프가 통하는지 확인한다**
 
-Run: `flutter test test/card_repository_test.dart test/card_collection_screen_test.dart`
+`tierOf` 단위 테스트만으로는 `CardRepository`가 실제로 클램프된 분모로 등급을 매기는지 안 드러난다. `test/card_repository_test.dart` 파일의 마지막 `test(...)` 블록 뒤, 마지막 `});`(main 함수를 닫는 줄) 앞에 추가한다.
+
+```dart
+  test('관련 절이 100개를 넘는 카드도 100개를 외우면 레전드로 반환된다', () async {
+    // 106개짜리 큰 카드 — 지구·예루살렘 같은 카드의 축소판이다.
+    final bigVerses = [for (var v = 1; v <= 106; v++) VerseRef(1, 8, v)];
+    for (var i = 0; i < 100; i++) {
+      await seedVerse(bigVerses[i], cleared: true);
+    }
+    for (var i = 100; i < 106; i++) {
+      await seedVerse(bigVerses[i]); // 안 외움
+    }
+
+    final result = await repo.unlockedCards([_card('big', bigVerses)]);
+    expect(result.single.tier, CardTier.legend);
+  });
+
+  test('큰 카드에서 100번째 절을 외운 순간 등급 상승이 뜬다', () async {
+    final bigVerses = [for (var v = 1; v <= 106; v++) VerseRef(1, 8, v)];
+    for (var i = 0; i < 99; i++) {
+      await seedVerse(bigVerses[i], cleared: true);
+    }
+    for (var i = 99; i < 106; i++) {
+      await seedVerse(bigVerses[i]);
+    }
+    // 아직 99개 — 골드(0.99 >= 0.67이지만 100 미만이므로 legend 아님).
+    final before = await repo.unlockedCards([_card('big', bigVerses)]);
+    expect(before.single.tier, CardTier.gold);
+
+    // 100번째 절을 외운다.
+    await seedVerse(bigVerses[99], cleared: true);
+    final upgrades =
+        await repo.pendingUpgradesForVerse([_card('big', bigVerses)], bigVerses[99]);
+    expect(upgrades.single.tier, CardTier.legend);
+  });
+
+  test('클램프된 카드에서 101번째 절을 외워도 이미 레전드라 등급 변화가 없다', () async {
+    final bigVerses = [for (var v = 1; v <= 106; v++) VerseRef(1, 8, v)];
+    for (var i = 0; i < 100; i++) {
+      await seedVerse(bigVerses[i], cleared: true);
+    }
+    for (var i = 100; i < 106; i++) {
+      await seedVerse(bigVerses[i]);
+    }
+    // 이미 레전드인 상태에서 101번째 절을 마저 외운다.
+    await seedVerse(bigVerses[100], cleared: true);
+    final upgrades =
+        await repo.pendingUpgradesForVerse([_card('big', bigVerses)], bigVerses[100]);
+    expect(upgrades, isEmpty, reason: '이미 레전드이므로 더 오를 등급이 없다');
+  });
+```
+
+Run: `flutter test test/card_repository_test.dart`
+Expected: PASS. 세 테스트 모두 통과해야 클램프가 `CardRepository` 경로에서도 실제로 동작한다는 뜻이다.
+
+- [ ] **Step 6: 도감 화면 회귀를 확인한다**
+
+Run: `flutter test test/card_collection_screen_test.dart`
 Expected: PASS. 호출부를 안 건드렸으므로 그대로 통과해야 한다.
 
-- [ ] **Step 6: 커밋한다**
+- [ ] **Step 7: 커밋한다**
 
 ```bash
 git add lib/core/cards/card_tier.dart test/card_tier_test.dart
@@ -669,6 +726,8 @@ courses.json 본문을 정규식으로 훑어 관련 절 ref를 뽑는다.
 
 `tool/cards/sources.json`을 새로 만든다. 설명 문구는 Task 5에서 채우므로 여기서는 빈 문자열로 둔다.
 
+**`beast`와 `dragon`의 관련 절은 일부 겹친다.** 요한계시록에는 "the dragon gave him his power... and the beast"처럼 용과 짐승이 같은 절에 함께 등장하는 곳이 있다. 이건 버그가 아니라 의도한 동작이다 — 한 절이 여러 카드의 등급을 동시에 올릴 수 있다는 등급 스펙 §5 그대로다. `exclude`로 이 겹침을 없애려 하지 않는다.
+
 ```json
 [
   { "id": "shepherd", "name": "목자", "name_en": "The Shepherd", "kind": "figure",
@@ -840,6 +899,11 @@ Expected: 다음과 같은 출력. 절 수는 정규식에 따라 몇 개 차이
 ```
 
 **확인할 것:** 카드가 **29장**이어야 한다(기존 6 + 신규 23). 어느 카드도 4절 미만으로 걸러지지 않아야 한다. 걸러진 카드가 있으면 그 카드의 `include`를 넓히거나 `sources.json`에서 뺀다.
+
+**절 수는 브레인스토밍 때 KJV 원문 기준으로 어림잡은 값이고, 실제 절 수는 `courses.json` 기준이다.** 둘 다 같은 KJV 본문이라 대체로 일치해야 하지만 정확히 맞아떨어질 필요는 없다 — 표에 적힌 숫자(74, 50, 13...)는 목표치가 아니라 "이 정도 규모여야 한다"는 감이다. 실제로 크게 벗어나면(예: 예상의 절반 이하이거나 두 배 이상) 다음을 의심한다.
+
+- **`donkey`(나귀)가 특히 갈릴 만하다.** `\bass\b|\basses\b|\bcolts?\b` 패턴이 KJV 표기 변형(`asses'`, `ass's`처럼 소유격이 붙은 형태)을 놓칠 수 있다. 실제 절 수가 100 밑으로 크게 떨어지면 이 패턴부터 넓혀본다.
+- 그 외 카드가 예상과 크게 다르면, 패턴이 잘못됐다고 단정하기 전에 먼저 `matchRefs`가 뽑은 절 본문을 몇 개 눈으로 읽어 오탐·누락 여부를 확인한다(§5의 곰·우물·방주 사례처럼).
 
 - [ ] **Step 4: 기존 6장이 안 바뀌었는지 확인한다**
 
@@ -1055,3 +1119,7 @@ git commit -m "feat: 카드 29장의 설명 문구를 채운다
 설계 문서 §9(2차 범위)의 항목들은 이 계획에 없다. 카드 주제 추가, 기존 6장 이관과 그때 생기는 등급 하락 처리, 도감 화면의 갈래별 그룹핑, 카드 아트가 여기 해당한다.
 
 `image`는 29장 모두 빈 문자열로 남는다. 타일은 이름 첫 글자와 갈래 색으로 렌더된다.
+
+## 서브에이전트 실행 시 유의사항
+
+**Task 5 Step 9(`flutter run`으로 도감을 눈으로 확인)는 자동화할 수 없다.** 서브에이전트가 시뮬레이터·에뮬레이터에 접근하지 못하면 이 스텝은 건너뛰고, 사람이 최종 확인하는 것으로 남긴다. 나머지 스텝(테스트 실행, 파일 생성, 커밋)은 서브에이전트가 그대로 수행할 수 있다.
