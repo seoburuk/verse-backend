@@ -40,7 +40,8 @@
 
 ## 1. 데이터 모델
 
-drift `schemaVersion` 3 → 4. `MemorizationPlan`에 컬럼 추가:
+drift `schemaVersion` 4 → 5(현재 값은 4다 — v3이 `sectionIds`, v4가 `mode`+`reading_progress`).
+`MemorizationPlan`에 컬럼 추가:
 
 ```dart
 TextColumn get topics => text().nullable()();  // "여자의 씨(처녀의 출산)" — null이면 섹션 전체
@@ -50,7 +51,7 @@ TextColumn get topics => text().nullable()();  // "여자의 씨(처녀의 출�
 목록으로 다루는데(`isIn`), 이는 `sectionIds`와 대칭을 맞추기 위한 것이고 UI가
 여러 개를 쓰게 되면 저장 계층을 다시 손볼 필요가 없기 때문이다.
 
-- 마이그레이션: `m.addColumn(memorizationPlan, memorizationPlan.topics)`.
+- 마이그레이션: `if (from < 5) await m.addColumn(memorizationPlan, memorizationPlan.topics);`.
   기존 플랜은 `topics=null` → 섹션 전체로 해석, 동작 불변.
 - 주제명은 표시용 한글 원문을 그대로 저장한다. 영문 표시는 `course_items.topic_en`으로
   조회해 렌더링한다(플랜 라벨이 로케일을 따라가야 하므로 `plan.title`과 같은 스냅샷
@@ -124,9 +125,10 @@ enum _Step { track, scopeRoot, sections, leaves, deadline }
 - `FilterChip` 다중선택 → `ChoiceChip` 단일선택. `PlanScope.sectionIds`는 항상 길이 1
   (예언은 `sectionIds` 길이 1 + `topics` 길이 1).
 - 마친 장·주제도 목록에 계속 노출하고 체크 아이콘만 붙인다. 다시 고를 수 있다(복습).
-- 기본 선택은 지금과 같이 **아직 안 깬 첫 항목** 하나. 전부 마쳤으면 첫 항목.
 - 확인 버튼이 사라진다 — 칩을 탭하면 곧바로 다음 단계로 넘어간다(단일선택이라
   확정 액션이 불필요하고, 뒤로가기로 되돌릴 수 있다).
+- 따라서 **기본 선택이라는 개념도 없어진다**. 탭이 곧 확정이므로 미리 선택된 칩은
+  의미가 없다(기존 다중선택 UI의 "기본은 첫 미완료 장" 규칙은 폐기).
 
 ## 5. 통독 — 마감 없는 자동 롤오버
 
@@ -178,8 +180,8 @@ int get todayTarget => mode == 'reading'
 
 `test/`의 기존 플랜 테스트에 다음을 추가한다.
 
-1. **마이그레이션** — v3 DB를 열어 v4로 올린 뒤, `topics=null`인 기존 플랜의
-   `planView().totalVerses`가 마이그레이션 전과 같은지.
+1. **마이그레이션** — `topics` 컬럼이 없는 플랜 행(기존 플랜)을 넣고 `topics`가
+   null로 읽히며 `planView().totalVerses`가 섹션 전체 절 수와 같은지.
 2. **주제 필터** — 예언 코스에서 `sectionIds=[창세기]`, `topics=['한 분의 왕']`인
    플랜의 `totalVerses`가 그 주제의 절 수와 일치하는지. 같은 권의 다른 주제 절을
    cleared 처리해도 `clearedVerses`가 0인지.
