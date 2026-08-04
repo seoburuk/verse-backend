@@ -1408,8 +1408,50 @@ body {
 
 .landing-app-sub {
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   letter-spacing: 0.08em;
+  border: 2px solid var(--border);
+  padding: 0.2rem 0.6rem;
+}
+
+.landing-verse-demo {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  max-width: 340px;
+}
+
+.landing-verse-tile {
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  box-shadow: 3px 3px 0 var(--shadow);
+  padding: 0.3rem 0.55rem;
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: var(--accent);
+  opacity: 0;
+  transform: translateY(10px) scale(0.85);
+  animation: verse-tile-snap 6s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.35s);
+}
+
+@keyframes verse-tile-snap {
+  0% { opacity: 0; transform: translateY(10px) scale(0.85); }
+  8%, 78% { opacity: 1; transform: translateY(0) scale(1); }
+  90%, 100% { opacity: 0; transform: translateY(-6px) scale(0.9); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-verse-tile {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .landing-verse-demo { justify-content: flex-start; }
 }
 
 .landing-hero-shot img,

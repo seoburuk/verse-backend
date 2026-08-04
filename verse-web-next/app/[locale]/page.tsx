@@ -64,6 +64,8 @@ export default async function LandingPage({
     </div>
   );
 
+  const verseDemoWords = ["For", "God", "so", "loved", "the", "world"];
+
   const modes = [
     { key: "1", shot: `/app/shot-drag-${suffix}.png`, alt: t("shotAltDrag") },
     { key: "2", shot: `/app/shot-type-${suffix}.png`, alt: t("shotAltType") },
@@ -85,6 +87,13 @@ export default async function LandingPage({
               priority
             />
             <p className="landing-app-sub">{t("appSub")}</p>
+            <div className="landing-verse-demo" aria-hidden="true">
+              {verseDemoWords.map((word, i) => (
+                <span className="landing-verse-tile" style={{ "--i": i } as React.CSSProperties} key={word}>
+                  {word}
+                </span>
+              ))}
+            </div>
             <h1 className="landing-title">{t("heroHeadline")}</h1>
             <p className="landing-tagline">{t("heroValue")}</p>
             <div className="landing-cta">
