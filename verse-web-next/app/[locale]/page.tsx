@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link, type Locale } from "@/i18n/routing";
 import { AuthRedirect } from "@/components/AuthRedirect";
 import { TRIAL_COURSE_SLUG } from "@/lib/guest";
-import { APP_STORE_URL } from "@/lib/app";
+import { APP_STORE_URL, PLAY_STORE_URL } from "@/lib/app";
 
 export async function generateMetadata({
   params: { locale },
@@ -45,6 +45,25 @@ export default async function LandingPage({
     </a>
   );
 
+  const playStoreBadge = (
+    <a
+      className="playstore-badge"
+      href={PLAY_STORE_URL}
+      target="_blank"
+      rel="noopener"
+      aria-label={t("playStoreAlt")}
+    >
+      {t("playStoreAlt")}
+    </a>
+  );
+
+  const storeBadges = (
+    <div className="landing-store-badges">
+      {appStoreBadge}
+      {playStoreBadge}
+    </div>
+  );
+
   const modes = [
     { key: "1", shot: `/app/shot-drag-${suffix}.png`, alt: t("shotAltDrag") },
     { key: "2", shot: `/app/shot-type-${suffix}.png`, alt: t("shotAltType") },
@@ -69,7 +88,7 @@ export default async function LandingPage({
             <h1 className="landing-title">{t("heroHeadline")}</h1>
             <p className="landing-tagline">{t("heroValue")}</p>
             <div className="landing-cta">
-              {appStoreBadge}
+              {storeBadges}
               <Link href={`/courses/${TRIAL_COURSE_SLUG}`} className="landing-web-link">
                 {t("webFallback")}
               </Link>
@@ -136,7 +155,12 @@ export default async function LandingPage({
         <section className="landing-final-cta">
           <h2 className="landing-section-title">{t("finalTitle")}</h2>
           <p className="landing-feature-desc">{t("finalDesc")}</p>
-          {appStoreBadge}
+          <div className="landing-cta">
+            {storeBadges}
+            <Link href={`/courses/${TRIAL_COURSE_SLUG}`} className="landing-web-link">
+              {t("webFallback")}
+            </Link>
+          </div>
         </section>
       </main>
     </div>

@@ -1463,6 +1463,32 @@ body {
 .appstore-badge:hover { transform: translate(-2px, -2px); }
 .appstore-badge:active { transform: translate(1px, 1px); }
 
+.landing-store-badges {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.playstore-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 0.9rem;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  box-shadow: 3px 3px 0 var(--shadow);
+  color: var(--text);
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: transform 0.06s steps(2), box-shadow 0.06s steps(2);
+}
+
+.playstore-badge:hover { border-color: var(--text); }
+.playstore-badge:active { transform: translate(3px, 3px); box-shadow: none; }
+
 .landing-web-link {
   color: var(--muted);
   font-size: 0.9rem;
