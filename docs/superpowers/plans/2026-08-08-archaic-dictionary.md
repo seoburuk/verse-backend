@@ -4,7 +4,7 @@
 
 **Goal:** 암송 결과 화면에서 구절의 고어 단어를 탭하면 뜻(현대영어/영영/한글) 바텀시트를 보여준다.
 
-**Architecture:** 고빈도 KJV 고어 약 300개를 정적 에셋 JSON으로 번들하고, `ArchaicDictionary`가 메모리 Map으로 로드·조회한다. 기존 `_MissedWordsCard`(결과 화면 구절 카드)를 초록 결과에도 노출하고 각 단어를 탭 가능하게 만든다.
+**Architecture:** KJV 본문 어휘 전체(고어 ~300개 + 일반 어휘 ~1만~1만2천개)를 정적 에셋 JSON 하나로 번들하고, `ArchaicDictionary`가 메모리 Map으로 로드·조회한다. 고어는 AI 생성 후 사람이 전수 검수하고, 일반 어휘는 kengdic(한글 뜻)과 Princeton WordNet(영영/현대영어)을 자동 병합한 뒤 표본만 검수한다 — 두 계층 모두 런타임 스키마는 동일(`modern`/`en`/`ko`). 기존 `_MissedWordsCard`(결과 화면 구절 카드)를 초록 결과에도 노출하고 각 단어를 탭 가능하게 만든다.
 
 **Tech Stack:** Flutter, Riverpod(기존 `FutureProvider`/`Provider` 패턴), rootBundle 에셋, flutter_test.
 
@@ -20,39 +20,49 @@
 - 새 사용자 노출 문자열은 `lib/l10n/app_en.arb` + `app_ko.arb` 양쪽에 추가
 - 기존 오답 표시(빨강+실선 밑줄)는 그대로 유지, 사전 어포던스보다 우선
 - 모든 커밋 메시지는 기존 관례대로 한국어 + conventional prefix
+- 사전 수집 범위는 KJV 본문에 실제 등장하는 단어로 한정한다 — 본문에 없는 단어는
+  후보로도 만들지 않는다
+- 계층 A(고어 300개)는 사람이 전수 검수, 계층 B(일반 어휘)는 자동 병합 + 표본 검수만
+  — 계층 B를 전수 검수하는 작업으로 되돌리지 않는다
+- kengdic 데이터를 가공해 재배포하므로 라이선스 고지가 필요하다(Task 6)
 
 ## File Structure
 
-- Create: `scripts/extract_archaic_candidates.py` — 일회성 빈도 추출 (앱 빌드와 무관)
-- Create: `assets/dictionary/archaic_kjv.json` — 사전 데이터 (진실의 원천)
+- Create: `scripts/extract_kjv_vocabulary.py` — KJV 전문에서 고유 단어 전체 추출 (앱 빌드와 무관)
+- Create: `scripts/extract_archaic_candidates.py` — 고어 후보 선별 (앱 빌드와 무관)
+- Create: `scripts/build_general_vocabulary.py` — kengdic+WordNet 병합 (앱 빌드와 무관)
+- Create: `assets/dictionary/archaic_kjv.json` — 사전 데이터 (진실의 원천, 계층 A+B 통합)
 - Create: `lib/core/dictionary/archaic_dictionary.dart` — 로드 + 조회
 - Modify: `lib/app/providers.dart` — provider 등록
 - Modify: `pubspec.yaml` — 에셋 등록
 - Modify: `lib/features/memorize/memorize_screen.dart` — 카드 초록 노출 + 탭 + 바텀시트
 - Modify: `lib/l10n/app_en.arb`, `lib/l10n/app_ko.arb`
+- Modify: 오픈소스 라이선스 고지 화면 (있으면) — kengdic 고지 추가
 - Test: `test/archaic_dictionary_test.dart`, `test/archaic_dictionary_data_test.dart`, `test/memorize_result_dictionary_test.dart`
 
 ---
 
-### Task 1: 고어 후보 추출 스크립트 + 사전 데이터 생성
+### Task 1: 계층 A — 고어 후보 추출 스크립트 + 300항목 생성
 
 **Files:**
 - Create: `scripts/extract_archaic_candidates.py`
-- Create: `assets/dictionary/archaic_kjv.json`
+- Create: `scripts/data/tier_a_archaic.json` — 계층 A 스테이징 산출물 (최종 에셋 아님)
 
 **Interfaces:**
-- Produces: `assets/dictionary/archaic_kjv.json` — `{ "<소문자 표제어>": { "modern": str, "en": str, "ko": str } }` 형태의 단일 JSON 객체. 이후 모든 Task가 이 스키마에 의존한다.
+- Produces: `scripts/data/tier_a_archaic.json` — `{ "<소문자 표제어>": { "modern": str, "en": str, "ko": str } }`.
+  Task 2가 이 파일을 계층 B 결과와 병합해 최종 `assets/dictionary/archaic_kjv.json`을 만든다.
+  스키마는 최종 에셋과 동일하다.
 
 - [ ] **Step 1: KJV 전문 확보**
 
-프로젝트 구터베르그 PD 텍스트를 스크래치패드에 받는다 (KJV 전문, 퍼블릭 도메인):
+프로젝트 구텐베르크 PD 텍스트를 스크래치패드에 받는다 (KJV 전문, 퍼블릭 도메인):
 
 ```bash
 curl -sL https://www.gutenberg.org/cache/epub/10/pg10.txt -o /tmp/kjv_pd.txt
 wc -l /tmp/kjv_pd.txt
 ```
 
-Expected: 10만 줄 내외 텍스트. (다운로드 불가 시 백엔드 `bible_verses` 테이블 export로 대체 — 어느 쪽이든 빈도 순위만 쓰므로 결과 차이는 무시 가능.)
+Expected: 10만 줄 내외 텍스트. (다운로드 불가 시 백엔드 `bible_verses` 테이블 export로 대체 — 어느 쪽이든 빈도 순위만 쓰므로 결과 차이는 무시 가능. Task 2도 같은 텍스트를 재사용하므로 `/tmp/kjv_pd.txt` 경로를 그대로 유지한다.)
 
 - [ ] **Step 2: 빈도 추출 스크립트 작성**
 
@@ -62,7 +72,7 @@ Expected: 10만 줄 내외 텍스트. (다운로드 불가 시 백엔드 `bible_
 #!/usr/bin/env python3
 """KJV 전문에서 토큰 빈도를 뽑아 고어 후보를 빈도순으로 출력한다.
 
-일회성 스크립트 — 산출물인 assets/dictionary/archaic_kjv.json이 진실의 원천이며
+일회성 스크립트 — 산출물인 scripts/data/tier_a_archaic.json이 진실의 원천이며
 이 스크립트는 앱 빌드/런타임과 무관하다.
 
 사용법: python3 scripts/extract_archaic_candidates.py /tmp/kjv_pd.txt > /tmp/candidates.txt
@@ -113,9 +123,9 @@ wc -l /tmp/candidates.txt
 
 Expected: 빈도 내림차순 `빈도\t단어` 목록. `-eth/-est` 패턴이 물어온 오탐(예: "harvest", "priest", "forest" 같은 일반 단어)을 눈으로 걸러내며 상위 약 300개를 고른다. 이 선별 판단은 구현자가 직접 한다.
 
-- [ ] **Step 4: 300개 항목 3필드 생성 → `assets/dictionary/archaic_kjv.json`**
+- [ ] **Step 4: 300개 항목 3필드 생성 → `scripts/data/tier_a_archaic.json`**
 
-선별한 각 표제어에 대해 아래 스키마로 JSON을 작성한다 (구현자가 AI 지식으로 직접 작성하되, KJV 용례 기준 의미로):
+`scripts/data/` 디렉터리를 만들고, 선별한 각 표제어에 대해 아래 스키마로 JSON을 작성한다 (구현자가 AI 지식으로 직접 작성하되, KJV 용례 기준 의미로):
 
 ```json
 {
@@ -147,7 +157,7 @@ Expected: 빈도 내림차순 `빈도\t단어` 목록. `-eth/-est` 패턴이 물
 ```bash
 python3 -c "
 import json
-d = json.load(open('assets/dictionary/archaic_kjv.json'))
+d = json.load(open('scripts/data/tier_a_archaic.json'))
 assert all(k == k.lower() for k in d), 'lowercase keys'
 assert all(v['modern'] and v['en'] and v['ko'] for v in d.values()), 'all fields'
 print(len(d), 'entries OK')
@@ -156,25 +166,244 @@ print(len(d), 'entries OK')
 
 Expected: `~300 entries OK`
 
+> **사람 검수 게이트:** 이 300줄은 배포 전 사람이 전수 검수한다(스펙의 계층 A 정책).
+> 검수는 Task 2(계층 B, 완전히 독립된 파이프라인)와 병렬로 진행할 수 있다.
+
 - [ ] **Step 5: 커밋**
 
 ```bash
-git add scripts/extract_archaic_candidates.py assets/dictionary/archaic_kjv.json
-git commit -m "feat: KJV 고어 사전 데이터 300항목 + 추출 스크립트"
+git add scripts/extract_archaic_candidates.py scripts/data/tier_a_archaic.json
+git commit -m "feat: KJV 고어 사전 데이터(계층 A) 300항목 + 추출 스크립트"
 ```
-
-> **사람 검수 게이트:** 이 JSON은 배포 전 사용자가 300줄 전수 검수한다. 검수는 개발과 병렬로 진행 — 이후 Task는 계속 진행한다.
 
 ---
 
-### Task 2: 에셋 등록 + 데이터 무결성 테스트
+### Task 2: 계층 B — KJV 어휘 추출 + kengdic/WordNet 병합 → 최종 에셋
+
+**Files:**
+- Create: `scripts/extract_kjv_vocabulary.py`
+- Create: `scripts/build_general_vocabulary.py`
+- Create: `assets/dictionary/archaic_kjv.json` — 계층 A + B 통합, 최종 산출물
+
+**Interfaces:**
+- Consumes: Task 1의 `scripts/data/tier_a_archaic.json`, `/tmp/kjv_pd.txt`(Task 1 Step 1에서 받은 KJV 전문)
+- Produces: `assets/dictionary/archaic_kjv.json` — 이후 모든 Task가 의존하는 최종 스키마
+  `{ "<소문자 표제어>": { "modern": str, "en": str, "ko": str } }`
+
+- [ ] **Step 1: KJV 고유 단어 전체 추출**
+
+`scripts/extract_kjv_vocabulary.py`:
+
+```python
+#!/usr/bin/env python3
+"""KJV 전문에서 고유 단어(알파벳만, 소문자화) 전체를 빈도와 함께 출력한다.
+계층 B(일반 어휘)의 상한 — 이 목록 밖 단어는 애초에 후보로 만들지 않는다.
+
+사용법: python3 scripts/extract_kjv_vocabulary.py /tmp/kjv_pd.txt > /tmp/kjv_vocab.tsv
+"""
+import re
+import sys
+from collections import Counter
+
+def main(path: str) -> None:
+    text = open(path, encoding="utf-8").read().lower()
+    tokens = re.findall(r"[a-z]+", text)
+    freq = Counter(tokens)
+    for word, n in freq.most_common():
+        print(f"{word}\t{n}")
+
+if __name__ == "__main__":
+    main(sys.argv[1])
+```
+
+```bash
+python3 scripts/extract_kjv_vocabulary.py /tmp/kjv_pd.txt > /tmp/kjv_vocab.tsv
+wc -l /tmp/kjv_vocab.tsv
+```
+
+Expected: KJV 고유 단어 수(약 1만2천~1만3천 개 내외) 출력.
+
+- [ ] **Step 2: kengdic 데이터 확보**
+
+```bash
+curl -sL https://raw.githubusercontent.com/garfieldnate/kengdic/master/kengdic.tsv -o /tmp/kengdic.tsv
+wc -l /tmp/kengdic.tsv
+head -3 /tmp/kengdic.tsv
+```
+
+Expected: TSV 헤더에 `id`, `surface`, `hanja`, `gloss`, `level`, `created`, `source` 열이 보인다.
+저장소의 실제 파일 경로/브랜치명이 다르면(리포지토리 구조가 바뀌었을 수 있음)
+`https://github.com/garfieldnate/kengdic`에서 데이터 파일 위치를 확인해 URL을 조정한다.
+
+- [ ] **Step 3: WordNet 확보**
+
+```bash
+pip3 install --user nltk
+python3 -c "import nltk; nltk.download('wordnet')"
+```
+
+Expected: `[nltk_data] Package wordnet is already up-to-date!` 또는 다운로드 완료 메시지.
+
+- [ ] **Step 4: 병합 스크립트 작성**
+
+`scripts/build_general_vocabulary.py`:
+
+```python
+#!/usr/bin/env python3
+"""KJV 어휘(계층 B 상한) × kengdic(한글 뜻) × WordNet(영영/현대영어)을 병합해
+계층 A(tier_a_archaic.json)와 합친 최종 assets/dictionary/archaic_kjv.json을 만든다.
+
+일회성 스크립트 — 이 스크립트 자체는 앱 빌드/런타임과 무관하다.
+kengdic·WordNet 양쪽에서 매칭되지 않는 단어, 이미 계층 A에 있는 단어는 건너뛴다.
+
+사용법:
+  python3 scripts/build_general_vocabulary.py \
+      --kjv-vocab /tmp/kjv_vocab.tsv \
+      --kengdic /tmp/kengdic.tsv \
+      --tier-a scripts/data/tier_a_archaic.json \
+      --out assets/dictionary/archaic_kjv.json
+"""
+import argparse
+import csv
+import json
+import sys
+
+from nltk.corpus import wordnet as wn
+
+
+def load_kjv_vocab(path: str) -> set[str]:
+    words = set()
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            word, _, _ = line.rstrip("\n").partition("\t")
+            if word:
+                words.add(word)
+    return words
+
+
+def load_kengdic_gloss(path: str) -> dict[str, str]:
+    """surface(소문자) -> 첫 번째로 만난 gloss."""
+    gloss_by_word: dict[str, str] = {}
+    with open(path, encoding="utf-8") as f:
+        reader = csv.DictReader(f, delimiter="\t")
+        for row in reader:
+            surface = (row.get("surface") or "").strip().lower()
+            gloss = (row.get("gloss") or "").strip()
+            if surface and gloss and surface not in gloss_by_word:
+                gloss_by_word[surface] = gloss
+    return gloss_by_word
+
+
+def wordnet_fields(word: str) -> tuple[str, str] | None:
+    """(en 정의, modern 동의어) 또는 매칭 없으면 None."""
+    synsets = wn.synsets(word)
+    if not synsets:
+        return None
+    first = synsets[0]
+    definition = first.definition()
+    lemma_names = [l.replace("_", " ") for l in first.lemma_names()]
+    modern = lemma_names[0] if lemma_names else word
+    return definition, modern
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--kjv-vocab", required=True)
+    ap.add_argument("--kengdic", required=True)
+    ap.add_argument("--tier-a", required=True)
+    ap.add_argument("--out", required=True)
+    args = ap.parse_args()
+
+    kjv_words = load_kjv_vocab(args.kjv_vocab)
+    kengdic_gloss = load_kengdic_gloss(args.kengdic)
+    tier_a = json.load(open(args.tier_a, encoding="utf-8"))
+
+    merged: dict[str, dict[str, str]] = dict(tier_a)
+    skipped_no_match = 0
+    added = 0
+
+    for word in kjv_words:
+        if word in merged:
+            continue  # 계층 A가 이미 다룬 단어
+        ko = kengdic_gloss.get(word)
+        wn_result = wordnet_fields(word)
+        if not ko or not wn_result:
+            skipped_no_match += 1
+            continue
+        en, modern = wn_result
+        merged[word] = {"modern": modern, "en": en, "ko": ko}
+        added += 1
+
+    with open(args.out, "w", encoding="utf-8") as f:
+        json.dump(merged, f, ensure_ascii=False, indent=2, sort_keys=True)
+
+    print(f"tier A: {len(tier_a)}, tier B 추가: {added}, "
+          f"매칭 실패로 제외: {skipped_no_match}, 최종 항목: {len(merged)}",
+          file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()
+```
+
+- [ ] **Step 5: 병합 실행 및 결과 확인**
+
+```bash
+mkdir -p assets/dictionary
+python3 scripts/build_general_vocabulary.py \
+    --kjv-vocab /tmp/kjv_vocab.tsv \
+    --kengdic /tmp/kengdic.tsv \
+    --tier-a scripts/data/tier_a_archaic.json \
+    --out assets/dictionary/archaic_kjv.json
+python3 -c "
+import json
+d = json.load(open('assets/dictionary/archaic_kjv.json'))
+assert all(k == k.lower() for k in d), 'lowercase keys'
+assert all(v['modern'] and v['en'] and v['ko'] for v in d.values()), 'all fields'
+print(len(d), 'entries OK')
+"
+```
+
+Expected: stderr에 `tier A: 300, tier B 추가: <수천>, 매칭 실패로 제외: <수>, 최종 항목: <수천>` 형태 요약,
+이어서 `<수천> entries OK`. 최종 항목이 5,000 미만이면 kengdic 다운로드나 매칭 로직을 의심하고
+Step 2~4를 재점검한다(스펙이 기대하는 규모는 1만~1만2천 내외).
+
+- [ ] **Step 6: 표본 검수**
+
+```bash
+python3 -c "
+import json, random
+d = json.load(open('assets/dictionary/archaic_kjv.json'))
+tier_a = set(json.load(open('scripts/data/tier_a_archaic.json')))
+tier_b_words = [w for w in d if w not in tier_a]
+random.seed(42)
+sample = random.sample(tier_b_words, min(100, len(tier_b_words)))
+for w in sample:
+    print(w, '|', d[w])
+"
+```
+
+이 출력 100개 + KJV 빈도 상위 50개(계층 B 중)를 사람이 눈으로 훑어 명백한 오매칭(동음이의어가
+완전히 다른 뜻으로 붙은 경우 등)이 없는지 확인한다. 문제 패턴을 발견하면 `build_general_vocabulary.py`에
+필터를 추가해 재실행한다 — 전수 재검수는 하지 않는다(스펙의 계층 B 정책).
+
+- [ ] **Step 7: 커밋**
+
+```bash
+git add scripts/extract_kjv_vocabulary.py scripts/build_general_vocabulary.py assets/dictionary/archaic_kjv.json
+git commit -m "feat: KJV 일반 어휘 사전(계층 B) 자동 병합 + 최종 에셋"
+```
+
+---
+
+### Task 3: 에셋 등록 + 데이터 무결성 테스트
 
 **Files:**
 - Modify: `pubspec.yaml` (flutter.assets 목록)
 - Test: `test/archaic_dictionary_data_test.dart`
 
 **Interfaces:**
-- Consumes: Task 1의 `assets/dictionary/archaic_kjv.json`
+- Consumes: Task 2의 `assets/dictionary/archaic_kjv.json`
 - Produces: 번들 에셋 `assets/dictionary/` (rootBundle 경로 `assets/dictionary/archaic_kjv.json`)
 
 - [ ] **Step 1: 무결성 테스트 작성**
@@ -203,6 +432,15 @@ void main() {
       }
     }
   });
+
+  // 계층 B(kengdic/WordNet 자동 병합) 파이프라인이 조용히 거의 아무것도
+  // 만들지 못하는 회귀를 잡는다 — 스펙 기대치는 1만~1만2천 항목 내외.
+  test('archaic_kjv.json: 항목 수가 최소 기대치 이상이다', () {
+    final raw = File('assets/dictionary/archaic_kjv.json').readAsStringSync();
+    final map = jsonDecode(raw) as Map<String, dynamic>;
+    expect(map.length, greaterThanOrEqualTo(5000),
+        reason: '계층 B 병합이 실패했거나 산출물이 비정상적으로 작다');
+  });
 }
 ```
 
@@ -212,7 +450,7 @@ void main() {
 flutter test test/archaic_dictionary_data_test.dart
 ```
 
-Expected: PASS (Task 1 데이터가 올바르면 바로 통과. 실패하면 데이터를 고친다 — 테스트를 고치지 않는다.)
+Expected: PASS (Task 1+2 데이터가 올바르면 바로 통과. 실패하면 데이터를 고친다 — 테스트를 고치지 않는다.)
 
 - [ ] **Step 3: pubspec.yaml 에셋 등록**
 
@@ -232,7 +470,7 @@ git commit -m "test: 고어 사전 에셋 등록 + 데이터 무결성 테스트
 
 ---
 
-### Task 3: ArchaicDictionary 로더/조회 + provider
+### Task 4: ArchaicDictionary 로더/조회 + provider
 
 **Files:**
 - Create: `lib/core/dictionary/archaic_dictionary.dart`
@@ -409,7 +647,7 @@ git commit -m "feat: ArchaicDictionary 로더·조회 + provider"
 
 ---
 
-### Task 4: 결과 화면 — 카드 초록 노출 + 단어 탭 + 바텀시트
+### Task 5: 결과 화면 — 카드 초록 노출 + 단어 탭 + 바텀시트
 
 **Files:**
 - Modify: `lib/features/memorize/memorize_screen.dart` (`_ResultView` build ~L947, `_MissedWordsCard` ~L1069)
@@ -734,7 +972,63 @@ git commit -m "feat: 암송 결과 구절 카드에 고어 사전 탭 + 초록 �
 
 ---
 
-### Task 5: 실기기/시뮬레이터 확인
+### Task 6: kengdic 라이선스 고지 추가
+
+**Files:**
+- Create (없으면): `lib/features/settings/open_source_licenses_screen.dart` 또는 기존 라이선스/크레딧 화면에 추가
+- Modify: `lib/l10n/app_en.arb`, `lib/l10n/app_ko.arb`
+
+**Interfaces:**
+- Consumes: 없음 (정적 문자열)
+- Produces: 없음 (UI 전용)
+
+kengdic 데이터(계층 B의 한글 뜻 출처)는 MPL 2.0 또는 LGPL 2.0+ 이중 라이선스이며,
+가공해 재배포하므로 출처 고지가 필요하다. kengdic 저장소(`github.com/garfieldnate/kengdic`)에는
+별도 LICENSE 파일이 없고 README에 이중 라이선스가 명시돼 있다 — 고지 문구는 저장소 URL과
+라이선스명을 함께 적는다.
+
+- [ ] **Step 1: 기존 라이선스/크레딧 화면 존재 여부 확인**
+
+```bash
+grep -rln "license\|License\|오픈소스\|크레딧" lib/features/settings/ 2>/dev/null
+```
+
+두 갈래로 나뉜다:
+- **화면이 있으면**: 그 파일에 아래 항목을 추가한다.
+- **화면이 없으면**: `lib/features/settings/` 아래 새 화면을 만들지, 설정 화면 하단에
+  간단한 텍스트 한 줄로 붙일지 구현자가 판단한다 — 이번 범위는 "고지 문구가 사용자에게
+  보인다"는 최소 요건만 만족하면 된다. 별도 라우팅/네비게이션 항목을 새로 설계하지 않는다.
+
+- [ ] **Step 2: l10n 문자열 추가**
+
+`lib/l10n/app_en.arb`:
+
+```json
+  "dictKengdicCredit": "Korean word meanings in the verse dictionary are derived from kengdic (github.com/garfieldnate/kengdic), dual-licensed under MPL 2.0 / LGPL 2.0+.",
+```
+
+`lib/l10n/app_ko.arb`:
+
+```json
+  "dictKengdicCredit": "구절 사전의 한글 뜻 일부는 kengdic(github.com/garfieldnate/kengdic) 데이터를 가공한 것이며, MPL 2.0 / LGPL 2.0 이상 이중 라이선스를 따릅니다.",
+```
+
+- [ ] **Step 3: 고지 문구를 화면에 배치**
+
+Step 1에서 찾은 화면(또는 새로 만든 최소 화면)에 `l.dictKengdicCredit` 텍스트 하나를
+추가한다. 픽셀 팔레트를 따르되 별도 카드/장식 없이 `p.muted` 색상의 작은 본문 텍스트로 충분하다.
+
+- [ ] **Step 4: gen-l10n + analyze + 커밋**
+
+```bash
+flutter gen-l10n && flutter analyze --no-fatal-infos
+git add lib/l10n/ lib/features/settings/
+git commit -m "docs: kengdic 데이터 라이선스 고지 추가"
+```
+
+---
+
+### Task 7: 실기기/시뮬레이터 확인
 
 **Files:** 없음 (검증만)
 
@@ -744,6 +1038,9 @@ git commit -m "feat: 암송 결과 구절 카드에 고어 사전 탭 + 초록 �
 1. 일부러 틀리게 제출 → 노랑/빨강 결과에서 카드가 기존처럼 보이고, `unto`·`hath` 류 단어에 점선 밑줄이 보인다
 2. 점선 단어 탭 → 바텀시트에 표제어/현대영어/영영/한글이 뜬다
 3. 완벽 정답 제출 → 초록 결과에도 카드가 뜨고 제목이 중립 문구다
-4. 미등재 단어 탭 → 아무 일도 없다
+4. **계층 B(일반 어휘) 단어 확인**: 고어가 아닌 평범한 단어(예: `shepherd`, `flock`,
+   `harvest`)가 포함된 구절로 암송해, 그런 단어에도 점선 밑줄과 탭 반응이 있는지 확인한다
+5. 미등재 단어 탭 → 아무 일도 없다
+6. Task 6에서 고지 문구를 넣은 화면으로 이동해 문구가 실제로 보이는지 확인한다
 
 - [ ] **Step 2: 스크린샷 확보 후 완료 보고**
