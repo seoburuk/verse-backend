@@ -29,6 +29,13 @@ type Config struct {
 	AppleServiceID  string        // 웹용 Apple Services ID. "Sign in with Apple JS" audience 검증에 사용(선택).
 	ResendAPIKey    string        // Resend 메일 발송 API 키. 비어있으면 로그 출력으로 대체(dev).
 	MailFrom        string        // 발신자 주소 (예: "verse <noreply@pixbible.cloud>").
+
+	// 강제 업데이트 게이트. 비어있으면("") 그 플랫폼은 게이트를 걸지 않는다 —
+	// 배포 없이 값만 없애면 즉시 게이트가 꺼진다.
+	MinAppVersionIOS     string
+	MinAppVersionAndroid string
+	StoreURLIOS          string
+	StoreURLAndroid      string
 }
 
 // Load — 환경변수에서 설정을 읽어 검증한다. 필수값 누락 시 에러.
@@ -54,6 +61,11 @@ func Load() (*Config, error) {
 		AppleServiceID:  getEnv("APPLE_SERVICE_ID", ""),
 		ResendAPIKey:    getEnv("RESEND_API_KEY", ""),
 		MailFrom:        getEnv("MAIL_FROM", "verse <noreply@pixbible.cloud>"),
+
+		MinAppVersionIOS:     getEnv("MIN_APP_VERSION_IOS", ""),
+		MinAppVersionAndroid: getEnv("MIN_APP_VERSION_ANDROID", ""),
+		StoreURLIOS:          getEnv("STORE_URL_IOS", ""),
+		StoreURLAndroid:      getEnv("STORE_URL_ANDROID", ""),
 	}
 
 	// fail fast: 잘못된 설정으로 조용히 뜨는 것보다

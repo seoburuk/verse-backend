@@ -18,12 +18,13 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/go-chi/httprate"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/seoburuk/verse-backend/internal/config"
 	mw "github.com/seoburuk/verse-backend/internal/handler/middleware"
 	"github.com/seoburuk/verse-backend/internal/service"
 )
 
 // NewRouter — 라우팅 + 미들웨어 체인을 조립해 http.Handler를 반환한다.
-func NewRouter(pool *pgxpool.Pool, h *Handler, auth *service.AuthService, corsOrigin string) http.Handler {
+func NewRouter(pool *pgxpool.Pool, h *Handler, auth *service.AuthService, cfg *config.Config) http.Handler {
 	r := chi.NewRouter()
 
 	// 전역 미들웨어 — 순서가 의미를 가진다(위→아래로 요청을 감싼다)
@@ -32,7 +33,7 @@ func NewRouter(pool *pgxpool.Pool, h *Handler, auth *service.AuthService, corsOr
 	r.Use(middleware.Logger)    // 메서드/경로/상태코드/소요시간 로깅
 	r.Use(middleware.Recoverer) // 핸들러 panic → 500 변환
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   strings.Split(corsOrigin, ","),
+		AllowedOrigins:   strings.Split(cfg.CORSOrigin, ","),
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 		AllowCredentials: true,
@@ -44,6 +45,9 @@ func NewRouter(pool *pgxpool.Pool, h *Handler, auth *service.AuthService, corsOr
 
 	// /v1 — 모든 API 엔드포인트. Next.js rewrites가 /v1/* → :8080 으로 전달.
 	r.Route("/v1", func(r chi.Router) {
+		// 강제 업데이트 게이트 — 인증 전에 확인해야 하므로 공개, 로그인 화면도 못
+		// 띄우게 막아야 하니 레이트리밋도 걸지 않는다(healthz와 동급 취급).
+		r.Get("/app-version", appVersionHandler(cfg))
 		// 공개 엔드포인트 — 브루트포스 방지 레이트리밋(IP당 분당 10회)
 		r.Group(func(r chi.Router) {
 			r.Use(httprate.LimitByIP(10, time.Minute))
@@ -129,6 +133,19 @@ func healthzHandler(pool *pgxpool.Pool) http.HandlerFunc {
 			"status": "ok",
 			"db":     dbStatus,
 			"time":   time.Now().UTC(),
+		})
+	}
+}
+
+// appVersionHandler — 클라이언트가 시작 시 물어보는 최소 지원 버전.
+// 값이 비어있는 플랫폼은 게이트를 걸지 않는다(cfg 미설정 상태).
+func appVersionHandler(cfg *config.Config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		writeJSON(w, http.StatusOK, map[string]any{
+			"min_version_ios":     cfg.MinAppVersionIOS,
+			"min_version_android": cfg.MinAppVersionAndroid,
+			"store_url_ios":       cfg.StoreURLIOS,
+			"store_url_android":   cfg.StoreURLAndroid,
 		})
 	}
 }
