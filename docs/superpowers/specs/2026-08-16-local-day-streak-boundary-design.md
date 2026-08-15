@@ -82,3 +82,12 @@ String todayLocalString() { ... }
 
 스펙에 "서버 스트릭(UTC)과 로컬 앱 스트릭(로컬 자정)이 다를 수 있음"을 알려진 제약으로 명시.
 서버 측 정합 작업은 이번 스펙 범위 밖의 후속 과제로 남긴다.
+
+## 구현 완료
+
+`docs/superpowers/plans/2026-08-16-local-day-streak-boundary.md` 계획대로 구현 완료.
+`todayLocalString()`(`lib/core/date/local_day.dart`) 공용 함수로 통합, `StreakRepository`와
+`ReminderService`의 날짜 판정을 로컬 자정 기준으로 교체. `flutter test` 전체 실행 결과
+이번 변경 대상 테스트는 모두 통과. `test/create_plan_screen_test.dart`의 "커스텀 마감일은
+고른 날짜 그대로 표시된다" 1건이 실패하지만, 이는 스코프 밖인 `create_plan_screen.dart`의
+자체 `_todayUtc()` 로직에서 비롯된 기존 결함으로 이번 변경과 무관 — 별도 이슈로 남긴다.
