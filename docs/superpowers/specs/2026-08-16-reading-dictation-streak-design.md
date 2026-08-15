@@ -89,3 +89,11 @@ class ReadingController extends StateNotifier<ReadingState> {
 - `memorize_controller_test.dart`(또는 관련 기존 테스트 파일): 받아쓰기 모드로 절을 완료하면 스트릭이
   오르는지 확인하는 테스트 추가(기존에 "dictation은 스트릭을 안 건드린다"를 검증하는 테스트가 있다면
   그 반대로 수정).
+
+## 구현 완료
+
+`docs/superpowers/plans/2026-08-16-reading-dictation-streak.md` 계획대로 구현 완료.
+`ReadingController`에 `StreakRepository`를 주입해 절 완료 시(`_completeVerse`) `recordActivityToday()`
+호출, `memorize_controller.dart`의 `_completeDictation()`에도 동일 호출 추가. 기존 "dictation 모드는
+진도/스트릭/하트를 건드리지 않는다" 테스트는 `submit()` 경로만 검증하는 것이라 영향 없이 그대로 통과.
+`flutter test` 전체 455개 통과, `flutter analyze` 이번 변경과 무관한 기존 이슈만 남음.
