@@ -71,3 +71,9 @@ import 'dart:math';
   클램프되는지.
 - 정상 진행 중(밀리지 않음)이면 상한에 안 걸리고 기존 naive 값 그대로인지(회귀 방지).
 - 상한 계산이 최소 1은 보장하는지(총 절수가 아주 적은 플랜 경계값).
+
+## 구현 완료
+
+`docs/superpowers/plans/2026-08-16-today-target-cap.md` 계획대로 구현 완료. `PlanView.todayTarget`이
+`_originalPace`(생성 시점 페이스)의 1.5배로 클램프되도록 수정. `flutter test` 전체 472개 통과,
+`flutter analyze` 이번 변경과 무관한 기존 이슈만 남음.
