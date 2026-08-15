@@ -63,3 +63,9 @@ String? milestoneBody(int currentStreak, String locale, {required bool isDanger}
 
 `test/streak_danger_test.dart`의 `milestoneBody` 그룹에 3/14/60/200/365 케이스 추가(기존 6/29/99
 케이스는 그대로 유지 — 여전히 유효한 7/30/100 전야 값).
+
+## 구현 완료
+
+`docs/superpowers/plans/2026-08-16-milestone-threshold-unify.md` 계획대로 구현 완료.
+`milestoneBody()`가 `streakMilestones`를 쓰도록 통일. `flutter test` 전체 473개 통과,
+`flutter analyze` 이번 변경과 무관한 기존 이슈만 남음.
