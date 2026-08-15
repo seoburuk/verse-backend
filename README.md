@@ -137,7 +137,7 @@ Go API (chi 라우터)
 HTTP_PORT=8080
 DATABASE_URL=postgres://pixelkjv:pixelkjv_dev_pw@localhost:5432/pixelkjv?sslmode=disable
 JWT_SECRET=change-me-in-production
-JWT_ACCESS_TTL=15          # 토큰 유효시간(분)
+JWT_ACCESS_TTL=43200       # 토큰 유효시간(분, 30일 — 리프레시 토큰 없음)
 KJV_DATA_DIR=../files/data/kjv
 ```
 

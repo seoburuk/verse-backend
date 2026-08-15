@@ -43,7 +43,10 @@ type Config struct {
 // 12-Factor 원칙(설정은 환경변수로) + 로컬 편의성의 절충.
 
 func Load() (*Config, error) {
-	ttlMinutes, err := strconv.Atoi(getEnv("JWT_ACCESS_TTL", "15"))
+	// 리프레시 토큰 흐름이 없으므로 만료 = 강제 재로그인이다. 앱은 오프라인
+	// 우선이라 만료를 감지할 지점이 동기화뿐이고, 짧은 TTL은 로그인 직후부터
+	// "로그인 필요" 배너로 이어졌다 — 30일로 둔다.
+	ttlMinutes, err := strconv.Atoi(getEnv("JWT_ACCESS_TTL", "43200"))
 	if err != nil {
 		return nil, fmt.Errorf("JWT_ACCESS_TTL must be an integer (minutes): %w", err)
 	}
