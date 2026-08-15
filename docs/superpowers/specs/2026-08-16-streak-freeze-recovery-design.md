@@ -179,3 +179,13 @@ Future<void> recoverStreak() async {
   `brokenFromLen`/`brokenOnDay` 초기화.
 - `shouldScheduleComeback` 관련 순수 함수 테스트에 freezeCount 파라미터 케이스 추가.
 - UI 위젯 테스트는 배너 노출 조건(있음/없음) 정도로 가볍게.
+
+## 구현 완료
+
+`docs/superpowers/plans/2026-08-16-streak-freeze-recovery.md` 계획대로 구현 완료. schemaVersion 5→6,
+`StreakRepository`에 `missedDays` 기준 프리즈 소모/지급과 `canRecover`/`recoverStreak` 추가,
+`shouldScheduleComeback`이 프리즈로 커버되는 공백엔 예약하지 않도록 수정(단, missedDays=0인 정상 상태는
+freezeCount와 무관하게 기존 로직을 따르도록 오프바이원 버그를 계획 단계에서 미리 고침), 오늘 화면에
+프리즈 배지(❄️×N)와 48시간 복구 배너 추가. 구현 중 기존 `plan_migration_v4_to_v5_test.dart`가 手작업
+v4 fixture에 `streak_state` 테이블을 안 만들어서 v6 마이그레이션(addColumn)이 실패하는 걸 발견해 함께
+수정. `flutter test` 전체 469개 통과, `flutter analyze` 이번 변경과 무관한 기존 이슈만 남음.
