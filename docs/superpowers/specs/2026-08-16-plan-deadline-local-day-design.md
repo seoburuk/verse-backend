@@ -89,3 +89,21 @@
 
 이번 스펙도 서버(`verse-backend`) 쪽 플랜/진행도 관련 로직은 범위 밖으로 남긴다(현재 플랜은 로컬 전용 기능이라
 서버에 대응 개념이 없는 것으로 확인됨 — 서버 동기화가 생기면 별도 검토 필요).
+
+## 구현 완료
+
+`docs/superpowers/plans/2026-08-16-plan-deadline-local-day.md` 계획대로 구현하되, 실행 중 계획에 없던
+범위 확장이 있었다(사용자 승인 후 진행):
+
+- `todayUtcDay()`가 `plan_repository.dart` 밖에서도 `today_screen.dart`(축하 1일1회 가드,
+  `mascotMoodFor` 호출부)에서 쓰이고 있어 이것도 함께 로컬 기준으로 교체. `mascot_mood.dart`의
+  `mascotMoodFor` 파라미터명도 `todayUtc` → `todayLocal`로 정리(스트릭 `lastDay`가 이미 로컬 기준으로
+  바뀐 상태라, 이 함수가 계속 UTC 문자열을 받으면 그 자체로 실제 버그였음).
+- `create_plan_screen_test.dart`의 기존 실패 테스트는 원래 짐작했던 UTC/로컬 불일치가 아니라, 날짜
+  선택기가 기본 마감일(프리셋 30일 후)이 속한 달을 펼친 채 열리는데 테스트가 다른 달의 날짜를 탭하려
+  했던 별개의 결함이었다 — 표시된 기본 마감일을 읽어 같은 달 안에서 타깃을 고르도록 테스트를 수정.
+- `plan_view_test.dart`, `plan_expiry_test.dart`, `today_screen_test.dart`에도 `DateTime.now().toUtc()`로
+  마감일을 계산하는 잔여 UTC 앵커가 있어 함께 정리(그렇지 않으면 `_remainingDays`가 로컬 기준으로 바뀐
+  뒤 이 테스트들이 타임존에 따라 flaky해짐).
+
+`flutter test` 전체 452개 통과, `flutter analyze` 이번 변경과 무관한 기존 이슈만 남음.
