@@ -48,3 +48,9 @@ final d = DateTime.now().add(Duration(days: span < 1 ? 7 : span));
 ## 마이그레이션 / 서버
 
 해당 없음 — 이전 스펙과 동일한 성격의 로컬 전용 계산 수정.
+
+## 구현 완료
+
+`docs/superpowers/plans/2026-08-16-plan-sheet-nextchapter-local-day.md` 계획대로 구현 완료.
+`plan_sheet.dart`의 마감일 변경 피커, `today_screen.dart`의 다음 장 이어하기 span 계산을
+로컬 자정 기준으로 교체. `flutter test` 전체 453개 통과.
