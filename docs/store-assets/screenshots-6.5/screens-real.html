@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<style>
+  :root{
+    --paper:#f3e7c9;
+    --ink:#20180f;
+    --red:#d1402f;
+    --gold:#e0a52a;
+    --green:#3f7d4e;
+    --blue:#2f5d8a;
+    --shadow:#20180f;
+    --appbg:#0e150e;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#000}
+  body{font-family:ui-monospace,"SFMono-Regular",Menlo,monospace;
+       -webkit-font-smoothing:none;font-smooth:never;}
+  .slide{
+    width:1242px;height:2688px;position:relative;overflow:hidden;
+    display:flex;flex-direction:column;align-items:center;
+    padding:150px 90px 0;
+  }
+  .headline{
+    text-align:center;color:var(--ink);line-height:1.18;
+    font-weight:800;font-size:112px;letter-spacing:-2px;
+  }
+  .headline .hl{background:var(--gold);padding:0 14px;box-shadow:14px 14px 0 var(--shadow);display:inline-block}
+  .headline .hlr{background:var(--red);color:var(--paper);padding:0 14px;box-shadow:14px 14px 0 var(--shadow);display:inline-block}
+  .sub{margin-top:44px;text-align:center;color:var(--ink);opacity:.72;font-size:50px;line-height:1.35;font-weight:600}
+
+  /* phone mock wrapping a REAL screenshot */
+  .phone{
+    margin-top:100px;width:820px;flex:0 0 auto;
+    background:var(--ink);border:12px solid var(--ink);
+    box-shadow:40px 40px 0 rgba(32,24,15,.28);
+  }
+  .screen{
+    background:var(--appbg);border:8px solid var(--ink);
+    height:1560px;overflow:hidden;position:relative;
+  }
+  .screen img{
+    width:100%;height:100%;
+    display:block;object-fit:cover;object-position:top center;
+  }
+
+  .footlogo{position:absolute;bottom:70px;left:0;right:0;text-align:center;font-size:48px;font-weight:800;color:var(--ink);letter-spacing:2px}
+  .footlogo .b{background:var(--ink);color:var(--paper);padding:6px 20px}
+</style>
+</head>
+<body>
+
+<!-- 1: Home / value prop -->
+<section class="slide" style="background:var(--paper)">
+  <h1 class="headline">타이핑으로 완성하는<br><span class="hl">성경 암송</span></h1>
+  <p class="sub">한 절씩, 매일 조금씩<br>KJV 66권을 몸에 새기세요</p>
+  <div class="phone"><div class="screen"><img src="../raw/raw-home.png"></div></div>
+  <div class="footlogo"><span class="b">PIXEL</span> KJV</div>
+</section>
+
+<!-- 2: verse list -->
+<section class="slide" style="background:#efd9a8">
+  <h1 class="headline">좋아하는 구절부터<br><span class="hlr">골라서 시작</span></h1>
+  <p class="sub">요한복음 3:16, 시편 23편…<br>익숙한 말씀으로 첫걸음</p>
+  <div class="phone"><div class="screen"><img src="../raw/raw-verselist.png"></div></div>
+  <div class="footlogo"><span class="b">PIXEL</span> KJV</div>
+</section>
+
+<!-- 3: gameplay -->
+<section class="slide" style="background:#cfe0d6">
+  <h1 class="headline">게임처럼 배치하며<br><span class="hl">단어를 외우기</span></h1>
+  <p class="sub">단어 타일을 순서대로 탭해서<br>구절을 완성해요</p>
+  <div class="phone"><div class="screen"><img src="../raw/raw-gameplay.png"></div></div>
+  <div class="footlogo"><span class="b">PIXEL</span> KJV</div>
+</section>
+
+<!-- 4: course catalog -->
+<section class="slide" style="background:#cdd8ea">
+  <h1 class="headline">성경 66권을<br><span class="hlr">코스로 정복</span></h1>
+  <p class="sub">기초 · 주기도문 · 워밍업 · 예언<br>구약 39권 · 신약 27권까지</p>
+  <div class="phone"><div class="screen"><img src="../raw/raw-courses.png"></div></div>
+  <div class="footlogo"><span class="b">PIXEL</span> KJV</div>
+</section>
+
+</body>
+</html>

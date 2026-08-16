@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<style>
+  :root{
+    --paper:#f3e7c9;
+    --ink:#20180f;
+    --red:#d1402f;
+    --gold:#e0a52a;
+    --green:#3f7d4e;
+    --blue:#2f5d8a;
+    --shadow:#20180f;
+    --appbg:#0e150e;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#000}
+  body{font-family:ui-monospace,"SFMono-Regular",Menlo,monospace;
+       -webkit-font-smoothing:none;font-smooth:never;}
+  .slide{
+    width:2048px;height:2732px;position:relative;overflow:hidden;
+    display:flex;flex-direction:column;align-items:center;
+    padding:130px 140px 0;
+  }
+  .headline{
+    text-align:center;color:var(--ink);line-height:1.18;
+    font-weight:800;font-size:112px;letter-spacing:-2px;
+  }
+  .headline .hl{background:var(--gold);padding:0 18px;box-shadow:16px 16px 0 var(--shadow);display:inline-block}
+  .headline .hlr{background:var(--red);color:var(--paper);padding:0 18px;box-shadow:16px 16px 0 var(--shadow);display:inline-block}
+  .headline .hlb{background:var(--blue);color:var(--paper);padding:0 18px;box-shadow:16px 16px 0 var(--shadow);display:inline-block}
+  .sub{margin-top:44px;text-align:center;color:var(--ink);opacity:.72;font-size:52px;line-height:1.35;font-weight:600}
+
+  .phone{
+    margin-top:80px;width:900px;flex:0 0 auto;
+    background:var(--ink);border:13px solid var(--ink);
+    box-shadow:42px 42px 0 rgba(32,24,15,.28);
+  }
+  .screen{
+    background:var(--appbg);border:8px solid var(--ink);
+    height:1710px;overflow:hidden;position:relative;
+  }
+  .screen img{
+    width:100%;height:100%;
+    display:block;object-fit:cover;object-position:top center;
+  }
+
+  .footlogo{position:absolute;bottom:60px;left:0;right:0;text-align:center;font-size:48px;font-weight:800;color:var(--ink);letter-spacing:2px}
+  .footlogo .b{background:var(--ink);color:var(--paper);padding:8px 24px}
+</style>
+</head>
+<body>
+
+<!-- 1: Home -->
+<section class="slide" style="background:var(--paper)">
+  <h1 class="headline">재밌게 배우는<br><span class="hl">성경 암송</span></h1>
+  <p class="sub">단어 배치 · 빈칸 채우기 · 받아쓰기<br>세 가지 방식으로 외우세요</p>
+  <div class="phone"><div class="screen"><img src="../raw/raw-home.png"></div></div>
+  <div class="footlogo"><span class="b">PIXBIBLE</span></div>
+</section>
+
+<!-- 2: Drag / tile tap mode -->
+<section class="slide" style="background:#cfe0d6">
+  <h1 class="headline">단어 타일을 탭해서<br><span class="hl">순서대로 배치</span></h1>
+  <p class="sub">퍼즐처럼 조각을 맞추며<br>구절의 흐름을 몸에 새겨요</p>
+  <div class="phone"><div class="screen"><img src="../raw/raw-mode-drag.png"></div></div>
+  <div class="footlogo"><span class="b">PIXBIBLE</span></div>
+</section>
+
+<!-- 3: Type / fill-in-blank mode -->
+<section class="slide" style="background:#efd9a8">
+  <h1 class="headline">빈칸을 채우며<br><span class="hlr">완성하는 타이핑</span></h1>
+  <p class="sub">첫 글자 힌트를 보고<br>기억을 더듬어 직접 입력해요</p>
+  <div class="phone"><div class="screen"><img src="../raw/raw-mode-type.png"></div></div>
+  <div class="footlogo"><span class="b">PIXBIBLE</span></div>
+</section>
+
+<!-- 4: Dictation mode -->
+<section class="slide" style="background:#cdd8ea">
+  <h1 class="headline">절을 보면서<br><span class="hlb">통째로 받아쓰기</span></h1>
+  <p class="sub">절 전문을 눈으로 따라가며<br>손으로 옮겨 적어요</p>
+  <div class="phone"><div class="screen"><img src="../raw/raw-mode-dictation.png"></div></div>
+  <div class="footlogo"><span class="b">PIXBIBLE</span></div>
+</section>
+
+<!-- 5: Typing bible reading (통독) -->
+<section class="slide" style="background:#e3d3ee">
+  <h1 class="headline">외우기 힘든 날엔<br><span class="hl">타자 통독</span></h1>
+  <p class="sub">채점도 목숨도 없이<br>읽고 치며 흘러가는 시간</p>
+  <div class="phone"><div class="screen"><img src="../raw/raw-reading.png"></div></div>
+  <div class="footlogo"><span class="b">PIXBIBLE</span></div>
+</section>
+
+<!-- 6: 66-book pixel bookshelf -->
+<section class="slide" style="background:#d8e5cf">
+  <h1 class="headline">칠수록 차오르는<br><span class="hlr">66권 픽셀 책장</span></h1>
+  <p class="sub">완독한 책이 하나씩<br>책장에 꽂혀요</p>
+  <div class="phone"><div class="screen"><img src="../raw/raw-bookshelf.png"></div></div>
+  <div class="footlogo"><span class="b">PIXBIBLE</span></div>
+</section>
+
+</body>
+</html>

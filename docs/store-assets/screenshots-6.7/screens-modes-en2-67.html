@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  :root{
+    --paper:#f3e7c9;
+    --ink:#20180f;
+    --red:#d1402f;
+    --gold:#e0a52a;
+    --green:#3f7d4e;
+    --blue:#2f5d8a;
+    --shadow:#20180f;
+    --purple:#6b4a9e;
+    --appbg:#0e150e;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#000}
+  body{font-family:ui-monospace,"SFMono-Regular",Menlo,monospace;
+       -webkit-font-smoothing:none;font-smooth:never;}
+  .slide{
+    width:1284px;height:2778px;position:relative;overflow:hidden;
+    display:flex;flex-direction:column;align-items:center;
+    padding:155px 93px 0;
+  }
+  .headline{
+    text-align:center;color:var(--ink);line-height:1.16;
+    font-weight:800;font-size:99px;letter-spacing:-2px;
+  }
+  .headline .hl{background:var(--gold);padding:0 14px;box-shadow:14px 14px 0 var(--shadow);display:inline-block}
+  .headline .hlr{background:var(--red);color:var(--paper);padding:0 14px;box-shadow:14px 14px 0 var(--shadow);display:inline-block}
+  .headline .hlb{background:var(--blue);color:var(--paper);padding:0 14px;box-shadow:14px 14px 0 var(--shadow);display:inline-block}
+  .headline .hlp{background:var(--purple);color:var(--paper);padding:0 14px;box-shadow:14px 14px 0 var(--shadow);display:inline-block}
+  .sub{margin-top:45px;text-align:center;color:var(--ink);opacity:.72;font-size:45px;line-height:1.4;font-weight:600}
+
+  .phone{
+    margin-top:103px;width:848px;flex:0 0 auto;
+    background:var(--ink);border:12px solid var(--ink);
+    box-shadow:41px 41px 0 rgba(32,24,15,.28);
+  }
+  .screen{
+    background:var(--appbg);border:8px solid var(--ink);
+    height:1613px;overflow:hidden;position:relative;
+  }
+  .screen img{
+    width:100%;height:100%;
+    display:block;object-fit:cover;object-position:top center;
+  }
+
+  .footlogo{position:absolute;bottom:72px;left:0;right:0;text-align:center;font-size:50px;font-weight:800;color:var(--ink);letter-spacing:2px}
+  .footlogo .b{background:var(--ink);color:var(--paper);padding:6px 21px}
+</style>
+</head>
+<body>
+
+<!-- 1: Home -->
+<section class="slide" style="background:var(--paper)">
+  <h1 class="headline">Memorize<br><span class="hl">Verses Like a Game</span></h1>
+  <p class="sub">Word tiles, fill-in-the-blank, dictation<br>three ways to learn the KJV</p>
+  <div class="phone"><div class="screen"><img src="../raw/raw-en-home.png"></div></div>
+  <div class="footlogo"><span class="b">PIXBIBLE</span></div>
+</section>
+
+<!-- 2: Drag / tile tap mode -->
+<section class="slide" style="background:#cfe0d6">
+  <h1 class="headline">Tap Word Tiles<br><span class="hl">Into the Right Order</span></h1>
+  <p class="sub">Piece the verse together<br>like a puzzle, one tile at a time</p>
+  <div class="phone"><div class="screen"><img src="../raw/raw-en-mode-drag.png"></div></div>
+  <div class="footlogo"><span class="b">PIXBIBLE</span></div>
+</section>
+
+<!-- 3: Type / fill-in-blank mode -->
+<section class="slide" style="background:#efd9a8">
+  <h1 class="headline">Fill In the Blanks<br><span class="hlr">and Type It Out</span></h1>
+  <p class="sub">First-letter hints jog your memory<br>as you type the verse yourself</p>
+  <div class="phone"><div class="screen"><img src="../raw/raw-en-mode-type.png"></div></div>
+  <div class="footlogo"><span class="b">PIXBIBLE</span></div>
+</section>
+
+<!-- 4: Dictation mode -->
+<section class="slide" style="background:#cdd8ea">
+  <h1 class="headline">Type the Whole Verse<br><span class="hlb">Word for Word</span></h1>
+  <p class="sub">The verse stays on screen<br>as you transcribe it, word for word</p>
+  <div class="phone"><div class="screen"><img src="../raw/raw-en-mode-dictation.png"></div></div>
+  <div class="footlogo"><span class="b">PIXBIBLE</span></div>
+</section>
+
+<!-- 5: Built-in KJV dictionary -->
+<section class="slide" style="background:#e2d8ee">
+  <h1 class="headline">Stuck on a Word?<br><span class="hlp">Just Tap It</span></h1>
+  <p class="sub">300+ archaic words and 2,000 more,<br>explained in plain English</p>
+  <div class="phone"><div class="screen"><img src="../raw/raw-en-dictionary-noko.png"></div></div>
+  <div class="footlogo"><span class="b">PIXBIBLE</span></div>
+</section>
+
+<!-- 6: Typing bible reading -->
+<section class="slide" style="background:#e3d3ee">
+  <h1 class="headline">Not Up for Memorizing?<br><span class="hl">Type Through It</span></h1>
+  <p class="sub">No grading, no hearts —<br>just read and type, verse by verse</p>
+  <div class="phone"><div class="screen"><img src="../raw/raw-en-reading.png"></div></div>
+  <div class="footlogo"><span class="b">PIXBIBLE</span></div>
+</section>
+
+<!-- 7: 66-book pixel bookshelf -->
+<section class="slide" style="background:#d8e5cf">
+  <h1 class="headline">Fill Your<br><span class="hlr">66-Book Pixel Shelf</span></h1>
+  <p class="sub">Every chapter you type brings<br>a book closer to done</p>
+  <div class="phone"><div class="screen"><img src="../raw/raw-en-bookshelf.png"></div></div>
+  <div class="footlogo"><span class="b">PIXBIBLE</span></div>
+</section>
+
+</body>
+</html>
