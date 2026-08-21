@@ -5,7 +5,8 @@ type SubmitAttemptRequest struct {
 	CourseItemID int64    `json:"course_item_id"`
 	Mode         string   `json:"mode"`
 	ClientGrade  string   `json:"client_grade"`
-	Tokens       []string `json:"tokens"` // 서버 재채점용 사용자 입력 토큰
+	Tokens       []string `json:"tokens"`    // 서버 재채점용 사용자 입력 토큰
+	LocalDay     string   `json:"local_day"` // 클라이언트 로컬 자정 기준 오늘(YYYY-MM-DD). 없으면 서버 UTC로 폴백
 }
 
 type AttemptResponse struct {
@@ -28,6 +29,7 @@ type BatchAttemptItem struct {
 	Mode         string   `json:"mode"`
 	ClientGrade  string   `json:"client_grade"`
 	Tokens       []string `json:"tokens"`
+	LocalDay     string   `json:"local_day"`
 }
 
 type BatchSubmitAttemptsResponse struct {

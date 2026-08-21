@@ -106,7 +106,7 @@ func TestUpdateStreak(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			repo := &stubAttemptRepo{streak: c.streak}
-			if err := UpdateStreak(ctx, repo, uid); err != nil {
+			if err := UpdateStreak(ctx, repo, uid, ""); err != nil {
 				t.Fatalf("UpdateStreak error: %v", err)
 			}
 			if repo.upserted == nil {
@@ -118,6 +118,33 @@ func TestUpdateStreak(t *testing.T) {
 			}
 			if got.LongestLen != c.wantLongestLen {
 				t.Errorf("LongestLen = %d, want %d", got.LongestLen, c.wantLongestLen)
+			}
+		})
+	}
+}
+
+func TestResolveToday(t *testing.T) {
+	cases := []struct {
+		name     string
+		localDay string
+		want     bool // true면 localDay 그대로, false면 UTC now와 같아야 함
+	}{
+		{name: "valid local day used as-is", localDay: "2026-08-20", want: true},
+		{name: "empty falls back to UTC now", localDay: "", want: false},
+		{name: "malformed falls back to UTC now", localDay: "not-a-date", want: false},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := resolveToday(c.localDay)
+			if c.want {
+				if got != c.localDay {
+					t.Errorf("got %q, want %q", got, c.localDay)
+				}
+			} else {
+				wantUTC := time.Now().UTC().Format("2006-01-02")
+				if got != wantUTC {
+					t.Errorf("got %q, want UTC today %q", got, wantUTC)
+				}
 			}
 		})
 	}

@@ -47,6 +47,7 @@ func (h *Handler) SubmitAttempt(w http.ResponseWriter, r *http.Request) {
 		mode,
 		domain.Grade(req.ClientGrade),
 		req.Tokens,
+		req.LocalDay,
 	)
 	if err != nil {
 		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
@@ -106,6 +107,7 @@ func (h *Handler) SubmitAttemptsBatch(w http.ResponseWriter, r *http.Request) {
 			Mode:         mode,
 			ClientGrade:  domain.Grade(a.ClientGrade),
 			Tokens:       a.Tokens,
+			LocalDay:     a.LocalDay,
 		}
 	}
 
