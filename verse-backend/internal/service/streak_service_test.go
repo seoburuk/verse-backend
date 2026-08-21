@@ -148,6 +148,45 @@ func TestResolveToday(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("more than 1 day in future is rejected", func(t *testing.T) {
+		future := dayStr(time.Now().AddDate(0, 0, 2))
+		wantUTC := time.Now().UTC().Format("2006-01-02")
+		if got := resolveToday(future); got != wantUTC {
+			t.Errorf("got %q, want UTC today %q", got, wantUTC)
+		}
+	})
+
+	t.Run("more than 1 day in past is rejected", func(t *testing.T) {
+		past := dayStr(time.Now().AddDate(0, 0, -2))
+		wantUTC := time.Now().UTC().Format("2006-01-02")
+		if got := resolveToday(past); got != wantUTC {
+			t.Errorf("got %q, want UTC today %q", got, wantUTC)
+		}
+	})
+
+	t.Run("yesterday within window accepted as-is", func(t *testing.T) {
+		yesterday := dayStr(time.Now().AddDate(0, 0, -1))
+		if got := resolveToday(yesterday); got != yesterday {
+			t.Errorf("got %q, want %q", got, yesterday)
+		}
+	})
+
+	t.Run("tomorrow within window accepted as-is", func(t *testing.T) {
+		tomorrow := dayStr(time.Now().AddDate(0, 0, 1))
+		if got := resolveToday(tomorrow); got != tomorrow {
+			t.Errorf("got %q, want %q", got, tomorrow)
+		}
+	})
+
+	t.Run("non-canonical format re-formatted canonically", func(t *testing.T) {
+		now := time.Now().UTC()
+		nonCanonical := now.Format("2006-1-2")
+		want := now.Format("2006-01-02")
+		if got := resolveToday(nonCanonical); got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
 }
 
 func TestIsNextDay(t *testing.T) {

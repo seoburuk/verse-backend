@@ -17,13 +17,25 @@ import (
 	"github.com/seoburuk/verse-backend/internal/repository"
 )
 
-// resolveToday — localDay가 "2006-01-02" 형식으로 유효하면 그대로 쓰고,
-// 아니면 UTC 기준 오늘로 폴백한다.
+// resolveToday — localDay가 "2006-01-02" 형식으로 파싱되고, 서버 UTC 기준
+// 오늘 ±1일 범위 내이면 정규 포맷(zero-padded)으로 재출력한다.
+// 파싱 실패거나 범위를 벗어나면(클라이언트 조작·시계 오차) UTC 기준 오늘로 폴백한다.
 func resolveToday(localDay string) string {
-	if _, err := time.Parse("2006-01-02", localDay); err != nil {
-		return time.Now().UTC().Format("2006-01-02")
+	utcNow := time.Now().UTC()
+	fallback := utcNow.Format("2006-01-02")
+
+	t, err := time.Parse("2006-01-02", localDay)
+	if err != nil {
+		return fallback
 	}
-	return localDay
+
+	utcToday := time.Date(utcNow.Year(), utcNow.Month(), utcNow.Day(), 0, 0, 0, 0, time.UTC)
+	diff := t.Sub(utcToday)
+	if diff < -24*time.Hour || diff > 24*time.Hour {
+		return fallback
+	}
+
+	return t.Format("2006-01-02")
 }
 
 // UpdateStreak — 시도 제출 후 streak를 갱신한다.
