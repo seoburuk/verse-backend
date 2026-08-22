@@ -124,12 +124,15 @@ func TestUpdateStreak(t *testing.T) {
 }
 
 func TestResolveToday(t *testing.T) {
+	// UTC 오늘 기준 상대 날짜로 계산한다 — 하드코딩된 절대 날짜는 ±1일 클램프
+	// 범위를 시간이 지나며 벗어나 테스트가 저절로 깨진다(실제로 CI에서 발생).
+	validLocalDay := dayStr(time.Now())
 	cases := []struct {
 		name     string
 		localDay string
 		want     bool // true면 localDay 그대로, false면 UTC now와 같아야 함
 	}{
-		{name: "valid local day used as-is", localDay: "2026-08-20", want: true},
+		{name: "valid local day used as-is", localDay: validLocalDay, want: true},
 		{name: "empty falls back to UTC now", localDay: "", want: false},
 		{name: "malformed falls back to UTC now", localDay: "not-a-date", want: false},
 	}
