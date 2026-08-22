@@ -106,7 +106,7 @@ func TestUpdateStreak(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			repo := &stubAttemptRepo{streak: c.streak}
-			if err := UpdateStreak(ctx, repo, uid); err != nil {
+			if err := UpdateStreak(ctx, repo, uid, ""); err != nil {
 				t.Fatalf("UpdateStreak error: %v", err)
 			}
 			if repo.upserted == nil {
@@ -121,6 +121,75 @@ func TestUpdateStreak(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestResolveToday(t *testing.T) {
+	// UTC 오늘 기준 상대 날짜로 계산한다 — 하드코딩된 절대 날짜는 ±1일 클램프
+	// 범위를 시간이 지나며 벗어나 테스트가 저절로 깨진다(실제로 CI에서 발생).
+	validLocalDay := dayStr(time.Now())
+	cases := []struct {
+		name     string
+		localDay string
+		want     bool // true면 localDay 그대로, false면 UTC now와 같아야 함
+	}{
+		{name: "valid local day used as-is", localDay: validLocalDay, want: true},
+		{name: "empty falls back to UTC now", localDay: "", want: false},
+		{name: "malformed falls back to UTC now", localDay: "not-a-date", want: false},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := resolveToday(c.localDay)
+			if c.want {
+				if got != c.localDay {
+					t.Errorf("got %q, want %q", got, c.localDay)
+				}
+			} else {
+				wantUTC := time.Now().UTC().Format("2006-01-02")
+				if got != wantUTC {
+					t.Errorf("got %q, want UTC today %q", got, wantUTC)
+				}
+			}
+		})
+	}
+
+	t.Run("more than 1 day in future is rejected", func(t *testing.T) {
+		future := dayStr(time.Now().AddDate(0, 0, 2))
+		wantUTC := time.Now().UTC().Format("2006-01-02")
+		if got := resolveToday(future); got != wantUTC {
+			t.Errorf("got %q, want UTC today %q", got, wantUTC)
+		}
+	})
+
+	t.Run("more than 1 day in past is rejected", func(t *testing.T) {
+		past := dayStr(time.Now().AddDate(0, 0, -2))
+		wantUTC := time.Now().UTC().Format("2006-01-02")
+		if got := resolveToday(past); got != wantUTC {
+			t.Errorf("got %q, want UTC today %q", got, wantUTC)
+		}
+	})
+
+	t.Run("yesterday within window accepted as-is", func(t *testing.T) {
+		yesterday := dayStr(time.Now().AddDate(0, 0, -1))
+		if got := resolveToday(yesterday); got != yesterday {
+			t.Errorf("got %q, want %q", got, yesterday)
+		}
+	})
+
+	t.Run("tomorrow within window accepted as-is", func(t *testing.T) {
+		tomorrow := dayStr(time.Now().AddDate(0, 0, 1))
+		if got := resolveToday(tomorrow); got != tomorrow {
+			t.Errorf("got %q, want %q", got, tomorrow)
+		}
+	})
+
+	t.Run("non-canonical format re-formatted canonically", func(t *testing.T) {
+		now := time.Now().UTC()
+		nonCanonical := now.Format("2006-1-2")
+		want := now.Format("2006-01-02")
+		if got := resolveToday(nonCanonical); got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
 }
 
 func TestIsNextDay(t *testing.T) {

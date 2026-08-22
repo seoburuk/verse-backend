@@ -45,6 +45,7 @@ func (s *AttemptService) SubmitAttempt(
 	mode domain.Mode,
 	clientGrade domain.Grade,
 	tokens []string,
+	localDay string,
 ) (AttemptResult, error) {
 	// 0. 목숨 확인 — 0이면 채점 없이 즉시 거부
 	// 연습 모드(받아쓰기·통독)는 목숨과 무관하다 — 목숨이 0이어도 시도를 받는다.
@@ -110,7 +111,7 @@ func (s *AttemptService) SubmitAttempt(
 	}
 
 	// 5. 연속일 갱신
-	if err := UpdateStreak(ctx, s.attempts, userID); err != nil {
+	if err := UpdateStreak(ctx, s.attempts, userID, localDay); err != nil {
 		return AttemptResult{}, err
 	}
 
@@ -132,6 +133,7 @@ type BatchAttemptInput struct {
 	Mode         domain.Mode
 	ClientGrade  domain.Grade
 	Tokens       []string
+	LocalDay     string
 }
 
 // BatchAttemptOutput — 배치 항목 하나의 처리 결과. 오프라인 우선 클라이언트가
@@ -163,7 +165,7 @@ func (s *AttemptService) SubmitAttemptsBatch(ctx context.Context, userID int64, 
 			continue
 		}
 
-		result, err := s.SubmitAttempt(ctx, userID, item.CourseItemID, item.Mode, item.ClientGrade, item.Tokens)
+		result, err := s.SubmitAttempt(ctx, userID, item.CourseItemID, item.Mode, item.ClientGrade, item.Tokens, item.LocalDay)
 		if err != nil {
 			if errors.Is(err, domain.ErrNoLives) {
 				noLives = true

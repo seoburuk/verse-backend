@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	MaxLives       = 10
-	LivesRefillTTL = 20 * time.Minute
+	MaxLives       = 5
+	LivesRefillTTL = 30 * time.Minute
 )
 
 // SettleLives — 저장된 목숨 상태에 경과 시간만큼의 리필을 반영한 새 상태를 계산한다.
