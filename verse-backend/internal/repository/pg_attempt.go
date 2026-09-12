@@ -20,6 +20,11 @@ func NewAttemptRepo(pool *pgxpool.Pool) AttemptRepo {
 	return &pgAttemptRepo{q: db.New(pool)}
 }
 
+// NewAttemptRepoTx — 트랜잭션에 묶인 저장소.
+func NewAttemptRepoTx(tx pgx.Tx) AttemptRepo {
+	return &pgAttemptRepo{q: db.New(tx)}
+}
+
 func (r *pgAttemptRepo) InsertAttempt(ctx context.Context, params InsertAttemptParams) (domain.Attempt, error) {
 	row, err := r.q.InsertAttempt(ctx, db.InsertAttemptParams{
 		UserID:       params.UserID,
@@ -83,6 +88,7 @@ func (r *pgAttemptRepo) ListUserProgress(ctx context.Context, userID int64) ([]d
 			CourseItemID: row.CourseItemID,
 			Grade:        domain.Grade(row.Grade),
 			Cleared:      row.Cleared,
+			UpdatedAt:    row.UpdatedAt.Time,
 			Book:         row.Book,
 			Chapter:      row.Chapter,
 			Verse:        row.Verse,

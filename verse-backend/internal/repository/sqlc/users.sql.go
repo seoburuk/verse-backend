@@ -280,6 +280,25 @@ func (q *Queries) GetUserLives(ctx context.Context, id int64) (GetUserLivesRow, 
 	return i, err
 }
 
+const getUserLivesForUpdate = `-- name: GetUserLivesForUpdate :one
+SELECT lives, lives_updated_at FROM users WHERE id = $1 FOR UPDATE
+`
+
+type GetUserLivesForUpdateRow struct {
+	Lives          int32              `json:"lives"`
+	LivesUpdatedAt pgtype.Timestamptz `json:"lives_updated_at"`
+}
+
+// 같은 사용자의 동시 제출을 직렬화하기 위한 잠금 읽기.
+// 목숨 확인 → 시도 기록 → 목숨 소모가 한 트랜잭션 안에서 원자적으로 일어나야
+// 중간에 끼어든 요청이 같은 목숨을 두 번 쓰지 못한다.
+func (q *Queries) GetUserLivesForUpdate(ctx context.Context, id int64) (GetUserLivesForUpdateRow, error) {
+	row := q.db.QueryRow(ctx, getUserLivesForUpdate, id)
+	var i GetUserLivesForUpdateRow
+	err := row.Scan(&i.Lives, &i.LivesUpdatedAt)
+	return i, err
+}
+
 const setUserEmailPending = `-- name: SetUserEmailPending :exec
 UPDATE users SET email = $2, email_verified_at = NULL WHERE id = $1
 `
@@ -295,11 +314,18 @@ func (q *Queries) SetUserEmailPending(ctx context.Context, arg SetUserEmailPendi
 }
 
 const setUserEmailVerified = `-- name: SetUserEmailVerified :exec
-UPDATE users SET email_verified_at = now() WHERE id = $1
+UPDATE users SET email = $2, email_verified_at = now() WHERE id = $1
 `
 
-func (q *Queries) SetUserEmailVerified(ctx context.Context, id int64) error {
-	_, err := q.db.Exec(ctx, setUserEmailVerified, id)
+type SetUserEmailVerifiedParams struct {
+	ID    int64       `json:"id"`
+	Email pgtype.Text `json:"email"`
+}
+
+// 인증 코드에 담긴 이메일을 이 시점에 확정한다. 코드 발송 시점에 미리
+// 저장하면 발송 실패·오타 시 기존 인증 이메일을 잃는다.
+func (q *Queries) SetUserEmailVerified(ctx context.Context, arg SetUserEmailVerifiedParams) error {
+	_, err := q.db.Exec(ctx, setUserEmailVerified, arg.ID, arg.Email)
 	return err
 }
 

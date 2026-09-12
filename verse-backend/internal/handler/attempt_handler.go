@@ -35,7 +35,7 @@ func (h *Handler) SubmitAttempt(w http.ResponseWriter, r *http.Request) {
 	if mode == "" {
 		mode = domain.ModeDrag
 	}
-	if mode != domain.ModeDrag && mode != domain.ModeType && mode != domain.ModeHard && mode != domain.ModeDictation {
+	if !domain.IsValidMode(mode) {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid mode"})
 		return
 	}
@@ -50,7 +50,7 @@ func (h *Handler) SubmitAttempt(w http.ResponseWriter, r *http.Request) {
 		req.LocalDay,
 	)
 	if err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 
@@ -93,7 +93,7 @@ func (h *Handler) SubmitAttemptsBatch(w http.ResponseWriter, r *http.Request) {
 		if mode == "" {
 			mode = domain.ModeDrag
 		}
-		if mode != domain.ModeDrag && mode != domain.ModeType && mode != domain.ModeHard && mode != domain.ModeDictation {
+		if !domain.IsValidMode(mode) {
 			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid mode at index " + strconv.Itoa(i)})
 			return
 		}
@@ -113,7 +113,7 @@ func (h *Handler) SubmitAttemptsBatch(w http.ResponseWriter, r *http.Request) {
 
 	outputs, err := h.attempt.SubmitAttemptsBatch(r.Context(), userID, inputs)
 	if err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 

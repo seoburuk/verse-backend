@@ -72,7 +72,7 @@ func run() error {
 	mailSvc    := mailer.NewMailer(cfg.ResendAPIKey, cfg.MailFrom)
 	authSvc    := service.NewAuthService(userRepo, cfg.JWTSecret, cfg.JWTAccessTTL, cfg.GoogleClientID, cfg.AppleBundleID, cfg.AppleServiceID, mailSvc)
 	courseSvc  := service.NewCourseService(courseRepo, verseRepo)
-	attemptSvc := service.NewAttemptService(courseRepo, attemptRepo, userRepo)
+	attemptSvc := service.NewAttemptService(courseRepo, attemptRepo, userRepo, pool)
 	h := handler.NewHandler(authSvc, courseSvc, attemptSvc)
 
 	// 4) HTTP 서버 조립

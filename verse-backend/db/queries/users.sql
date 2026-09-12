@@ -52,7 +52,15 @@ SELECT * FROM users WHERE lower(email) = lower($1) AND email_verified_at IS NOT 
 UPDATE users SET email = $2, email_verified_at = NULL WHERE id = $1;
 
 -- name: SetUserEmailVerified :exec
-UPDATE users SET email_verified_at = now() WHERE id = $1;
+-- 인증 코드에 담긴 이메일을 이 시점에 확정한다. 코드 발송 시점에 미리
+-- 저장하면 발송 실패·오타 시 기존 인증 이메일을 잃는다.
+UPDATE users SET email = $2, email_verified_at = now() WHERE id = $1;
 
 -- name: UpdatePasswordHash :exec
 UPDATE users SET password_hash = $2 WHERE id = $1;
+
+-- name: GetUserLivesForUpdate :one
+-- 같은 사용자의 동시 제출을 직렬화하기 위한 잠금 읽기.
+-- 목숨 확인 → 시도 기록 → 목숨 소모가 한 트랜잭션 안에서 원자적으로 일어나야
+-- 중간에 끼어든 요청이 같은 목숨을 두 번 쓰지 못한다.
+SELECT lives, lives_updated_at FROM users WHERE id = $1 FOR UPDATE;

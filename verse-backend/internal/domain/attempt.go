@@ -7,7 +7,7 @@ import "time"
 type Grade string
 
 const (
-	GradeGreen  Grade = "green"  // ≥ 75% 회상
+	GradeGreen  Grade = "green"  // 100% 회상(완전 일치)
 	GradeYellow Grade = "yellow" // ≥ 50% 회상
 	GradeRed    Grade = "red"    // < 50% 회상
 	GradeNone   Grade = "none"   // 미시도
@@ -23,6 +23,15 @@ const (
 	ModeDictation Mode = "dictation" // 받아쓰기: 본문을 보며 따라 적기. 절 완료로 치지 않음.
 	ModeReading   Mode = "reading"   // 통독: 절 원문을 보며 장 단위로 따라 치기. 절 완료로 치지 않음.
 )
+
+// IsValidMode — 클라이언트가 보낸 모드 문자열이 서버가 아는 값인가.
+func IsValidMode(m Mode) bool {
+	switch m {
+	case ModeDrag, ModeType, ModeHard, ModeDictation, ModeReading:
+		return true
+	}
+	return false
+}
 
 // IsPracticeMode — 진도·목숨과 무관한 연습 모드인가.
 // 받아쓰기와 통독은 본문을 보고 따라 적는 저강도 루프라서 진도를 갱신하지 않고,
@@ -63,6 +72,7 @@ type ItemProgress struct {
 	CourseItemID int64
 	Grade        Grade
 	Cleared      bool
+	UpdatedAt    time.Time
 	Book         int16
 	Chapter      int16
 	Verse        int16

@@ -5,9 +5,9 @@ import (
 	"errors"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/seoburuk/verse-backend/internal/domain"
 	db "github.com/seoburuk/verse-backend/internal/repository/sqlc"
 )
@@ -25,6 +25,11 @@ func NewCourseRepo(pool *pgxpool.Pool) CourseRepo {
 	return &pgCourseRepo{q: db.New(pool)}
 }
 
+// NewCourseRepoTx — 트랜잭션에 묶인 저장소.
+func NewCourseRepoTx(tx pgx.Tx) CourseRepo {
+	return &pgCourseRepo{q: db.New(tx)}
+}
+
 func (r *pgCourseRepo) ListCourses(ctx context.Context) ([]domain.Course, error) {
 	rows, err := r.q.ListCourses(ctx)
 	if err != nil {
@@ -35,6 +40,10 @@ func (r *pgCourseRepo) ListCourses(ctx context.Context) ([]domain.Course, error)
 		courses[i] = toDomainCourse(row)
 	}
 	return courses, nil
+}
+
+func (r *pgCourseRepo) GetCoursesContentDigest(ctx context.Context) (string, error) {
+	return r.q.GetCoursesContentDigest(ctx)
 }
 
 func (r *pgCourseRepo) GetCourseBySlug(ctx context.Context, slug string) (domain.Course, error) {

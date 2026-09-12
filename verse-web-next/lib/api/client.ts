@@ -40,7 +40,10 @@ export async function apiFetch<T>(
     // 토큰이 있었는데 401이면 만료 → 로그인으로. 게스트(토큰 없음)는 리다이렉트하지 않는다.
     if (token) {
       clearToken();
-      window.location.href = "/login";
+      // "/en/..." 처럼 로케일 프리픽스가 붙어 있으면 유지한다 —
+      // "/login"으로 보내면 영어 사용자가 한국어 페이지로 떨어진다.
+      const locale = window.location.pathname.split("/")[1];
+      window.location.href = locale === "en" ? "/en/login" : "/login";
     }
     throw new ApiError(401, "unauthorized");
   }

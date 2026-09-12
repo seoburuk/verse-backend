@@ -16,6 +16,8 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/jackc/pgx/v5/pgconn"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/seoburuk/verse-backend/internal/domain"
 	"github.com/seoburuk/verse-backend/internal/mailer"
@@ -87,8 +89,10 @@ func (s *AuthService) RequestEmailVerification(ctx context.Context, userID int64
 		return err
 	}
 
-	if err := s.users.SetUserEmailPending(ctx, userID, email); err != nil {
-		return err
+	// 다른 계정이 이미 인증해 쓰는 이메일이면 확정 단계에서 unique 위반으로
+	// 터진다. 코드 발송 전에 걸러 409로 알린다.
+	if other, err := s.users.GetUserByVerifiedEmail(ctx, email); err == nil && other.ID != userID {
+		return domain.ErrConflict
 	}
 
 	user, err := s.users.GetUserByID(ctx, userID)
@@ -96,15 +100,22 @@ func (s *AuthService) RequestEmailVerification(ctx context.Context, userID int64
 		return err
 	}
 
+	// users.email은 여기서 건드리지 않는다. 인증 코드(auth_codes.email)에만 담아
+	// 두고 ConfirmEmailVerification에서 확정한다 — 발송 실패나 오타로 기존
+	// 인증 이메일을 잃지 않기 위해서다.
 	return s.issueAndSendCode(ctx, userID, purposeVerifyEmail, email, user.Language)
 }
 
 // ConfirmEmailVerification — 인증 코드를 검증하고 이메일을 확정한다.
 func (s *AuthService) ConfirmEmailVerification(ctx context.Context, userID int64, code string) error {
-	if err := s.verifyCode(ctx, userID, purposeVerifyEmail, code); err != nil {
+	authCode, err := s.verifyCode(ctx, userID, purposeVerifyEmail, code)
+	if err != nil {
 		return err
 	}
-	if err := s.users.SetUserEmailVerified(ctx, userID); err != nil {
+	if err := s.users.SetUserEmailVerified(ctx, userID, authCode.Email); err != nil {
+		if isDuplicateError(err) {
+			return domain.ErrConflict
+		}
 		return err
 	}
 	return s.users.DeleteAuthCodes(ctx, userID, purposeVerifyEmail)
@@ -145,7 +156,7 @@ func (s *AuthService) ConfirmPasswordReset(ctx context.Context, email, code, new
 		return domain.ErrUnauthorized
 	}
 
-	if err := s.verifyCode(ctx, user.ID, purposeResetPassword, code); err != nil {
+	if _, err := s.verifyCode(ctx, user.ID, purposeResetPassword, code); err != nil {
 		return err
 	}
 
@@ -210,22 +221,22 @@ func (s *AuthService) issueAndSendCode(ctx context.Context, userID int64, purpos
 }
 
 // verifyCode — 최신 코드를 조회해 만료/횟수/일치 여부를 확인한다.
-func (s *AuthService) verifyCode(ctx context.Context, userID int64, purpose, code string) error {
+func (s *AuthService) verifyCode(ctx context.Context, userID int64, purpose, code string) (domain.AuthCode, error) {
 	authCode, err := s.users.GetLatestAuthCode(ctx, userID, purpose)
 	if err != nil {
 		if errors.Is(err, domain.ErrNotFound) {
-			return domain.ErrUnauthorized
+			return domain.AuthCode{}, domain.ErrUnauthorized
 		}
-		return err
+		return domain.AuthCode{}, err
 	}
 	if authCode.Attempts >= authCodeMaxAttempts {
-		return domain.ErrRateLimited
+		return domain.AuthCode{}, domain.ErrRateLimited
 	}
 	if subtle.ConstantTimeCompare([]byte(hashCode(code)), []byte(authCode.CodeHash)) != 1 {
 		_ = s.users.IncrementAuthCodeAttempts(ctx, authCode.ID)
-		return domain.ErrUnauthorized
+		return domain.AuthCode{}, domain.ErrUnauthorized
 	}
-	return nil
+	return authCode, nil
 }
 
 // generateCode — 6자리 숫자 인증 코드를 생성한다.
@@ -245,6 +256,10 @@ func hashCode(code string) string {
 // SignUp — 새 사용자 등록. 아이디 중복 시 ErrConflict.
 func (s *AuthService) SignUp(ctx context.Context, username, displayName, password string) (domain.User, string, error) {
 	if username == "" || displayName == "" || password == "" {
+		return domain.User{}, "", domain.ErrInvalidInput
+	}
+	// 재설정·변경 경로는 8자를 강제하는데 가입만 빠져 있었다.
+	if utf8.RuneCountInString(password) < minPasswordLen {
 		return domain.User{}, "", domain.ErrInvalidInput
 	}
 	if containsProfanity(username) || containsProfanity(displayName) {
@@ -277,6 +292,10 @@ func (s *AuthService) Login(ctx context.Context, username, password string) (dom
 	user, err := s.users.GetUserByUsername(ctx, username)
 	if err != nil {
 		if errors.Is(err, domain.ErrNotFound) {
+			// 없는 아이디라고 바로 반환하면 argon2 검증을 건너뛰어 응답이
+			// 눈에 띄게 빨라진다 — 응답 시간만으로 계정 존재 여부를 알 수
+			// 있으므로 더미 해시로 같은 비용을 치른다.
+			verifyPassword(password, dummyPasswordHash)
 			return domain.User{}, "", domain.ErrUnauthorized
 		}
 		return domain.User{}, "", err
@@ -473,6 +492,16 @@ func (s *AuthService) issueToken(userID int64) (string, error) {
 	return t.SignedString(s.jwtSecret)
 }
 
+// dummyPasswordHash — 존재하지 않는 아이디로 로그인 시도가 왔을 때 비교에
+// 쓰는 고정 해시. 어떤 비밀번호와도 일치하지 않는다.
+var dummyPasswordHash = func() string {
+	h, err := hashPassword("dummy-password-for-constant-time-login")
+	if err != nil {
+		panic(err) // 시작 시 1회 — rand 실패는 복구 불가
+	}
+	return h
+}()
+
 // hashPassword — argon2id로 해싱 후 "salt$hash" 형식 문자열 반환.
 func hashPassword(password string) (string, error) {
 	salt := make([]byte, argonSaltLen)
@@ -510,6 +539,8 @@ func verifyPassword(password, stored string) bool {
 }
 
 // isDuplicateError — pgx unique 제약 위반 에러를 감지한다.
+// 에러 문자열에 "unique"가 있는지 보는 대신 SQLSTATE 23505로 판별한다.
 func isDuplicateError(err error) bool {
-	return err != nil && strings.Contains(err.Error(), "unique")
+	var pgErr *pgconn.PgError
+	return errors.As(err, &pgErr) && pgErr.Code == "23505"
 }

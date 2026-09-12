@@ -2,7 +2,9 @@
 SELECT * FROM courses WHERE NOT hidden ORDER BY ord;
 
 -- name: GetCourseBySlug :one
-SELECT * FROM courses WHERE slug = $1;
+-- 목록·이어가기와 동일하게 hidden 코스는 제외한다. 빠져 있으면 숨긴 코스가
+-- URL 직접 접근이나 SSR로 노출된다.
+SELECT * FROM courses WHERE slug = $1 AND NOT hidden;
 
 -- name: ListCourseItems :many
 SELECT * FROM course_items WHERE course_id = $1 ORDER BY ord;
@@ -64,3 +66,23 @@ SELECT ci2.id
 FROM course_items ci
 JOIN course_items ci2 ON ci2.verse_id = ci.verse_id
 WHERE ci.id = $1;
+
+-- name: GetCoursesContentDigest :one
+-- 앱이 내려받는 콘텐츠 전체(코스·섹션·절 목록과 각 텍스트)를 해시 하나로 요약한다.
+-- id/ord만 넣으면 제목·해설·영문 번역·본문 수정이 이미 설치된 앱에 영원히
+-- 전파되지 않으므로, 실제로 내려가는 텍스트를 모두 포함한다.
+SELECT COALESCE(md5(string_agg(row_digest, '' ORDER BY row_digest)), 'empty')::text AS digest
+FROM (
+  SELECT md5(concat_ws('|', 'c', c.id, c.slug, c.title, c.title_en, c.theme, c.ord,
+                       c.category, c.commentary, c.commentary_en)) AS row_digest
+  FROM courses c
+  WHERE NOT c.hidden
+  UNION ALL
+  SELECT md5(concat_ws('|', 's', s.id, s.course_id, s.title, s.title_en, s.ord))
+  FROM course_sections s
+  UNION ALL
+  SELECT md5(concat_ws('|', 'i', ci.id, ci.course_id, ci.section_id, ci.ord, ci.topic,
+                       ci.topic_en, bv.book, bv.chapter, bv.verse, bv.text))
+  FROM course_items ci
+  JOIN bible_verses bv ON bv.id = ci.verse_id
+) t;

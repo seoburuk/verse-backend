@@ -57,20 +57,3 @@ func GetLives(ctx context.Context, users repository.UserRepo, userID int64) (dom
 	}
 	return SettleLives(stored, time.Now().UTC()), nil
 }
-
-// ConsumeLife — 정산 후 목숨을 1 소모하고 저장한다. 남은 목숨이 없으면 domain.ErrNoLives.
-func ConsumeLife(ctx context.Context, users repository.UserRepo, userID int64) (domain.Lives, error) {
-	stored, err := users.GetLives(ctx, userID)
-	if err != nil {
-		return domain.Lives{}, err
-	}
-	settled := SettleLives(stored, time.Now().UTC())
-	if settled.Count <= 0 {
-		return settled, domain.ErrNoLives
-	}
-	settled.Count--
-	if err := users.UpdateLives(ctx, userID, settled); err != nil {
-		return domain.Lives{}, err
-	}
-	return settled, nil
-}

@@ -34,6 +34,7 @@ export interface MemorizeState {
   typeReveal: TypeHintWord[]; // type 모드 밑줄 스캐폴드 (단어별 공개 상태)
   liveGrade: Grade;
   submitting: boolean;
+  submitError: boolean;
   serverGrade: Grade | null;
   mismatch: boolean;
   outOfLives: boolean;
@@ -43,7 +44,7 @@ export interface MemorizeState {
 
 interface UseMemorizeReturn extends MemorizeState {
   setMode: (mode: RecallMode) => void;
-  tapTile: (tile: string, fromPool: boolean) => void;
+  tapTile: (index: number, fromPool: boolean) => void;
   setTyped: (text: string) => void;
   startRecall: (currentLives: number | null) => void;
   submit: () => Promise<void>;
@@ -94,6 +95,7 @@ export function useMemorize(
   const [placed, setPlaced] = useState<string[]>([]);
   const [typed, setTyped] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
   const [serverGrade, setServerGrade] = useState<Grade | null>(null);
   const [mismatch, setMismatch] = useState(false);
   const [outOfLives, setOutOfLives] = useState(false);
@@ -153,14 +155,14 @@ export function useMemorize(
     }
   }, [typeReveal, mode, phase, fireFx]);
 
-  const tapTile = useCallback((tile: string, fromPool: boolean) => {
+  // 타일은 값이 아니라 위치로 식별한다 — 같은 단어가 여러 개 있으면
+  // indexOf가 엉뚱한 타일을 지운다.
+  const tapTile = useCallback((index: number, fromPool: boolean) => {
     if (phase !== "recall") return;
     if (fromPool) {
-      setTiles((prev) => {
-        const idx = prev.indexOf(tile);
-        if (idx === -1) return prev;
-        return [...prev.slice(0, idx), ...prev.slice(idx + 1)];
-      });
+      const tile = tiles[index];
+      if (tile === undefined) return;
+      setTiles((prev) => [...prev.slice(0, index), ...prev.slice(index + 1)]);
       setPlaced((prev) => [...prev, tile]);
       // 정답 순서대로 배치했으면 히트 효과
       const nextTokens = [...placed, tile].flatMap((t) => normalize(t));
@@ -170,15 +172,13 @@ export function useMemorize(
       if (correct) fireFx("hit", nextTokens.length - 1);
       else fireFx("miss", -1);
     } else {
-      setPlaced((prev) => {
-        const idx = prev.indexOf(tile);
-        if (idx === -1) return prev;
-        return [...prev.slice(0, idx), ...prev.slice(idx + 1)];
-      });
+      const tile = placed[index];
+      if (tile === undefined) return;
+      setPlaced((prev) => [...prev.slice(0, index), ...prev.slice(index + 1)]);
       setTiles((prev) => [...prev, tile]);
       setCombo(0);
     }
-  }, [phase, placed, answerTokens, fireFx]);
+  }, [phase, placed, tiles, answerTokens, fireFx]);
 
   // 목숨이 0이면 recall을 막는다(서버 attempt_service.go의 목숨 확인을 사전에 미러).
   // currentLives가 null이면(게스트, 또는 로딩 전) 체크를 건너뛴다.
@@ -199,6 +199,7 @@ export function useMemorize(
       return;
     }
     setSubmitting(true);
+    setSubmitError(false);
     try {
       const result = await submitAttempt({
         course_item_id: courseItemId,
@@ -213,7 +214,9 @@ export function useMemorize(
       if (err instanceof ApiError && err.status === 403) {
         setOutOfLives(true);
       } else {
-        throw err;
+        // 네트워크 장애·서버 오류. 예전에는 rethrow해서 onClick에서 삼켜졌고
+        // 사용자에게는 아무 반응이 없었다.
+        setSubmitError(true);
       }
     } finally {
       setSubmitting(false);
@@ -232,10 +235,11 @@ export function useMemorize(
     setTyped("");
     setServerGrade(null);
     setMismatch(false);
+    setSubmitError(false);
     setCombo(0);
     setFx(null);
     prevFilledRef.current = 0;
   }, [answerDisplay]);
 
-  return { phase, mode, tiles, placed, typed, typeReveal, liveGrade, submitting, serverGrade, mismatch, outOfLives, combo, fx, setMode, tapTile, setTyped, startRecall, submit, reset, clearOutOfLives };
+  return { phase, mode, tiles, placed, typed, typeReveal, liveGrade, submitting, submitError, serverGrade, mismatch, outOfLives, combo, fx, setMode, tapTile, setTyped, startRecall, submit, reset, clearOutOfLives };
 }

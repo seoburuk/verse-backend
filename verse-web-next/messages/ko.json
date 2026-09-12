@@ -56,7 +56,11 @@
     "createAccount": "계정 만들기",
     "genericError": "오류가 발생했습니다",
     "forgotPassword": "비밀번호를 잊으셨나요?",
-    "emailOptional": "이메일 (선택)"
+    "emailOptional": "이메일 (선택)",
+    "appleButton": " Apple로 로그인",
+    "appleLoadError": "Apple 로그인을 불러오지 못했습니다.",
+    "appleSignInError": "Apple 로그인에 실패했습니다.",
+    "googleLoadError": "Google 로그인을 불러오지 못했습니다."
   },
   "nav": {
     "bookmarks": "책갈피",
@@ -173,6 +177,8 @@
     "submit": "제출",
     "complete": "완료!",
     "perfect": "완벽해요!",
+    "submitFailed": "제출에 실패했어요. 네트워크를 확인하고 다시 시도해 주세요.",
+    "submitRetry": "다시 제출",
     "serverConfirmed": "서버 채점으로 확정됐어요",
     "retry": "다시 시도",
     "retryAll": "다시하기",

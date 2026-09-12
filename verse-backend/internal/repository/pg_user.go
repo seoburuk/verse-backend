@@ -21,6 +21,12 @@ func NewUserRepo(pool *pgxpool.Pool) UserRepo {
 	return &pgUserRepo{q: db.New(pool), pool: pool}
 }
 
+// NewUserRepoTx — 트랜잭션에 묶인 저장소. pool이 없으므로 자체 트랜잭션을
+// 여는 메서드(DeleteUser)는 이 인스턴스에서 호출하지 않는다.
+func NewUserRepoTx(tx pgx.Tx) UserRepo {
+	return &pgUserRepo{q: db.New(tx)}
+}
+
 func (r *pgUserRepo) CreateUser(ctx context.Context, username, displayName, passwordHash string) (domain.User, error) {
 	row, err := r.q.CreateUser(ctx, db.CreateUserParams{
 		Username:     username,
@@ -132,27 +138,28 @@ func (r *pgUserRepo) UpdateDisplayName(ctx context.Context, userID int64, displa
 	return toDomainUser(row), nil
 }
 
-// DeleteUser — 사용자 데이터 전체 삭제. FK에 CASCADE가 없어 자식 테이블을 먼저 지운다.
+// DeleteUser — 사용자 데이터 전체 삭제. 자식 테이블은 FK ON DELETE CASCADE로
+// 함께 지워진다(마이그레이션 000020).
 func (r *pgUserRepo) DeleteUser(ctx context.Context, userID int64) error {
-	tx, err := r.pool.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-
-	for _, table := range []string{"item_favorites", "attempts", "progress", "streaks"} {
-		if _, err := tx.Exec(ctx, "DELETE FROM "+table+" WHERE user_id = $1", userID); err != nil {
-			return err
-		}
-	}
-	if _, err := tx.Exec(ctx, "DELETE FROM users WHERE id = $1", userID); err != nil {
-		return err
-	}
-	return tx.Commit(ctx)
+	_, err := r.pool.Exec(ctx, "DELETE FROM users WHERE id = $1", userID)
+	return err
 }
 
 func (r *pgUserRepo) GetLives(ctx context.Context, userID int64) (domain.Lives, error) {
 	row, err := r.q.GetUserLives(ctx, userID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.Lives{}, domain.ErrNotFound
+		}
+		return domain.Lives{}, err
+	}
+	return domain.Lives{Count: row.Lives, UpdatedAt: row.LivesUpdatedAt.Time}, nil
+}
+
+// GetLivesForUpdate — users 행을 잠근 채 목숨을 읽는다. 트랜잭션 안에서만
+// 의미가 있으며, 같은 사용자의 동시 요청을 직렬화한다.
+func (r *pgUserRepo) GetLivesForUpdate(ctx context.Context, userID int64) (domain.Lives, error) {
+	row, err := r.q.GetUserLivesForUpdate(ctx, userID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return domain.Lives{}, domain.ErrNotFound
@@ -188,8 +195,11 @@ func (r *pgUserRepo) SetUserEmailPending(ctx context.Context, userID int64, emai
 	})
 }
 
-func (r *pgUserRepo) SetUserEmailVerified(ctx context.Context, userID int64) error {
-	return r.q.SetUserEmailVerified(ctx, userID)
+func (r *pgUserRepo) SetUserEmailVerified(ctx context.Context, userID int64, email string) error {
+	return r.q.SetUserEmailVerified(ctx, db.SetUserEmailVerifiedParams{
+		ID:    userID,
+		Email: pgtype.Text{String: email, Valid: true},
+	})
 }
 
 func (r *pgUserRepo) UpdatePasswordHash(ctx context.Context, userID int64, passwordHash string) error {

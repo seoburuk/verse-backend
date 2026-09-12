@@ -4,7 +4,8 @@
 
 ```
 verse-backend/   Go REST API (포트 8080)
-verse-web/       React 웹 클라이언트 (포트 5173)
+verse-web-next/  Next.js 웹 클라이언트 (포트 3000)
+verse-flutter/   Flutter 앱 (별도 private 저장소, 이 저장소에는 포함되지 않음)
 files/           KJV 원본 데이터 + DB 파이프라인
 ```
 
@@ -40,22 +41,22 @@ curl http://localhost:8080/healthz
 ### 2. 프론트엔드
 
 ```bash
-cd verse-web
+cd verse-web-next
 npm install
 npm run dev
-# → http://localhost:5173
+# → http://localhost:3000
 ```
 
-`/v1/*` 요청은 Vite 프록시가 자동으로 `:8080`으로 전달한다.
+API 주소는 `NEXT_PUBLIC_API_URL` / `INTERNAL_API_URL`로 지정한다(`next.config.js` 참고).
 
 ---
 
 ## 아키텍처
 
 ```
-브라우저 (React)
-    │  /v1/*  (Vite 프록시 → :8080)
-    ▼
+브라우저 (Next.js)          Flutter 앱 (오프라인 우선)
+    │  /v1/*                  │  로컬 DB + 배치 동기화
+    ▼                         ▼
 Go API (chi 라우터)
     │
     ├── handler   (HTTP 계층)
@@ -63,7 +64,9 @@ Go API (chi 라우터)
     └── repository (sqlc → PostgreSQL)
 ```
 
-멀티 클라이언트 구조: 동일한 REST API에 React 웹과 Flutter 앱(예정)이 각각 붙는다.
+멀티 클라이언트 구조: 동일한 REST API에 Next.js 웹과 Flutter 앱이 각각 붙는다.
+웹은 매 시도를 바로 제출하고, 앱은 로컬에서 채점·저장한 뒤 `/v1/sync/attempts`로
+모아 올린다.
 
 ---
 
@@ -82,7 +85,9 @@ Go API (chi 라우터)
 
 ## 채점 규칙 (★ 가장 중요한 계약)
 
-`verse-backend/internal/service/grading.go` ↔ `verse-web/src/grading/` 는 **1:1로 동일**해야 한다.
+`verse-backend/internal/service/grading.go` ↔ `verse-web-next/lib/grading/` ↔
+`verse-flutter/lib/core/grading/` 는 **1:1로 동일**해야 한다.
+검증 벡터: [`docs/grading_vectors.json`](docs/grading_vectors.json)
 
 **정규화 (`normalize`)**
 1. 소문자화
@@ -90,7 +95,7 @@ Go API (chi 라우터)
 3. trim → 공백 분리
 
 **등급 (`gradeRecall`)** — LCS(최장공통부분수열) 기반
-- LCS 길이 / 정답 토큰 수 ≥ 0.75 → `green`
+- LCS 길이 / 정답 토큰 수 == 1.0 (완전 일치) → `green`
 - ≥ 0.50 → `yellow`
 - 미만 → `red`
 
@@ -145,10 +150,8 @@ KJV_DATA_DIR=../files/data/kjv
 
 ## 범위 밖 (후속)
 
-- 타자 입력 모드 (`mode: "type"`)
-- 픽셀/8비트 비주얼 테마, Lamb 마스코트
-- 진도·스트릭 표시 화면
-- JWT 리프레시 토큰
+- JWT 리프레시 토큰 (현재는 TTL 30일 액세스 토큰만)
 - 검색 / 랜덤 절
-- 단어 사전 툴팁 (word_glossary)
-- Flutter 앱
+- 단어 사전 툴팁 서버 연동 (`word_glossary` 테이블은 있으나 미사용 —
+  고어 사전은 현재 앱 로컬 데이터로 제공)
+- 구독 / 광고 제거 (`docs/subscription-implementation-plan.md`)

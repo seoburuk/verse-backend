@@ -17,7 +17,7 @@ func (h *Handler) GetMyResume(w http.ResponseWriter, r *http.Request) {
 
 	target, err := h.attempt.GetResume(r.Context(), userID)
 	if err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 

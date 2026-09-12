@@ -19,7 +19,7 @@ func (h *Handler) GetMyLives(w http.ResponseWriter, r *http.Request) {
 
 	lives, err := h.attempt.GetLives(r.Context(), userID)
 	if err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 
@@ -49,7 +49,7 @@ func (h *Handler) ConsumeLife(w http.ResponseWriter, r *http.Request) {
 
 	lives, err := h.attempt.ConsumeLife(r.Context(), userID)
 	if err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 

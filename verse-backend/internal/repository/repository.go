@@ -21,12 +21,13 @@ type UserRepo interface {
 	UpdateThemeLanguage(ctx context.Context, userID int64, theme, language *string) (domain.User, error)
 	DeleteUser(ctx context.Context, userID int64) error
 	GetLives(ctx context.Context, userID int64) (domain.Lives, error)
+	GetLivesForUpdate(ctx context.Context, userID int64) (domain.Lives, error)
 	UpdateLives(ctx context.Context, userID int64, lives domain.Lives) error
 
 	// 비밀번호 찾기 / 복구 이메일
 	GetUserByVerifiedEmail(ctx context.Context, email string) (domain.User, error)
 	SetUserEmailPending(ctx context.Context, userID int64, email string) error
-	SetUserEmailVerified(ctx context.Context, userID int64) error
+	SetUserEmailVerified(ctx context.Context, userID int64, email string) error
 	UpdatePasswordHash(ctx context.Context, userID int64, passwordHash string) error
 	CreateAuthCode(ctx context.Context, userID int64, purpose, codeHash, email string, expiresAt time.Time) error
 	GetLatestAuthCode(ctx context.Context, userID int64, purpose string) (domain.AuthCode, error)
@@ -38,6 +39,7 @@ type UserRepo interface {
 // CourseRepo — 코스 저장소 인터페이스.
 type CourseRepo interface {
 	ListCourses(ctx context.Context) ([]domain.Course, error)
+	GetCoursesContentDigest(ctx context.Context) (string, error)
 	GetCourseBySlug(ctx context.Context, slug string) (domain.Course, error)
 	ListCourseItems(ctx context.Context, courseID int64) ([]domain.CourseItem, error)
 	ListCourseItemsWithVerse(ctx context.Context, courseID int64) ([]domain.CourseItemWithVerse, error)

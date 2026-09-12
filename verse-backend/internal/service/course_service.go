@@ -34,6 +34,11 @@ func (s *CourseService) ListCourses(ctx context.Context) ([]domain.Course, error
 	return s.courses.ListCourses(ctx)
 }
 
+// CoursesContentDigest — 클라이언트 콘텐츠 캐시 무효화용 해시.
+func (s *CourseService) CoursesContentDigest(ctx context.Context) (string, error) {
+	return s.courses.GetCoursesContentDigest(ctx)
+}
+
 func (s *CourseService) AddFavorite(ctx context.Context, userID, courseItemID int64) error {
 	return s.courses.AddFavorite(ctx, userID, courseItemID)
 }

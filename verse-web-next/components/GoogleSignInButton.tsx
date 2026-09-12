@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 
 // Google Identity Services 스크립트 URL. CSP/외부 스크립트 허용 필요.
 const GIS_SRC = "https://accounts.google.com/gsi/client";
@@ -56,6 +57,7 @@ interface Props {
 
 export default function GoogleSignInButton({ onCredential, onError }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  const t = useTranslations("login");
 
   useEffect(() => {
     if (!CLIENT_ID) return;
@@ -74,12 +76,12 @@ export default function GoogleSignInButton({ onCredential, onError }: Props) {
           width: 280,
         });
       })
-      .catch(() => onError?.("Google 로그인을 불러오지 못했습니다."));
+      .catch(() => onError?.(t("googleLoadError")));
 
     return () => {
       cancelled = true;
     };
-  }, [onCredential, onError]);
+  }, [onCredential, onError, t]);
 
   // 클라이언트 ID 미설정 시 버튼을 숨긴다(로컬 개발 등).
   if (!CLIENT_ID) return null;

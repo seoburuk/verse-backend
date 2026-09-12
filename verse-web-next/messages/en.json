@@ -56,7 +56,11 @@
     "createAccount": "Create an account",
     "genericError": "Something went wrong",
     "forgotPassword": "Forgot password?",
-    "emailOptional": "Email (optional)"
+    "emailOptional": "Email (optional)",
+    "appleButton": " Sign in with Apple",
+    "appleLoadError": "Couldn't load Apple sign-in.",
+    "appleSignInError": "Apple sign-in failed.",
+    "googleLoadError": "Couldn't load Google sign-in."
   },
   "nav": {
     "bookmarks": "Bookmarks",
@@ -173,6 +177,8 @@
     "submit": "Submit",
     "complete": "Done!",
     "perfect": "Perfect!",
+    "submitFailed": "Couldn't submit. Check your connection and try again.",
+    "submitRetry": "Submit again",
     "serverConfirmed": "Confirmed by server grading",
     "retry": "Try again",
     "retryAll": "Try again",

@@ -17,7 +17,7 @@ func (h *Handler) GetMyStats(w http.ResponseWriter, r *http.Request) {
 
 	stats, err := h.attempt.GetStats(r.Context(), userID)
 	if err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 

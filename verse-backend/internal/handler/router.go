@@ -28,10 +28,11 @@ func NewRouter(pool *pgxpool.Pool, h *Handler, auth *service.AuthService, cfg *c
 	r := chi.NewRouter()
 
 	// 전역 미들웨어 — 순서가 의미를 가진다(위→아래로 요청을 감싼다)
-	r.Use(middleware.RequestID) // 요청마다 고유 ID → 로그 추적
-	r.Use(middleware.RealIP)    // 프록시 뒤에서도 실제 클라이언트 IP 복원
-	r.Use(middleware.Logger)    // 메서드/경로/상태코드/소요시간 로깅
-	r.Use(middleware.Recoverer) // 핸들러 panic → 500 변환
+	r.Use(middleware.RequestID)  // 요청마다 고유 ID → 로그 추적
+	r.Use(middleware.RealIP)     // 프록시 뒤에서도 실제 클라이언트 IP 복원
+	r.Use(middleware.Logger)     // 메서드/경로/상태코드/소요시간 로깅
+	r.Use(middleware.Recoverer)  // 핸들러 panic → 500 변환
+	r.Use(maxBodyBytes(1 << 20)) // 요청 본문 1MB 상한 — 거대한 tokens 배열로 메모리·CPU 소모 방지
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   strings.Split(cfg.CORSOrigin, ","),
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -157,4 +158,15 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(v)
+}
+
+// maxBodyBytes — 요청 본문 크기 상한. 배치 동기화(최대 200건)도 충분히
+// 들어가는 크기이며, 초과하면 디코딩 단계에서 에러가 나 400으로 떨어진다.
+func maxBodyBytes(limit int64) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			r.Body = http.MaxBytesReader(w, r.Body, limit)
+			next.ServeHTTP(w, r)
+		})
+	}
 }
