@@ -72,6 +72,7 @@ type ItemProgress struct {
 	CourseItemID int64
 	Grade        Grade
 	Cleared      bool
+	UpdatedAt    time.Time
 	Book         int16
 	Chapter      int16
 	Verse        int16

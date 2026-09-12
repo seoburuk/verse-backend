@@ -19,7 +19,7 @@ ON CONFLICT (user_id)
 DO UPDATE SET current_len = EXCLUDED.current_len, longest_len = EXCLUDED.longest_len, last_day = EXCLUDED.last_day;
 
 -- name: ListUserProgress :many
-SELECT p.course_item_id, p.grade, p.cleared, bv.book, bv.chapter, bv.verse
+SELECT p.course_item_id, p.grade, p.cleared, p.updated_at, bv.book, bv.chapter, bv.verse
 FROM progress p
 JOIN course_items ci ON ci.id = p.course_item_id
 JOIN bible_verses bv ON bv.id = ci.verse_id

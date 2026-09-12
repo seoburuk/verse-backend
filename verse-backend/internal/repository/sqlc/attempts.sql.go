@@ -132,7 +132,7 @@ func (q *Queries) ListReadingProgress(ctx context.Context, userID int64) ([]List
 }
 
 const listUserProgress = `-- name: ListUserProgress :many
-SELECT p.course_item_id, p.grade, p.cleared, bv.book, bv.chapter, bv.verse
+SELECT p.course_item_id, p.grade, p.cleared, p.updated_at, bv.book, bv.chapter, bv.verse
 FROM progress p
 JOIN course_items ci ON ci.id = p.course_item_id
 JOIN bible_verses bv ON bv.id = ci.verse_id
@@ -140,12 +140,13 @@ WHERE p.user_id = $1
 `
 
 type ListUserProgressRow struct {
-	CourseItemID int64  `json:"course_item_id"`
-	Grade        string `json:"grade"`
-	Cleared      bool   `json:"cleared"`
-	Book         int16  `json:"book"`
-	Chapter      int16  `json:"chapter"`
-	Verse        int16  `json:"verse"`
+	CourseItemID int64              `json:"course_item_id"`
+	Grade        string             `json:"grade"`
+	Cleared      bool               `json:"cleared"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	Book         int16              `json:"book"`
+	Chapter      int16              `json:"chapter"`
+	Verse        int16              `json:"verse"`
 }
 
 func (q *Queries) ListUserProgress(ctx context.Context, userID int64) ([]ListUserProgressRow, error) {
@@ -161,6 +162,7 @@ func (q *Queries) ListUserProgress(ctx context.Context, userID int64) ([]ListUse
 			&i.CourseItemID,
 			&i.Grade,
 			&i.Cleared,
+			&i.UpdatedAt,
 			&i.Book,
 			&i.Chapter,
 			&i.Verse,

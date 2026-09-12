@@ -4,6 +4,7 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/seoburuk/verse-backend/internal/handler/dto"
 	mw "github.com/seoburuk/verse-backend/internal/handler/middleware"
@@ -32,6 +33,7 @@ func (h *Handler) GetMyProgress(w http.ResponseWriter, r *http.Request) {
 			CourseItemID: it.CourseItemID,
 			Grade:        string(it.Grade),
 			Cleared:      it.Cleared,
+			UpdatedAt:    it.UpdatedAt.UTC().Format(time.RFC3339),
 			Book:         it.Book,
 			Chapter:      it.Chapter,
 			Verse:        it.Verse,

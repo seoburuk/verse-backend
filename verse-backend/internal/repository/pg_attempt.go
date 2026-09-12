@@ -83,6 +83,7 @@ func (r *pgAttemptRepo) ListUserProgress(ctx context.Context, userID int64) ([]d
 			CourseItemID: row.CourseItemID,
 			Grade:        domain.Grade(row.Grade),
 			Cleared:      row.Cleared,
+			UpdatedAt:    row.UpdatedAt.Time,
 			Book:         row.Book,
 			Chapter:      row.Chapter,
 			Verse:        row.Verse,
