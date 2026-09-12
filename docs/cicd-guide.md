@@ -73,10 +73,10 @@ on:
 
 jobs:
   backend:   # verse-backend에서 go test ./...
-  frontend:  # verse-web에서 npm test (Vitest)
+  frontend:  # verse-web-next에서 npm run typecheck + npm test (Vitest)
 ```
 
-**중요한 빈틈**: `frontend` job이 `verse-web`(구 프론트) 디렉터리를 테스트하고 있고, 실제로 배포되는 `verse-web-next`는 CI 대상이 아니다. 즉 지금 우리가 계속 작업 중인 프론트엔드는 **push해도 아무 자동 검증이 안 되는 상태**다. 이건 이 프로젝트가 다음 CI/CD 개선에서 가장 먼저 고쳐야 할 부분이다.
+**해결됨**: `frontend` job이 git에서 사라진 `verse-web`(구 프론트)를 테스트하고 있어 실제로 배포되는 `verse-web-next`가 아무 검증도 받지 못했다. 대상 디렉터리를 `verse-web-next`로 바꾸고 `npm run typecheck` 단계를 추가했다.
 
 ---
 

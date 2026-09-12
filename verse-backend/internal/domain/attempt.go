@@ -7,7 +7,7 @@ import "time"
 type Grade string
 
 const (
-	GradeGreen  Grade = "green"  // ≥ 75% 회상
+	GradeGreen  Grade = "green"  // 100% 회상(완전 일치)
 	GradeYellow Grade = "yellow" // ≥ 50% 회상
 	GradeRed    Grade = "red"    // < 50% 회상
 	GradeNone   Grade = "none"   // 미시도
