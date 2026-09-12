@@ -61,7 +61,7 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
   const isLast = index >= items.length - 1;
   const {
     phase, mode, tiles, placed, typed, typeReveal, liveGrade, submitting, serverGrade, mismatch, outOfLives, combo, fx,
-    setMode, tapTile, setTyped, startRecall, submit, reset, clearOutOfLives,
+    setMode, tapTile, setTyped, startRecall, submit, submitError, reset, clearOutOfLives,
   } = useMemorize(item.course_item_id, item.text);
 
   // 진행 게이지 — recall 단계에서 채운 단어 비율 (드래그: 배치 수, 타자: 정확히 채운 수)
@@ -293,8 +293,13 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
                 (mode === "drag" ? placed.length === 0 : typed.trim() === "")
               }
             >
-              {submitting ? t("submitting") : t("submit")}
+              {submitting ? t("submitting") : submitError ? t("submitRetry") : t("submit")}
             </button>
+            {submitError && (
+              <p className="muted" role="alert" style={{ fontSize: "0.85rem" }}>
+                {t("submitFailed")}
+              </p>
+            )}
           </div>
         )}
 
@@ -325,7 +330,7 @@ function MemorizeContent({ items, index, sectionId, backHref, doneHref, buildIte
             )}
             {mismatch && (
               <p className="muted" style={{ fontSize: "0.85rem" }}>
-                서버 채점으로 확정됐어요
+                {t("serverConfirmed")}
               </p>
             )}
             <div className="verse-box">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 
 // Sign in with Apple JS. CSP/외부 스크립트 허용 필요(GoogleSignInButton과 동일 패턴).
 const APPLE_JS_SRC =
@@ -65,6 +66,7 @@ interface Props {
 }
 
 export default function AppleSignInButton({ onCredential, onError }: Props) {
+  const t = useTranslations("login");
   const initialized = useRef(false);
 
   useEffect(() => {
@@ -84,8 +86,8 @@ export default function AppleSignInButton({ onCredential, onError }: Props) {
           initialized.current = true;
         }
       })
-      .catch(() => onError?.("Apple 로그인을 불러오지 못했습니다."));
-  }, [onError]);
+      .catch(() => onError?.(t("appleLoadError")));
+  }, [onError, t]);
 
   async function handleClick() {
     try {
@@ -97,7 +99,7 @@ export default function AppleSignInButton({ onCredential, onError }: Props) {
         .join(" ");
       onCredential(res.authorization.id_token, name || undefined);
     } catch {
-      onError?.("Apple 로그인에 실패했습니다.");
+      onError?.(t("appleSignInError"));
     }
   }
 
@@ -106,7 +108,7 @@ export default function AppleSignInButton({ onCredential, onError }: Props) {
 
   return (
     <button type="button" className="apple-btn" onClick={handleClick}>
-       Apple로 로그인
+      {t("appleButton")}
     </button>
   );
 }

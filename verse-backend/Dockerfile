@@ -1,7 +1,7 @@
 # 멀티스테이지 빌드: 빌드 환경과 실행 환경을 분리해 최종 이미지를 작게.
-FROM golang:1.22-alpine AS build
+FROM golang:1.25-alpine AS build
 WORKDIR /src
-COPY go.mod ./
+COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 RUN go build -o /bin/api ./cmd/api

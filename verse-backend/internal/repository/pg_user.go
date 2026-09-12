@@ -21,6 +21,12 @@ func NewUserRepo(pool *pgxpool.Pool) UserRepo {
 	return &pgUserRepo{q: db.New(pool), pool: pool}
 }
 
+// NewUserRepoTx — 트랜잭션에 묶인 저장소. pool이 없으므로 자체 트랜잭션을
+// 여는 메서드(DeleteUser)는 이 인스턴스에서 호출하지 않는다.
+func NewUserRepoTx(tx pgx.Tx) UserRepo {
+	return &pgUserRepo{q: db.New(tx)}
+}
+
 func (r *pgUserRepo) CreateUser(ctx context.Context, username, displayName, passwordHash string) (domain.User, error) {
 	row, err := r.q.CreateUser(ctx, db.CreateUserParams{
 		Username:     username,
@@ -141,6 +147,19 @@ func (r *pgUserRepo) DeleteUser(ctx context.Context, userID int64) error {
 
 func (r *pgUserRepo) GetLives(ctx context.Context, userID int64) (domain.Lives, error) {
 	row, err := r.q.GetUserLives(ctx, userID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.Lives{}, domain.ErrNotFound
+		}
+		return domain.Lives{}, err
+	}
+	return domain.Lives{Count: row.Lives, UpdatedAt: row.LivesUpdatedAt.Time}, nil
+}
+
+// GetLivesForUpdate — users 행을 잠근 채 목숨을 읽는다. 트랜잭션 안에서만
+// 의미가 있으며, 같은 사용자의 동시 요청을 직렬화한다.
+func (r *pgUserRepo) GetLivesForUpdate(ctx context.Context, userID int64) (domain.Lives, error) {
+	row, err := r.q.GetUserLivesForUpdate(ctx, userID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return domain.Lives{}, domain.ErrNotFound

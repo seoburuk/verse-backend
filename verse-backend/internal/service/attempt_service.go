@@ -1,19 +1,23 @@
 // attempt_service.go — ★ 서버 도메인 로직의 핵심(포트폴리오 하이라이트) ★
 //
 // SubmitAttempt 흐름:
-//   1) 클라 tokens → 정답 절 텍스트 조회 → Normalize
-//   2) GradeRecall(LCS)로 server_grade 산출
-//   3) InsertAttempt(client_grade + server_grade 둘 다 저장)
-//   4) UpsertProgress(cleared = server_grade=="green")
-//   5) UpdateStreak
+//  1. 클라 tokens → 정답 절 텍스트 조회 → Normalize
+//  2. GradeRecall(LCS)로 server_grade 산출
+//  3. InsertAttempt(client_grade + server_grade 둘 다 저장)
+//  4. UpsertProgress(cleared = server_grade=="green")
+//  5. UpdateStreak
 //
-// NOTE: 트랜잭션(sqlc WithTx) 래핑은 후속 리팩터. 현재는 순차 실행.
+// 전 과정은 하나의 트랜잭션에서 실행되며, 시작 시 users 행을 잠가(FOR UPDATE)
+// 같은 사용자의 동시 제출을 직렬화한다. 잠금이 없으면 두 요청이 같은 목숨을
+// 두 번 쓰거나 연속일이 어긋날 수 있다.
 package service
 
 import (
 	"context"
 	"errors"
+	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/seoburuk/verse-backend/internal/domain"
 	"github.com/seoburuk/verse-backend/internal/repository"
 )
@@ -31,10 +35,30 @@ type AttemptService struct {
 	courses  repository.CourseRepo
 	attempts repository.AttemptRepo
 	users    repository.UserRepo
+	pool     *pgxpool.Pool
 }
 
-func NewAttemptService(courses repository.CourseRepo, attempts repository.AttemptRepo, users repository.UserRepo) *AttemptService {
-	return &AttemptService{courses: courses, attempts: attempts, users: users}
+func NewAttemptService(courses repository.CourseRepo, attempts repository.AttemptRepo, users repository.UserRepo, pool *pgxpool.Pool) *AttemptService {
+	return &AttemptService{courses: courses, attempts: attempts, users: users, pool: pool}
+}
+
+// inTx — 트랜잭션에 묶인 저장소로 같은 서비스를 다시 만들어 fn을 실행한다.
+func (s *AttemptService) inTx(ctx context.Context, fn func(tx *AttemptService) error) error {
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx) //nolint:errcheck // 커밋 성공 후의 Rollback은 무시된다
+
+	txSvc := &AttemptService{
+		courses:  repository.NewCourseRepoTx(tx),
+		attempts: repository.NewAttemptRepoTx(tx),
+		users:    repository.NewUserRepoTx(tx),
+	}
+	if err := fn(txSvc); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
 }
 
 // SubmitAttempt — 시도 제출, 서버 재채점, 진도·연속일 갱신.
@@ -47,18 +71,36 @@ func (s *AttemptService) SubmitAttempt(
 	tokens []string,
 	localDay string,
 ) (AttemptResult, error) {
+	var result AttemptResult
+	err := s.inTx(ctx, func(tx *AttemptService) error {
+		var err error
+		result, err = tx.submitLocked(ctx, userID, courseItemID, mode, clientGrade, tokens, localDay)
+		return err
+	})
+	return result, err
+}
+
+// submitLocked — 트랜잭션 안에서만 호출된다. 시작 시 users 행을 잠근다.
+func (s *AttemptService) submitLocked(
+	ctx context.Context,
+	userID, courseItemID int64,
+	mode domain.Mode,
+	clientGrade domain.Grade,
+	tokens []string,
+	localDay string,
+) (AttemptResult, error) {
 	// 0. 목숨 확인 — 0이면 채점 없이 즉시 거부
 	// 연습 모드(받아쓰기·통독)는 목숨과 무관하다 — 목숨이 0이어도 시도를 받는다.
 	// 이 분기가 없으면 목숨 소진 시 통독 기록이 전부 거부되어 영영 동기화되지
 	// 않고, 클라이언트의 책장과 재설치 복원이 깨진다.
-	if !domain.IsPracticeMode(mode) {
-		lives, err := GetLives(ctx, s.users, userID)
-		if err != nil {
-			return AttemptResult{}, err
-		}
-		if lives.Count <= 0 {
-			return AttemptResult{}, domain.ErrNoLives
-		}
+	// 연습 모드도 연속일을 갱신하므로 잠금 자체는 항상 잡는다.
+	stored, err := s.users.GetLivesForUpdate(ctx, userID)
+	if err != nil {
+		return AttemptResult{}, err
+	}
+	lives := SettleLives(stored, time.Now().UTC())
+	if !domain.IsPracticeMode(mode) && lives.Count <= 0 {
+		return AttemptResult{}, domain.ErrNoLives
 	}
 
 	// 1. 정답 절 텍스트 조회 → 정규화
@@ -115,10 +157,11 @@ func (s *AttemptService) SubmitAttempt(
 		return AttemptResult{}, err
 	}
 
-	// 6. 비초록 결과는 목숨 1 소모. 연습 모드는 소모하지 않는다. 이미 시도는 기록됐으므로
-	// 동시성 경합으로 목숨이 먼저 소진된 예외적인 경우(ErrNoLives)는 무시하고 결과를 그대로 반환한다.
+	// 6. 비초록 결과는 목숨 1 소모. 연습 모드는 소모하지 않는다.
+	// 위에서 잠금 상태로 읽어 정산한 값을 그대로 쓰므로 경합이 없다.
 	if !cleared && !domain.IsPracticeMode(mode) {
-		if _, err := ConsumeLife(ctx, s.users, userID); err != nil && !errors.Is(err, domain.ErrNoLives) {
+		lives.Count--
+		if err := s.users.UpdateLives(ctx, userID, lives); err != nil {
 			return AttemptResult{}, err
 		}
 	}
@@ -194,10 +237,19 @@ func (s *AttemptService) GetLives(ctx context.Context, userID int64) (domain.Liv
 
 // ConsumeLife — 목숨 1을 소모한다(암송 중 이탈 페널티 등). 남은 목숨이 없으면 현재 상태를 반환한다.
 func (s *AttemptService) ConsumeLife(ctx context.Context, userID int64) (domain.Lives, error) {
-	lives, err := ConsumeLife(ctx, s.users, userID)
-	if errors.Is(err, domain.ErrNoLives) {
-		return lives, nil
-	}
+	var lives domain.Lives
+	err := s.inTx(ctx, func(tx *AttemptService) error {
+		stored, err := tx.users.GetLivesForUpdate(ctx, userID)
+		if err != nil {
+			return err
+		}
+		lives = SettleLives(stored, time.Now().UTC())
+		if lives.Count <= 0 {
+			return nil // 남은 목숨이 없으면 현재 상태를 그대로 반환한다
+		}
+		lives.Count--
+		return tx.users.UpdateLives(ctx, userID, lives)
+	})
 	return lives, err
 }
 

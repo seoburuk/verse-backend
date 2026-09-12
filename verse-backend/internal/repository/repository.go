@@ -21,6 +21,7 @@ type UserRepo interface {
 	UpdateThemeLanguage(ctx context.Context, userID int64, theme, language *string) (domain.User, error)
 	DeleteUser(ctx context.Context, userID int64) error
 	GetLives(ctx context.Context, userID int64) (domain.Lives, error)
+	GetLivesForUpdate(ctx context.Context, userID int64) (domain.Lives, error)
 	UpdateLives(ctx context.Context, userID int64, lives domain.Lives) error
 
 	// 비밀번호 찾기 / 복구 이메일

@@ -34,6 +34,7 @@ export interface MemorizeState {
   typeReveal: TypeHintWord[]; // type 모드 밑줄 스캐폴드 (단어별 공개 상태)
   liveGrade: Grade;
   submitting: boolean;
+  submitError: boolean;
   serverGrade: Grade | null;
   mismatch: boolean;
   outOfLives: boolean;
@@ -94,6 +95,7 @@ export function useMemorize(
   const [placed, setPlaced] = useState<string[]>([]);
   const [typed, setTyped] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
   const [serverGrade, setServerGrade] = useState<Grade | null>(null);
   const [mismatch, setMismatch] = useState(false);
   const [outOfLives, setOutOfLives] = useState(false);
@@ -197,6 +199,7 @@ export function useMemorize(
       return;
     }
     setSubmitting(true);
+    setSubmitError(false);
     try {
       const result = await submitAttempt({
         course_item_id: courseItemId,
@@ -211,7 +214,9 @@ export function useMemorize(
       if (err instanceof ApiError && err.status === 403) {
         setOutOfLives(true);
       } else {
-        throw err;
+        // 네트워크 장애·서버 오류. 예전에는 rethrow해서 onClick에서 삼켜졌고
+        // 사용자에게는 아무 반응이 없었다.
+        setSubmitError(true);
       }
     } finally {
       setSubmitting(false);
@@ -230,10 +235,11 @@ export function useMemorize(
     setTyped("");
     setServerGrade(null);
     setMismatch(false);
+    setSubmitError(false);
     setCombo(0);
     setFx(null);
     prevFilledRef.current = 0;
   }, [answerDisplay]);
 
-  return { phase, mode, tiles, placed, typed, typeReveal, liveGrade, submitting, serverGrade, mismatch, outOfLives, combo, fx, setMode, tapTile, setTyped, startRecall, submit, reset, clearOutOfLives };
+  return { phase, mode, tiles, placed, typed, typeReveal, liveGrade, submitting, submitError, serverGrade, mismatch, outOfLives, combo, fx, setMode, tapTile, setTyped, startRecall, submit, reset, clearOutOfLives };
 }
