@@ -21,7 +21,7 @@ func (h *Handler) GetVerse(w http.ResponseWriter, r *http.Request) {
 
 	v, err := h.courses.GetVerse(r.Context(), int16(book), int16(chapter), int16(verse))
 	if err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 

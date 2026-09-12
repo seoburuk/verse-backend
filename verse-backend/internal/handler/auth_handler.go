@@ -21,7 +21,7 @@ func (h *Handler) Signup(w http.ResponseWriter, r *http.Request) {
 
 	user, token, err := h.auth.SignUp(r.Context(), req.Username, req.DisplayName, req.Password)
 	if err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 
@@ -51,7 +51,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	user, token, err := h.auth.Login(r.Context(), req.Username, req.Password)
 	if err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 
@@ -74,7 +74,7 @@ func (h *Handler) GoogleLogin(w http.ResponseWriter, r *http.Request) {
 
 	user, token, err := h.auth.GoogleLogin(r.Context(), req.IDToken)
 	if err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 
@@ -97,7 +97,7 @@ func (h *Handler) AppleLogin(w http.ResponseWriter, r *http.Request) {
 
 	user, token, err := h.auth.AppleLogin(r.Context(), req.IDToken, req.Name)
 	if err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 
@@ -129,14 +129,14 @@ func (h *Handler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	if req.DisplayName != nil {
 		user, err = h.auth.UpdateDisplayName(r.Context(), userID, *req.DisplayName)
 		if err != nil {
-			writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+			writeError(w, r, err)
 			return
 		}
 	}
 	if req.Theme != nil || req.Language != nil {
 		user, err = h.auth.UpdateThemeLanguage(r.Context(), userID, req.Theme, req.Language)
 		if err != nil {
-			writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+			writeError(w, r, err)
 			return
 		}
 	}
@@ -157,7 +157,7 @@ func (h *Handler) GetMe(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.auth.GetMe(r.Context(), userID)
 	if err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 
@@ -188,7 +188,7 @@ func (h *Handler) RequestEmailVerification(w http.ResponseWriter, r *http.Reques
 	}
 
 	if err := h.auth.RequestEmailVerification(r.Context(), userID, req.Email); err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 	w.WriteHeader(http.StatusAccepted)
@@ -208,7 +208,7 @@ func (h *Handler) ConfirmEmailVerification(w http.ResponseWriter, r *http.Reques
 	}
 
 	if err := h.auth.ConfirmEmailVerification(r.Context(), userID, req.Code); err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]bool{"verified": true})
@@ -228,7 +228,7 @@ func (h *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.auth.ChangePassword(r.Context(), userID, req.CurrentPassword, req.NewPassword); err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
@@ -254,7 +254,7 @@ func (h *Handler) ConfirmPasswordReset(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.auth.ConfirmPasswordReset(r.Context(), req.Email, req.Code, req.NewPassword); err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
@@ -268,7 +268,7 @@ func (h *Handler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.auth.DeleteAccount(r.Context(), userID); err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 

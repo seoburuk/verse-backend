@@ -18,7 +18,7 @@ func (h *Handler) GetMyProgress(w http.ResponseWriter, r *http.Request) {
 
 	summary, err := h.attempt.GetProgress(r.Context(), userID)
 	if err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 

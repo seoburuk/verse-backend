@@ -37,6 +37,10 @@ func (r *pgCourseRepo) ListCourses(ctx context.Context) ([]domain.Course, error)
 	return courses, nil
 }
 
+func (r *pgCourseRepo) GetCoursesContentDigest(ctx context.Context) (string, error) {
+	return r.q.GetCoursesContentDigest(ctx)
+}
+
 func (r *pgCourseRepo) GetCourseBySlug(ctx context.Context, slug string) (domain.Course, error) {
 	row, err := r.q.GetCourseBySlug(ctx, slug)
 	if err != nil {

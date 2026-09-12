@@ -38,6 +38,7 @@ type UserRepo interface {
 // CourseRepo — 코스 저장소 인터페이스.
 type CourseRepo interface {
 	ListCourses(ctx context.Context) ([]domain.Course, error)
+	GetCoursesContentDigest(ctx context.Context) (string, error)
 	GetCourseBySlug(ctx context.Context, slug string) (domain.Course, error)
 	ListCourseItems(ctx context.Context, courseID int64) ([]domain.CourseItem, error)
 	ListCourseItemsWithVerse(ctx context.Context, courseID int64) ([]domain.CourseItemWithVerse, error)

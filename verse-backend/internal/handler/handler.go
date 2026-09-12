@@ -3,6 +3,7 @@ package handler
 
 import (
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/seoburuk/verse-backend/internal/domain"
@@ -48,4 +49,17 @@ func errStatus(err error) int {
 	default:
 		return http.StatusInternalServerError
 	}
+}
+
+// writeError — 도메인 에러를 상태코드로 바꿔 응답한다.
+// 500으로 떨어지는 예기치 못한 에러(주로 DB 실패)는 내부 메시지가 그대로
+// 클라이언트에 노출되지 않도록 고정 문구로 바꾸고 서버 로그에만 남긴다.
+func writeError(w http.ResponseWriter, r *http.Request, err error) {
+	status := errStatus(err)
+	if status == http.StatusInternalServerError {
+		log.Printf("%s %s: %v", r.Method, r.URL.Path, err)
+		writeJSON(w, status, map[string]string{"error": "internal error"})
+		return
+	}
+	writeJSON(w, status, map[string]string{"error": err.Error()})
 }

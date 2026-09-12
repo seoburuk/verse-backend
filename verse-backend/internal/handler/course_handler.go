@@ -2,8 +2,6 @@
 package handler
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"net/http"
 	"strconv"
 
@@ -22,7 +20,7 @@ func (h *Handler) GetSection(w http.ResponseWriter, r *http.Request) {
 
 	sec, err := h.courses.GetSectionDetail(r.Context(), id)
 	if err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 
@@ -55,7 +53,7 @@ func toItemResponse(it domain.CourseItemWithVerse) dto.CourseItemResponse {
 func (h *Handler) ListCourses(w http.ResponseWriter, r *http.Request) {
 	courses, err := h.courses.ListCourses(r.Context())
 	if err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 
@@ -76,28 +74,15 @@ func (h *Handler) ListCourses(w http.ResponseWriter, r *http.Request) {
 
 // GetCoursesVersion — 오프라인 우선 클라이언트가 앱 시작 시 가볍게 호출해
 // 로컬 번들 콘텐츠(코스 목록)를 재다운로드해야 하는지 판단하는 데 쓴다.
-// course 목록 전체를 매번 내려받는 대신 (id, slug, ord, category)로 만든
-// 해시 하나만 비교하면 되므로 응답 크기가 훨씬 작다.
+// 콘텐츠 전체를 매번 내려받는 대신 DB에서 계산한 해시 하나만 비교한다.
 func (h *Handler) GetCoursesVersion(w http.ResponseWriter, r *http.Request) {
-	courses, err := h.courses.ListCourses(r.Context())
+	version, err := h.courses.CoursesContentDigest(r.Context())
 	if err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 
-	hasher := sha256.New()
-	for _, c := range courses {
-		hasher.Write([]byte(strconv.FormatInt(c.ID, 10)))
-		hasher.Write([]byte("|"))
-		hasher.Write([]byte(c.Slug))
-		hasher.Write([]byte("|"))
-		hasher.Write([]byte(strconv.Itoa(c.Ord)))
-		hasher.Write([]byte("|"))
-		hasher.Write([]byte(c.Category))
-		hasher.Write([]byte("\n"))
-	}
-
-	writeJSON(w, http.StatusOK, dto.CoursesVersionResponse{Version: hex.EncodeToString(hasher.Sum(nil))})
+	writeJSON(w, http.StatusOK, dto.CoursesVersionResponse{Version: version})
 }
 
 func (h *Handler) GetCourse(w http.ResponseWriter, r *http.Request) {
@@ -105,7 +90,7 @@ func (h *Handler) GetCourse(w http.ResponseWriter, r *http.Request) {
 
 	detail, err := h.courses.GetCourseDetail(r.Context(), slug)
 	if err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 

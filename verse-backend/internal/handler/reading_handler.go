@@ -20,7 +20,7 @@ func (h *Handler) GetMyReading(w http.ResponseWriter, r *http.Request) {
 
 	rows, err := h.attempt.GetReadingProgress(r.Context(), userID)
 	if err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 

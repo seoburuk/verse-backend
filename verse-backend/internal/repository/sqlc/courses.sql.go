@@ -67,6 +67,34 @@ func (q *Queries) GetCourseItemVerse(ctx context.Context, id int64) (GetCourseIt
 	return i, err
 }
 
+const getCoursesContentDigest = `-- name: GetCoursesContentDigest :one
+SELECT COALESCE(md5(string_agg(row_digest, '' ORDER BY row_digest)), 'empty')::text AS digest
+FROM (
+  SELECT md5(concat_ws('|', 'c', c.id, c.slug, c.title, c.title_en, c.theme, c.ord,
+                       c.category, c.commentary, c.commentary_en)) AS row_digest
+  FROM courses c
+  WHERE NOT c.hidden
+  UNION ALL
+  SELECT md5(concat_ws('|', 's', s.id, s.course_id, s.title, s.title_en, s.ord))
+  FROM course_sections s
+  UNION ALL
+  SELECT md5(concat_ws('|', 'i', ci.id, ci.course_id, ci.section_id, ci.ord, ci.topic,
+                       ci.topic_en, bv.book, bv.chapter, bv.verse, bv.text))
+  FROM course_items ci
+  JOIN bible_verses bv ON bv.id = ci.verse_id
+) t
+`
+
+// 앱이 내려받는 콘텐츠 전체(코스·섹션·절 목록과 각 텍스트)를 해시 하나로 요약한다.
+// id/ord만 넣으면 제목·해설·영문 번역·본문 수정이 이미 설치된 앱에 영원히
+// 전파되지 않으므로, 실제로 내려가는 텍스트를 모두 포함한다.
+func (q *Queries) GetCoursesContentDigest(ctx context.Context) (string, error) {
+	row := q.db.QueryRow(ctx, getCoursesContentDigest)
+	var digest string
+	err := row.Scan(&digest)
+	return digest, err
+}
+
 const getSectionByID = `-- name: GetSectionByID :one
 SELECT id, course_id, title, title_en, ord FROM course_sections WHERE id = $1
 `

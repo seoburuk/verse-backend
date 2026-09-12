@@ -50,7 +50,7 @@ func (h *Handler) SubmitAttempt(w http.ResponseWriter, r *http.Request) {
 		req.LocalDay,
 	)
 	if err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 
@@ -113,7 +113,7 @@ func (h *Handler) SubmitAttemptsBatch(w http.ResponseWriter, r *http.Request) {
 
 	outputs, err := h.attempt.SubmitAttemptsBatch(r.Context(), userID, inputs)
 	if err != nil {
-		writeJSON(w, errStatus(err), map[string]string{"error": err.Error()})
+		writeError(w, r, err)
 		return
 	}
 
