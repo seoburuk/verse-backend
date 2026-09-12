@@ -24,6 +24,15 @@ const (
 	ModeReading   Mode = "reading"   // 통독: 절 원문을 보며 장 단위로 따라 치기. 절 완료로 치지 않음.
 )
 
+// IsValidMode — 클라이언트가 보낸 모드 문자열이 서버가 아는 값인가.
+func IsValidMode(m Mode) bool {
+	switch m {
+	case ModeDrag, ModeType, ModeHard, ModeDictation, ModeReading:
+		return true
+	}
+	return false
+}
+
 // IsPracticeMode — 진도·목숨과 무관한 연습 모드인가.
 // 받아쓰기와 통독은 본문을 보고 따라 적는 저강도 루프라서 진도를 갱신하지 않고,
 // 목숨을 검사하지도 소모하지도 않는다. 시도 기록·연속일은 다른 모드와 동일하다.

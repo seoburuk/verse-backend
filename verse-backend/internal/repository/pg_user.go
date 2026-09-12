@@ -188,8 +188,11 @@ func (r *pgUserRepo) SetUserEmailPending(ctx context.Context, userID int64, emai
 	})
 }
 
-func (r *pgUserRepo) SetUserEmailVerified(ctx context.Context, userID int64) error {
-	return r.q.SetUserEmailVerified(ctx, userID)
+func (r *pgUserRepo) SetUserEmailVerified(ctx context.Context, userID int64, email string) error {
+	return r.q.SetUserEmailVerified(ctx, db.SetUserEmailVerifiedParams{
+		ID:    userID,
+		Email: pgtype.Text{String: email, Valid: true},
+	})
 }
 
 func (r *pgUserRepo) UpdatePasswordHash(ctx context.Context, userID int64, passwordHash string) error {

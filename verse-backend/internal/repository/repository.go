@@ -26,7 +26,7 @@ type UserRepo interface {
 	// 비밀번호 찾기 / 복구 이메일
 	GetUserByVerifiedEmail(ctx context.Context, email string) (domain.User, error)
 	SetUserEmailPending(ctx context.Context, userID int64, email string) error
-	SetUserEmailVerified(ctx context.Context, userID int64) error
+	SetUserEmailVerified(ctx context.Context, userID int64, email string) error
 	UpdatePasswordHash(ctx context.Context, userID int64, passwordHash string) error
 	CreateAuthCode(ctx context.Context, userID int64, purpose, codeHash, email string, expiresAt time.Time) error
 	GetLatestAuthCode(ctx context.Context, userID int64, purpose string) (domain.AuthCode, error)

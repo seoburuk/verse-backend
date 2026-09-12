@@ -87,8 +87,10 @@ func (s *AuthService) RequestEmailVerification(ctx context.Context, userID int64
 		return err
 	}
 
-	if err := s.users.SetUserEmailPending(ctx, userID, email); err != nil {
-		return err
+	// 다른 계정이 이미 인증해 쓰는 이메일이면 확정 단계에서 unique 위반으로
+	// 터진다. 코드 발송 전에 걸러 409로 알린다.
+	if other, err := s.users.GetUserByVerifiedEmail(ctx, email); err == nil && other.ID != userID {
+		return domain.ErrConflict
 	}
 
 	user, err := s.users.GetUserByID(ctx, userID)
@@ -96,15 +98,22 @@ func (s *AuthService) RequestEmailVerification(ctx context.Context, userID int64
 		return err
 	}
 
+	// users.email은 여기서 건드리지 않는다. 인증 코드(auth_codes.email)에만 담아
+	// 두고 ConfirmEmailVerification에서 확정한다 — 발송 실패나 오타로 기존
+	// 인증 이메일을 잃지 않기 위해서다.
 	return s.issueAndSendCode(ctx, userID, purposeVerifyEmail, email, user.Language)
 }
 
 // ConfirmEmailVerification — 인증 코드를 검증하고 이메일을 확정한다.
 func (s *AuthService) ConfirmEmailVerification(ctx context.Context, userID int64, code string) error {
-	if err := s.verifyCode(ctx, userID, purposeVerifyEmail, code); err != nil {
+	authCode, err := s.verifyCode(ctx, userID, purposeVerifyEmail, code)
+	if err != nil {
 		return err
 	}
-	if err := s.users.SetUserEmailVerified(ctx, userID); err != nil {
+	if err := s.users.SetUserEmailVerified(ctx, userID, authCode.Email); err != nil {
+		if isDuplicateError(err) {
+			return domain.ErrConflict
+		}
 		return err
 	}
 	return s.users.DeleteAuthCodes(ctx, userID, purposeVerifyEmail)
@@ -145,7 +154,7 @@ func (s *AuthService) ConfirmPasswordReset(ctx context.Context, email, code, new
 		return domain.ErrUnauthorized
 	}
 
-	if err := s.verifyCode(ctx, user.ID, purposeResetPassword, code); err != nil {
+	if _, err := s.verifyCode(ctx, user.ID, purposeResetPassword, code); err != nil {
 		return err
 	}
 
@@ -210,22 +219,22 @@ func (s *AuthService) issueAndSendCode(ctx context.Context, userID int64, purpos
 }
 
 // verifyCode — 최신 코드를 조회해 만료/횟수/일치 여부를 확인한다.
-func (s *AuthService) verifyCode(ctx context.Context, userID int64, purpose, code string) error {
+func (s *AuthService) verifyCode(ctx context.Context, userID int64, purpose, code string) (domain.AuthCode, error) {
 	authCode, err := s.users.GetLatestAuthCode(ctx, userID, purpose)
 	if err != nil {
 		if errors.Is(err, domain.ErrNotFound) {
-			return domain.ErrUnauthorized
+			return domain.AuthCode{}, domain.ErrUnauthorized
 		}
-		return err
+		return domain.AuthCode{}, err
 	}
 	if authCode.Attempts >= authCodeMaxAttempts {
-		return domain.ErrRateLimited
+		return domain.AuthCode{}, domain.ErrRateLimited
 	}
 	if subtle.ConstantTimeCompare([]byte(hashCode(code)), []byte(authCode.CodeHash)) != 1 {
 		_ = s.users.IncrementAuthCodeAttempts(ctx, authCode.ID)
-		return domain.ErrUnauthorized
+		return domain.AuthCode{}, domain.ErrUnauthorized
 	}
-	return nil
+	return authCode, nil
 }
 
 // generateCode — 6자리 숫자 인증 코드를 생성한다.
