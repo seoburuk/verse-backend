@@ -11,7 +11,7 @@ interface Props {
   liveGrade: Grade;
   combo: number;
   fx?: HitFx | null;
-  onTap: (tile: string, fromPool: boolean) => void;
+  onTap: (index: number, fromPool: boolean) => void;
   placeholder?: string;
 }
 
@@ -51,7 +51,7 @@ export function DragTiles({ placed, pool, liveGrade, combo, fx, onTap, placehold
             <button
               key={isHit ? `placed-${i}-${tile}-${fx.seq}` : `placed-${i}-${tile}`}
               className={isHit ? "tile tile-placed tile-hit" : "tile tile-placed"}
-              onClick={() => onTap(tile, false)}
+              onClick={() => onTap(i, false)}
             >
               {tile}
               {isHit && <PixelBurst seq={fx.seq} />}
@@ -64,7 +64,7 @@ export function DragTiles({ placed, pool, liveGrade, combo, fx, onTap, placehold
           <button
             key={`pool-${i}-${tile}`}
             className="tile tile-pool"
-            onClick={() => onTap(tile, true)}
+            onClick={() => onTap(i, true)}
           >
             {tile}
           </button>

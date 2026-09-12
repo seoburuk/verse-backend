@@ -43,7 +43,7 @@ export interface MemorizeState {
 
 interface UseMemorizeReturn extends MemorizeState {
   setMode: (mode: RecallMode) => void;
-  tapTile: (tile: string, fromPool: boolean) => void;
+  tapTile: (index: number, fromPool: boolean) => void;
   setTyped: (text: string) => void;
   startRecall: (currentLives: number | null) => void;
   submit: () => Promise<void>;
@@ -153,14 +153,14 @@ export function useMemorize(
     }
   }, [typeReveal, mode, phase, fireFx]);
 
-  const tapTile = useCallback((tile: string, fromPool: boolean) => {
+  // 타일은 값이 아니라 위치로 식별한다 — 같은 단어가 여러 개 있으면
+  // indexOf가 엉뚱한 타일을 지운다.
+  const tapTile = useCallback((index: number, fromPool: boolean) => {
     if (phase !== "recall") return;
     if (fromPool) {
-      setTiles((prev) => {
-        const idx = prev.indexOf(tile);
-        if (idx === -1) return prev;
-        return [...prev.slice(0, idx), ...prev.slice(idx + 1)];
-      });
+      const tile = tiles[index];
+      if (tile === undefined) return;
+      setTiles((prev) => [...prev.slice(0, index), ...prev.slice(index + 1)]);
       setPlaced((prev) => [...prev, tile]);
       // 정답 순서대로 배치했으면 히트 효과
       const nextTokens = [...placed, tile].flatMap((t) => normalize(t));
@@ -170,15 +170,13 @@ export function useMemorize(
       if (correct) fireFx("hit", nextTokens.length - 1);
       else fireFx("miss", -1);
     } else {
-      setPlaced((prev) => {
-        const idx = prev.indexOf(tile);
-        if (idx === -1) return prev;
-        return [...prev.slice(0, idx), ...prev.slice(idx + 1)];
-      });
+      const tile = placed[index];
+      if (tile === undefined) return;
+      setPlaced((prev) => [...prev.slice(0, index), ...prev.slice(index + 1)]);
       setTiles((prev) => [...prev, tile]);
       setCombo(0);
     }
-  }, [phase, placed, answerTokens, fireFx]);
+  }, [phase, placed, tiles, answerTokens, fireFx]);
 
   // 목숨이 0이면 recall을 막는다(서버 attempt_service.go의 목숨 확인을 사전에 미러).
   // currentLives가 null이면(게스트, 또는 로딩 전) 체크를 건너뛴다.

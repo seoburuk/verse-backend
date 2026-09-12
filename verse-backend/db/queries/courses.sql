@@ -2,7 +2,9 @@
 SELECT * FROM courses WHERE NOT hidden ORDER BY ord;
 
 -- name: GetCourseBySlug :one
-SELECT * FROM courses WHERE slug = $1;
+-- 목록·이어가기와 동일하게 hidden 코스는 제외한다. 빠져 있으면 숨긴 코스가
+-- URL 직접 접근이나 SSR로 노출된다.
+SELECT * FROM courses WHERE slug = $1 AND NOT hidden;
 
 -- name: ListCourseItems :many
 SELECT * FROM course_items WHERE course_id = $1 ORDER BY ord;

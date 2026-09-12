@@ -132,23 +132,11 @@ func (r *pgUserRepo) UpdateDisplayName(ctx context.Context, userID int64, displa
 	return toDomainUser(row), nil
 }
 
-// DeleteUser — 사용자 데이터 전체 삭제. FK에 CASCADE가 없어 자식 테이블을 먼저 지운다.
+// DeleteUser — 사용자 데이터 전체 삭제. 자식 테이블은 FK ON DELETE CASCADE로
+// 함께 지워진다(마이그레이션 000020).
 func (r *pgUserRepo) DeleteUser(ctx context.Context, userID int64) error {
-	tx, err := r.pool.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-
-	for _, table := range []string{"item_favorites", "attempts", "progress", "streaks"} {
-		if _, err := tx.Exec(ctx, "DELETE FROM "+table+" WHERE user_id = $1", userID); err != nil {
-			return err
-		}
-	}
-	if _, err := tx.Exec(ctx, "DELETE FROM users WHERE id = $1", userID); err != nil {
-		return err
-	}
-	return tx.Commit(ctx)
+	_, err := r.pool.Exec(ctx, "DELETE FROM users WHERE id = $1", userID)
+	return err
 }
 
 func (r *pgUserRepo) GetLives(ctx context.Context, userID int64) (domain.Lives, error) {

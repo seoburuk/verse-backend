@@ -47,7 +47,7 @@ export default function SectionItemList({ slug, sectionId, items }: Props) {
               key={item.course_item_id}
               className="item-card"
               onClick={() => {
-                localStorage.setItem(itemsCacheKey.section(String(sectionId)), JSON.stringify(items));
+                sessionStorage.setItem(itemsCacheKey.section(String(sectionId)), JSON.stringify(items));
                 router.push(`/courses/${slug}/sections/${sectionId}/memorize/${item.course_item_id}?i=${index}`);
               }}
             >

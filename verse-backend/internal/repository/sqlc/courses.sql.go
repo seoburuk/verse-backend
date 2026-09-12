@@ -12,9 +12,11 @@ import (
 )
 
 const getCourseBySlug = `-- name: GetCourseBySlug :one
-SELECT id, slug, title, theme, ord, hidden, category, title_en, commentary, commentary_en FROM courses WHERE slug = $1
+SELECT id, slug, title, theme, ord, hidden, category, title_en, commentary, commentary_en FROM courses WHERE slug = $1 AND NOT hidden
 `
 
+// 목록·이어가기와 동일하게 hidden 코스는 제외한다. 빠져 있으면 숨긴 코스가
+// URL 직접 접근이나 SSR로 노출된다.
 func (q *Queries) GetCourseBySlug(ctx context.Context, slug string) (Course, error) {
 	row := q.db.QueryRow(ctx, getCourseBySlug, slug)
 	var i Course

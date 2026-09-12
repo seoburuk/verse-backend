@@ -2,7 +2,11 @@ import type { Course, CourseDetail, SectionDetail } from "./courses";
 
 export type { Course, CourseDetail, SectionDetail };
 
-const API = process.env.API_URL ?? "http://localhost:8080/v1";
+// next.config.js의 rewrite와 같은 변수(INTERNAL_API_URL)를 쓴다.
+// 배포 서버 .env가 아직 옛 이름(API_URL)을 쓰고 있을 수 있어 그쪽을 먼저 본다.
+const API =
+  process.env.API_URL ??
+  `${process.env.INTERNAL_API_URL ?? "http://localhost:8080"}/v1`;
 
 async function serverFetch<T>(path: string): Promise<T> {
   const res = await fetch(`${API}${path}`, { next: { revalidate: 3600 } } as RequestInit);

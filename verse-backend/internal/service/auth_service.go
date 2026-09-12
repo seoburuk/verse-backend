@@ -16,6 +16,8 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/jackc/pgx/v5/pgconn"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/seoburuk/verse-backend/internal/domain"
 	"github.com/seoburuk/verse-backend/internal/mailer"
@@ -256,6 +258,10 @@ func (s *AuthService) SignUp(ctx context.Context, username, displayName, passwor
 	if username == "" || displayName == "" || password == "" {
 		return domain.User{}, "", domain.ErrInvalidInput
 	}
+	// 재설정·변경 경로는 8자를 강제하는데 가입만 빠져 있었다.
+	if utf8.RuneCountInString(password) < minPasswordLen {
+		return domain.User{}, "", domain.ErrInvalidInput
+	}
 	if containsProfanity(username) || containsProfanity(displayName) {
 		return domain.User{}, "", domain.ErrProfanity
 	}
@@ -286,6 +292,10 @@ func (s *AuthService) Login(ctx context.Context, username, password string) (dom
 	user, err := s.users.GetUserByUsername(ctx, username)
 	if err != nil {
 		if errors.Is(err, domain.ErrNotFound) {
+			// 없는 아이디라고 바로 반환하면 argon2 검증을 건너뛰어 응답이
+			// 눈에 띄게 빨라진다 — 응답 시간만으로 계정 존재 여부를 알 수
+			// 있으므로 더미 해시로 같은 비용을 치른다.
+			verifyPassword(password, dummyPasswordHash)
 			return domain.User{}, "", domain.ErrUnauthorized
 		}
 		return domain.User{}, "", err
@@ -482,6 +492,16 @@ func (s *AuthService) issueToken(userID int64) (string, error) {
 	return t.SignedString(s.jwtSecret)
 }
 
+// dummyPasswordHash — 존재하지 않는 아이디로 로그인 시도가 왔을 때 비교에
+// 쓰는 고정 해시. 어떤 비밀번호와도 일치하지 않는다.
+var dummyPasswordHash = func() string {
+	h, err := hashPassword("dummy-password-for-constant-time-login")
+	if err != nil {
+		panic(err) // 시작 시 1회 — rand 실패는 복구 불가
+	}
+	return h
+}()
+
 // hashPassword — argon2id로 해싱 후 "salt$hash" 형식 문자열 반환.
 func hashPassword(password string) (string, error) {
 	salt := make([]byte, argonSaltLen)
@@ -519,6 +539,8 @@ func verifyPassword(password, stored string) bool {
 }
 
 // isDuplicateError — pgx unique 제약 위반 에러를 감지한다.
+// 에러 문자열에 "unique"가 있는지 보는 대신 SQLSTATE 23505로 판별한다.
 func isDuplicateError(err error) bool {
-	return err != nil && strings.Contains(err.Error(), "unique")
+	var pgErr *pgconn.PgError
+	return errors.As(err, &pgErr) && pgErr.Code == "23505"
 }
